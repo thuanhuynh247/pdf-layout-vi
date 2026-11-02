@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PDF Translation Layout</title>
+<meta name="description" content="Gói kỹ năng AI miễn phí dịch PDF sang tiếng Việt mà vẫn giữ nguyên bố cục, chữ vector thật, xuất bản song ngữ và video đọc sách. Dùng cho Antigravity, Claude Code và ChatGPT.">
+<meta name="theme-color" content="#eef2f2">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dịch PDF sang tiếng Việt, giữ nguyên từng trang">
+<meta property="og:description" content="Gói kỹ năng AI miễn phí v3.0.1 cho Antigravity, Claude Code và ChatGPT. Chữ vector thật, song ngữ, video đọc sách.">
+<meta property="og:url" content="https://pdf.huynhanhthuan.com/">
+<meta property="og:image" content="https://pdf.huynhanhthuan.com/assets/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<link rel="canonical" href="https://pdf.huynhanhthuan.com/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="preload" href="assets/fonts/pjs-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/pjs-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="config.js" defer></script>
+<script src="assets/js/p13-boxes.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="pdf-translation-layout, về đầu trang">
+      <img src="assets/img/favicon.svg" alt="" width="26" height="26">
+      <span>pdf-translation-layout <span class="mono" data-version>v3.0.1</span></span>
+    </a>
+    <nav class="nav" aria-label="Mục lục">
+      <a href="#che-do">Chế độ xuất bản</a>
+      <a href="#cach-hoat-dong">Cách hoạt động</a>
+      <a href="#nen-tang">Nền tảng</a>
+      <a href="#hoi-dap">Hỏi đáp</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="#dang-ky">Nhận miễn phí</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">Gói kỹ năng AI · miễn phí · giấy phép MIT</p>
+        <h1>Dịch PDF sang tiếng Việt, giữ nguyên <span class="bbox">từng trang</span><span class="bbox-tag" aria-hidden="true">sc 0.94</span></h1>
+        <p class="lead">Bản dịch được dàn lại bằng chữ vector thật: vẫn bôi đen, tìm kiếm và in sắc nét. Tiếng Việt dài hơn bản gốc 12–18%, nên engine tự nới dòng, chỉnh giãn dòng rồi mới co chữ theo bậc để mọi đoạn nằm gọn trong khung cũ.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="#dang-ky">Nhận gói kỹ năng qua email</a>
+          <a class="btn btn-ghost" href="#demo"><span class="play-ico" aria-hidden="true"></span>Xem video đọc song ngữ</a>
+        </div>
+        <p class="meta-row"><span>Antigravity</span><span>Claude Code</span><span>ChatGPT</span><span class="num">550 KB · 39 tệp</span></p>
+      </div>
+
+      <figure class="proof" aria-labelledby="proof-cap">
+        <div class="proof-bar label"><span id="proof-cap">Trang 13 / 163 · bản dịch thử</span><span>Kéo thanh giữa để so sánh</span></div>
+        <div class="proof-stage">
+          <span class="crop tl"></span><span class="crop tr"></span><span class="crop bl"></span><span class="crop br"></span>
+          <span class="dim-x mono" aria-hidden="true">612 pt</span>
+          <span class="dim-y mono" aria-hidden="true">792 pt</span>
+          <div class="compare" id="compare">
+            <img class="layer-vi" src="assets/img/p13-vi.webp" width="1224" height="1584" alt="Trang 13 bản dịch tiếng Việt: đoạn văn và biểu đồ cột đã Việt hóa nhãn, bố cục trùng khớp bản gốc.">
+            <svg class="boxes" viewBox="0 0 612 792" preserveAspectRatio="none" aria-hidden="true"></svg>
+            <img class="layer-en" src="assets/img/p13-en.webp" width="1224" height="1584" alt="Trang 13 bản gốc tiếng Anh.">
+            <span class="side-label en">EN</span><span class="side-label vi">VI</span>
+            <div class="compare-handle" aria-hidden="true"><span class="knob"><span>EN</span><span>VI</span></span></div>
+            <input class="compare-range" id="compare-range" type="range" min="0" max="100" value="50" step="1" aria-label="Vị trí so sánh: kéo sang phải để xem thêm bản gốc tiếng Anh">
+          </div>
+        </div>
+        <figcaption class="proof-controls">
+          <label class="switch" for="toggle-boxes">
+            <input type="checkbox" id="toggle-boxes">
+            <span class="track" aria-hidden="true"></span>
+            Hiện khung chữ engine đã đặt
+          </label>
+          <span class="proof-note label" id="boxes-note">22 dòng · 791 run · 0 tràn lề</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ============ VẤN ĐỀ ============ -->
+  <section class="section" id="van-de" aria-labelledby="van-de-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Vì sao cần</p>
+        <h2 id="van-de-h">Ba kiểu hỏng thường gặp khi dịch PDF</h2>
+      </div>
+      <div class="fails">
+        <div class="fail">
+          <div class="fail-demo blurred" aria-hidden="true"><span>Cẩm nang khởi đầu</span></div>
+          <h3>Chữ biến thành ảnh</h3>
+          <p>Nhiều công cụ chụp cả trang thành ảnh rồi vẽ chữ dịch lên. Kết quả không bôi đen được, Ctrl+F không tìm thấy gì, in ra thì nhòe.</p>
+        </div>
+        <div class="fail">
+          <div class="fail-demo overflow" aria-hidden="true"><span class="frame"></span><span>Một số vấn đề <em>lớn hơn rất nhiều</em></span></div>
+          <h3>Tràn khung, đè hình</h3>
+          <p>Câu tiếng Việt dài hơn câu tiếng Anh. Chép thẳng vào khung cũ thì chữ tràn lề, đè lên biểu đồ hoặc chui xuống chân trang.</p>
+        </div>
+        <div class="fail">
+          <div class="fail-demo tofu" aria-hidden="true"><span>C<b>□</b>m nang kh<b>□</b>i <b>□</b><b>□</b>u</span></div>
+          <h3>Mất dấu tiếng Việt</h3>
+          <p>Font của file gốc thường thiếu ký tự có dấu. Chữ “ẩ”, “ở”, “đầ” biến thành ô vuông (tofu) hoặc dấu hỏi.</p>
+        </div>
+      </div>
+
+      <div class="answer">
+        <div>
+          <h3>Gói kỹ năng này xử lý cả ba</h3>
+          <ul>
+            <li><span><strong>Giữ lớp chữ vector.</strong> Không có trang nào bị chụp thành ảnh. Liên kết, bảng, hình minh họa giữ nguyên vị trí.</span></li>
+            <li><span><strong>Co giãn theo bậc.</strong> Nới bề ngang dòng tối đa 18 pt, chỉnh giãn dòng, thu khoảng cách đoạn, sau cùng mới co cỡ chữ trong khoảng 1.0 → 0.67.</span></li>
+            <li><span><strong>Nhúng font đủ dấu.</strong> Plus Jakarta Sans được nhúng dạng CID, kèm bước kiểm tra 0 ký tự tofu trước khi giao file.</span></li>
+          </ul>
+        </div>
+        <figure class="zoom">
+          <div class="zoom-frame"><img src="assets/img/zoom-500.webp" width="960" height="120" alt="Dòng chữ tiếng Việt “Vì vậy: Một số vấn đề có quy mô” phóng to 500%, nét chữ vẫn sắc."></div>
+          <figcaption><span class="label">Phóng 500%, chữ vẫn là chữ</span><span class="label">Ctrl+F “quy mô” → 1 kết quả</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ QA ============ -->
+  <section class="section" id="qa" aria-labelledby="qa-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Kiểm chứng</p>
+        <h2 id="qa-h">Mỗi file đều qua cổng kiểm định 4 tầng</h2>
+        <p>Số liệu dưới đây là kết quả thật trên bản dịch thử một cuốn cẩm nang 163 trang.</p>
+      </div>
+      <div class="qa-wrap">
+        <table class="qa">
+          <caption class="mono">qa_report.json · source 612 × 792 pt · 163 pages</caption>
+          <thead><tr><th scope="col">Tầng</th><th scope="col">Kiểm tra gì</th><th scope="col">Kết quả</th><th scope="col">Trạng thái</th></tr></thead>
+          <tbody>
+            <tr><td>Cơ khí<span class="label">tầng 1</span></td><td>Số trang, khổ giấy, font được nhúng</td><td class="result"><b>163 / 163</b> trang khớp · 612 × 792 pt</td><td><span class="pass">PASS</span></td></tr>
+            <tr><td>Hình học<span class="label">tầng 2</span></td><td>Tràn lề an toàn, đè lên ảnh, khối chữ va nhau, tràn ô bảng</td><td class="result"><b>0</b> vi phạm / 7.399 dòng chữ · 34 ảnh</td><td><span class="pass">PASS</span></td></tr>
+            <tr><td>Nội dung<span class="label">tầng 3</span></td><td>Ký tự lỗi font, liên kết trong và ngoài</td><td class="result"><b>0</b> tofu / 406.529 ký tự · 996 liên kết giữ nguyên</td><td><span class="pass">PASS</span></td></tr>
+            <tr><td>Trực quan<span class="label">tầng 4</span></td><td>Render đối chiếu từng trang ở 130 DPI</td><td class="result"><b>9</b> biểu đồ đã Việt hóa nhãn</td><td><span class="pass">PASS</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CHẾ ĐỘ ============ -->
+  <section class="section" id="che-do" aria-labelledby="che-do-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Đầu ra</p>
+        <h2 id="che-do-h">Một bản dịch, nhiều cách xuất bản</h2>
+        <p>Dịch một lần, rồi chọn kiểu file phù hợp người đọc: bản tiếng Việt thuần, sách song ngữ để in, hay bản xen đoạn để học.</p>
+      </div>
+      <div class="modes">
+        <figure class="mode wide">
+          <img class="mode-img" src="assets/img/mode-facing.webp" width="1400" height="906" loading="lazy" alt="Bố cục đối trang: trang trái tiếng Anh gốc, trang phải tiếng Việt cùng vị trí.">
+          <figcaption><span class="mono">--mode facing</span><strong>Đối trang</strong><span>Trái tiếng Anh, phải tiếng Việt. Có bản trang đơn để đọc 2 trang và bản ghép khổ đôi để in.</span></figcaption>
+        </figure>
+        <figure class="mode">
+          <img class="mode-img" src="assets/img/mode-mono.webp" width="700" height="906" loading="lazy" alt="Bản dịch đơn ngữ tiếng Việt giữ nguyên biểu đồ và chú thích chân trang.">
+          <figcaption><span class="mono">translate-mono</span><strong>Đơn ngữ</strong><span>Bản tiếng Việt thay chỗ bản gốc, giữ hình, bảng, chú thích và liên kết.</span></figcaption>
+        </figure>
+        <div class="video-card mode wide" id="demo">
+          <div class="video-frame">
+            <video class="demo-video" id="demo-video" controls preload="none" playsinline width="1920" height="1080" poster="assets/img/video-poster.webp" aria-describedby="video-desc">
+              <source src="assets/media/doc-song-ngu-trang13.mp4" type="video/mp4">
+              Trình duyệt của bạn không phát được video. <a href="assets/media/doc-song-ngu-trang13.mp4">Mở tệp video</a>.
+            </video>
+          </div>
+          <span class="mono">cli.py video --mode bilingual · trang 13 · 1:10 · 1080p</span>
+          <h3>Video đọc sách</h3>
+          <p id="video-desc">Xuất thẳng từ bản v3.0.1, không chỉnh sửa: Andrew đọc từng đoạn tiếng Anh, Đức Trí đọc lại đoạn tiếng Việt tương ứng. Khung chữ đang đọc chuyển màu cam ở bản gốc, xanh teal ở bản dịch, phụ đề chạy bên dưới. Có thể nhân bản giọng của chính bạn từ một đoạn ghi âm 3–8 giây.</p>
+        </div>
+        <figure class="mode">
+          <img class="mode-img" src="assets/img/mode-interleaved.webp" width="700" height="906" loading="lazy" alt="Bố cục xen đoạn: mỗi đoạn tiếng Anh đi liền đoạn dịch tiếng Việt màu xanh teal.">
+          <figcaption><span class="mono">--mode interleaved</span><strong>Xen đoạn</strong><span>Đoạn gốc đi liền đoạn dịch màu teal. Hợp để học tiếng Anh qua tài liệu thật.</span></figcaption>
+        </figure>
+        <div class="voices mode full" role="group" aria-labelledby="voices-h">
+          <div class="voices-head">
+            <p class="voices-h" id="voices-h">Nghe thử giọng đọc AI</p>
+            <p class="voices-sub">Hai câu trong trang 13, mỗi giọng một ngôn ngữ. Câu đang đọc được tô sáng như trong video.</p>
+          </div>
+          <div class="voices-row">
+            <div class="voice" data-src="assets/media/giong-vi.mp3">
+              <button class="voice-btn" type="button" aria-pressed="false" aria-label="Phát giọng Đức Trí đọc tiếng Việt"><span class="ico" aria-hidden="true"></span></button>
+              <div class="voice-body">
+                <div class="voice-head"><strong>Đức Trí</strong><span class="mono">VI · VieNeu-TTS · 0:12</span></div>
+                <p class="voice-text"><span data-t="0">Vì vậy: Một số vấn đề có quy mô lớn hơn rất nhiều so với những vấn đề khác.</span> <span data-t="6.76">Đồng thời, một số vấn đề lại đang bị xã hội bỏ ngỏ hơn rất nhiều.</span></p>
+                <div class="voice-bar" aria-hidden="true"><i></i></div>
+              </div>
+            </div>
+            <div class="voice" data-src="assets/media/giong-en.mp3">
+              <button class="voice-btn" type="button" aria-pressed="false" aria-label="Phát giọng Andrew đọc tiếng Anh"><span class="ico" aria-hidden="true"></span></button>
+              <div class="voice-body">
+                <div class="voice-head"><strong>Andrew</strong><span class="mono">EN · Microsoft Edge TTS · 0:08</span></div>
+                <p class="voice-text" lang="en"><span data-t="0">So: Some problems are much bigger than others.</span> <span data-t="3.43">At the same time, some problems are much more neglected by society.</span></p>
+                <div class="voice-bar" aria-hidden="true"><i></i></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CÁCH HOẠT ĐỘNG ============ -->
+  <section class="section" id="cach-hoat-dong" aria-labelledby="how-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Quy trình</p>
+        <h2 id="how-h">Bạn ra lệnh một câu, agent làm sáu bước</h2>
+        <p>Ví dụ: “Dịch file bao-cao.pdf sang tiếng Việt, giữ nguyên layout, xuất thêm bản đối trang.” Agent tự chạy các lệnh dưới đây và báo lại khi xong.</p>
+      </div>
+      <ol class="steps">
+        <li><div><h3>Kiểm kê file gốc</h3><p>Đếm trang, khổ giấy, font, ảnh, bảng, liên kết. File gốc chỉ được đọc, không bị sửa.</p></div><code>python scripts/cli.py inspect --source book.pdf</code></li>
+        <li><div><h3>Dịch và giữ thuật ngữ</h3><p>Dịch theo lô 20–25 trang, giữ in đậm, in nghiêng, chỉ số trên và đích liên kết. Lập bảng thuật ngữ để cả cuốn dùng thống nhất.</p></div><code><span class="c"># agent ghi ra</span>
+data/translations.json</code></li>
+        <li><div><h3>Việt hóa biểu đồ</h3><p>Lấy màu nền quanh nhãn tiếng Anh, xóa nhãn cũ, ghi nhãn tiếng Việt cùng font, xoay được nhãn trục 90°.</p></div><code>python scripts/figure_localizer.py --image chart.png</code></li>
+        <li><div><h3>Dàn trang vector</h3><p>Ghép bản dịch vào đúng vị trí cũ, co giãn theo bậc. Chọn đơn ngữ hoặc song ngữ.</p></div><code>python scripts/cli.py translate-mono --source book.pdf \
+  --trans data/translations.json --out output/book_VI.pdf</code></li>
+        <li><div><h3>Giọng đọc AI <span class="opt">(tùy chọn)</span></h3><p>Tổng hợp giọng đọc cho từng câu, hoặc nhân bản giọng từ mẫu 3–8 giây.</p></div><code>python scripts/cli.py voice synth --lang vi --voice "Đức Trí"</code></li>
+        <li><div><h3>Video đọc sách <span class="opt">(tùy chọn)</span></h3><p>Dựng video 1080p, tô sáng đoạn đang đọc theo đúng khung chữ trên trang.</p></div><code>python scripts/cli.py video --mode bilingual --out video.mp4</code></li>
+      </ol>
+      <p class="gate"><span class="pass">QA</span><span><strong>Cổng kiểm định chạy sau cùng.</strong> Nếu còn vi phạm lề hoặc ký tự lỗi, agent đọc tọa độ lỗi trong báo cáo và tự sửa trước khi giao file.</span></p>
+    </div>
+  </section>
+
+  <!-- ============ NỀN TẢNG ============ -->
+  <section class="section" id="nen-tang" aria-labelledby="nen-tang-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Tương thích</p>
+        <h2 id="nen-tang-h">Chạy trên ba nền tảng AI</h2>
+        <p>Email hướng dẫn sẽ gửi đúng các bước cho nền tảng bạn chọn khi đăng ký.</p>
+      </div>
+      <div class="matrix-wrap">
+        <table class="matrix">
+          <thead><tr><th scope="col"><span class="visually-hidden">Tính năng</span></th><th scope="col">Antigravity<span>IDE · máy của bạn</span></th><th scope="col">Claude Code<span>CLI · máy của bạn</span></th><th scope="col">ChatGPT<span>Custom GPT · trên mây</span></th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Dịch đơn ngữ giữ bố cục</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td></tr>
+            <tr><th scope="row">Song ngữ đối trang, xen đoạn</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td></tr>
+            <tr><th scope="row">Việt hóa nhãn biểu đồ</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td></tr>
+            <tr><th scope="row">Giọng đọc AI, video 1080p</th><td class="yes">Có</td><td class="yes">Có</td><td class="no">Không</td></tr>
+            <tr><th scope="row">Sách trên 100 trang</th><td>Theo lô 20–25 trang</td><td>Theo lô 20–25 trang</td><td>10–20 trang mỗi lượt</td></tr>
+            <tr><th scope="row">Cách cài</th><td>Chép thư mục vào skills</td><td>Gõ <code class="mono">claude</code> trong thư mục</td><td>Dán Instructions vào Custom GPT</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="footnote">* Trên ChatGPT, GPT dựng lại quy trình theo đặc tả trong Code Interpreter. Mỗi lượt chạy giới hạn khoảng 60–120 giây và sandbox thiếu ffmpeg, nên chất lượng phụ thuộc từng phiên. Tài liệu dài nên dùng Claude Code hoặc Antigravity.</p>
+    </div>
+  </section>
+
+  <!-- ============ ĐĂNG KÝ ============ -->
+  <section class="section register" id="dang-ky" aria-labelledby="dang-ky-h">
+    <div class="wrap">
+      <div>
+        <div class="section-head">
+          <p class="eyebrow">Nhận gói kỹ năng</p>
+          <h2 id="dang-ky-h">Để lại email, nhận gói kỹ năng và hướng dẫn cài</h2>
+        </div>
+        <ul class="get-list">
+          <li><span class="ic">zip</span><div><strong>pdf-translation-layout-v<span data-version-plain>3.0.1</span>.zip</strong><span>550 KB, 39 tệp: script, font, đặc tả, hướng dẫn cho 3 nền tảng.</span></div></li>
+          <li><span class="ic">1·2·3</span><div><strong>Các bước cài cho đúng nền tảng của bạn</strong><span>Kèm câu lệnh chạy thử đầu tiên để biết đã cài đúng.</span></div></li>
+          <li><span class="ic">v+</span><div><strong>Báo khi có phiên bản mới</strong><span>Chỉ khi bạn chọn nhận. Vài lần mỗi năm, không quảng cáo.</span></div></li>
+        </ul>
+        <p class="register-note">Email gửi từ <strong>hello@huynhanhthuan.com</strong>, thường đến trong 1–2 phút. Không thấy thì xem thêm mục Quảng cáo hoặc Spam.</p>
+      </div>
+
+      <div class="form-card">
+        <form class="form" id="signup" novalidate>
+          <div class="form-row">
+            <div class="field">
+              <label for="f-name">Họ tên</label>
+              <input class="input" id="f-name" name="name" type="text" autocomplete="name" maxlength="80" required aria-describedby="e-name" placeholder="Nguyễn Văn A">
+              <p class="err" id="e-name" hidden></p>
+            </div>
+            <div class="field">
+              <label for="f-email">Email</label>
+              <input class="input" id="f-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="120" required aria-describedby="e-email" placeholder="ban@gmail.com">
+              <p class="err" id="e-email" hidden></p>
+            </div>
+          </div>
+
+          <fieldset id="f-platform" aria-describedby="e-platform">
+            <legend>Bạn đang dùng nền tảng AI nào?</legend>
+            <div class="chips">
+              <label class="chip"><input type="radio" name="platform" id="p-ag" value="Antigravity"><span>Antigravity</span></label>
+              <label class="chip"><input type="radio" name="platform" id="p-cc" value="Claude Code"><span>Claude Code</span></label>
+              <label class="chip"><input type="radio" name="platform" id="p-gpt" value="ChatGPT"><span>ChatGPT</span></label>
+              <label class="chip"><input type="radio" name="platform" id="p-none" value="Chưa dùng"><span>Chưa dùng cái nào</span></label>
+            </div>
+            <p class="err" id="e-platform" hidden></p>
+          </fieldset>
+
+          <div class="field">
+            <label for="f-purpose">Bạn định dùng để làm gì? <span class="opt">(không bắt buộc)</span></label>
+            <select class="select" id="f-purpose" name="purpose">
+              <option value="">Chọn mục đích</option>
+              <option>Dịch sách, tài liệu học tập</option>
+              <option>Tài liệu công việc, báo cáo</option>
+              <option>Học tiếng Anh qua bản song ngữ</option>
+              <option>Làm video đọc sách</option>
+              <option>Nghiên cứu, tìm hiểu kỹ thuật</option>
+              <option>Mục đích khác</option>
+            </select>
+          </div>
+
+          <label class="check" for="f-updates">
+            <input type="checkbox" id="f-updates" name="updates">
+            <span>Gửi email cho tôi khi có phiên bản mới.</span>
+          </label>
+          <label class="check" for="f-consent">
+            <input type="checkbox" id="f-consent" name="consent" required aria-describedby="e-consent">
+            <span><strong>Tôi đồng ý</strong> để Huỳnh Anh Thuận lưu họ tên, email và các câu trả lời trên nhằm gửi gói kỹ năng và hỗ trợ sử dụng. Xem <a href="privacy.html">chính sách dữ liệu</a>.</span>
+          </label>
+          <p class="err" id="e-consent" hidden></p>
+
+          <div class="hp" aria-hidden="true">
+            <label for="f-website">Website</label>
+            <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off">
+          </div>
+
+          <div class="form-foot">
+            <button class="btn btn-primary" type="submit" id="submit-btn">Gửi gói kỹ năng cho tôi</button>
+            <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+          </div>
+        </form>
+
+        <div class="done" id="done" hidden tabindex="-1">
+          <span class="tick" aria-hidden="true">✓</span>
+          <h3 id="done-title">Đã nhận đăng ký</h3>
+          <p id="done-text">Gói kỹ năng đang trên đường tới hộp thư của bạn.</p>
+          <p class="demo-note" id="demo-note" hidden>Đây là bản xem trước: trang chưa kết nối máy chủ nên chưa có email nào được gửi.</p>
+          <p>Trong lúc chờ: nếu gói kỹ năng giúp bạn tiết kiệm thời gian, <a href="#ung-ho">mời mình một ly cà phê</a>.</p>
+          <button class="btn btn-ghost btn-sm" type="button" id="again-btn">Đăng ký cho email khác</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ỦNG HỘ ============ -->
+  <section class="coffee" id="ung-ho" aria-labelledby="ung-ho-h">
+    <div class="wrap">
+      <div class="inner">
+        <div class="copy">
+          <p class="eyebrow">Give me a coffee</p>
+          <h2 id="ung-ho-h">Mời mình một ly cà phê</h2>
+          <p>Gói kỹ năng miễn phí và sẽ tiếp tục miễn phí. Nếu nó giúp bạn bớt vài buổi tối ngồi chỉnh từng dòng chữ, một ly cà phê là lời cảm ơn mình rất trân trọng. Khoản ủng hộ dùng để duy trì và làm các phiên bản tiếp theo.</p>
+        </div>
+        <div class="qr-block">
+          <img class="qr-img" id="qr-img" src="assets/img/vietqr-any.png" width="220" height="220" alt="Mã VietQR chuyển khoản Vietcombank tới Huỳnh Anh Thuận, số tài khoản 0161001623062.">
+          <div class="qr-side">
+            <fieldset>
+              <legend class="visually-hidden">Chọn số tiền</legend>
+              <div class="amounts">
+                <label class="chip"><input type="radio" name="amount" id="a-any" value="any" checked><span>Tùy tâm</span></label>
+                <label class="chip"><input type="radio" name="amount" id="a-30" value="30k"><span>30.000đ</span></label>
+                <label class="chip"><input type="radio" name="amount" id="a-50" value="50k"><span>50.000đ</span></label>
+                <label class="chip"><input type="radio" name="amount" id="a-100" value="100k"><span>100.000đ</span></label>
+              </div>
+            </fieldset>
+            <dl class="bank">
+              <div><dt>Ngân hàng</dt><dd>Vietcombank</dd></div>
+              <div><dt>Chủ tài khoản</dt><dd>HUỲNH ANH THUẬN</dd></div>
+              <div><dt>Số tài khoản</dt><dd><span class="mono" id="acc-no">0161001623062</span><button class="copy-btn" type="button" data-copy="0161001623062" aria-label="Sao chép số tài khoản">Sao chép</button></dd></div>
+              <div><dt>Nội dung</dt><dd><span class="mono">UNG HO PDF LAYOUT</span><button class="copy-btn" type="button" data-copy="UNG HO PDF LAYOUT" aria-label="Sao chép nội dung chuyển khoản">Sao chép</button></dd></div>
+            </dl>
+            <p class="qr-caption">Quét bằng app ngân hàng bất kỳ có hỗ trợ VietQR.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HỎI ĐÁP ============ -->
+  <section class="section" id="hoi-dap" aria-labelledby="hoi-dap-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Hỏi đáp</p>
+        <h2 id="hoi-dap-h">Câu hỏi thường gặp</h2>
+      </div>
+      <div class="faq">
+        <details><summary>Có thật sự miễn phí không?</summary><div><p>Có. Gói kỹ năng phát hành theo giấy phép MIT: bạn được dùng, sửa và chia sẻ, kể cả cho công việc có thu nhập. Ủng hộ cà phê là hoàn toàn tự nguyện.</p></div></details>
+        <details><summary>Tôi không biết lập trình, có dùng được không?</summary><div><p>Được, nếu bạn dùng Claude Code hoặc Antigravity. Bạn ra lệnh bằng tiếng Việt, agent tự chạy các câu lệnh. Bạn chỉ cần cài Python 3.10 trở lên một lần, email có hướng dẫn từng bước.</p></div></details>
+        <details><summary>Tài liệu của tôi có bị gửi đi đâu không?</summary><div><p>Các script chạy trên máy của bạn. Phần dịch do AI bạn đang dùng (Claude, Gemini hoặc ChatGPT) thực hiện, nên nội dung đi qua nhà cung cấp AI đó theo chính sách của họ. Trang web này không nhận và không lưu tài liệu của bạn.</p></div></details>
+        <details><summary>File PDF nào dịch được?</summary><div><p>PDF có lớp chữ, tức là bạn bôi đen được chữ trong file. PDF scan dạng ảnh chụp cần chạy nhận dạng chữ (OCR) trước, phiên bản này chưa làm bước đó.</p></div></details>
+        <details><summary>Đăng ký rồi mà chưa thấy email?</summary><div><p>Tìm thư từ hello@huynhanhthuan.com, kể cả trong mục Quảng cáo hoặc Spam. Nếu hôm đó số người đăng ký vượt hạn mức gửi trong ngày, hệ thống tự gửi cho bạn trong vòng 24 giờ. Vẫn không thấy thì gửi email tới hello@huynhanhthuan.com.</p></div></details>
+        <details><summary>Tôi có được dịch sách đang có bản quyền không?</summary><div><p>Công cụ không thay đổi quyền tác giả của tài liệu gốc. Bạn tự chịu trách nhiệm về quyền sử dụng tài liệu mình dịch; muốn chia sẻ hoặc phát hành bản dịch, bạn cần sự cho phép của chủ sở hữu.</p></div></details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div>
+      <p><strong>pdf-translation-layout</strong> · Huỳnh Anh Thuận · giấy phép MIT · © <span id="year">2026</span></p>
+      <p>Liên hệ: <a href="mailto:hello@huynhanhthuan.com">hello@huynhanhthuan.com</a></p>
+      <p class="credit">Trang mẫu là bản dịch thử “Starter Guide” của 80,000 Hours, dùng để minh họa kỹ thuật dàn trang. Trang web này không liên kết với 80,000 Hours.</p>
+    </div>
+    <nav aria-label="Liên kết cuối trang">
+      <a href="privacy.html">Chính sách dữ liệu</a>
+      <a href="#dang-ky">Nhận gói kỹ năng</a>
+      <a href="#ung-ho">Ủng hộ</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

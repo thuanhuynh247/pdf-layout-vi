@@ -1,0 +1,88 @@
+/* =====================================================================
+   Proof Sheet — design tokens cho trang phát hành pdf-translation-layout
+   Ý tưởng bố cục: "bàn dàn trang" (pasteboard) xám lạnh, trên đó các trang
+   PDF trắng có dấu cắt (crop marks), chú thích kích thước bằng pt, và khung
+   chữ (bounding box) nét đứt màu teal — đúng ngôn ngữ của sản phẩm.
+   Màu & font lấy từ chính skill: teal #0a7a8c (màu xen đoạn) + Plus Jakarta Sans.
+   ===================================================================== */
+
+@font-face { font-family: "PJS"; src: url("../fonts/pjs-regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "PJS"; src: url("../fonts/pjs-italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "PJS"; src: url("../fonts/pjs-medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "PJS"; src: url("../fonts/pjs-semibold.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "PJS"; src: url("../fonts/pjs-bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+
+:root {
+  /* --- Màu: 6 vai trò, mọi màu khác suy ra từ đây --- */
+  --board: #eef2f2;      /* nền bàn dàn trang, xám lạnh ngả teal */
+  --paper: #ffffff;      /* bề mặt trang giấy, thẻ, ô nhập */
+  --ink: #13282b;        /* chữ chính, gần đen ngả teal */
+  --ink-2: #4a5f62;      /* chữ phụ, chú thích */
+  --rule: #cfdadb;       /* đường kẻ, viền */
+  --teal: #0a7a8c;       /* màu nhấn = màu xen đoạn của skill (5.0:1 trên trắng) */
+
+  /* --- Màu suy ra / ngữ nghĩa --- */
+  --teal-ink: #075e6c;   /* link, chữ teal nhỏ (7.1:1) */
+  --teal-wash: #e3f1f3;  /* nền nhấn nhẹ, highlight */
+  --on-teal: #ffffff;
+  --mark: #13282b;       /* dấu cắt, đường kích thước */
+  --error: #b4232f;      /* lỗi form, minh họa ký tự tofu */
+  --error-wash: #fbeced;
+  --pass: #1d7a4a;       /* QA PASS */
+  --focus: #0a7a8c;
+  --field-border: #7f9598; /* viền ô nhập: 3.1:1 trên trắng (WCAG 1.4.11) */
+  --deep: #13282b;        /* khối nền tối (thẻ video) giữ tối ở cả 2 chế độ */
+  --on-deep: #eef2f2;
+  --on-deep-accent: #78d3e0;
+  --shadow-page: 0 1px 2px rgb(19 40 43 / .08), 0 12px 32px -12px rgb(19 40 43 / .28);
+
+  /* --- Chữ --- */
+  --font-sans: "PJS", "Plus Jakarta Sans", "Be Vietnam Pro", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  /* Thang chữ tỉ lệ 1.25, neo 17px */
+  --fs-xs: .8125rem;   /* 13 — nhãn đo đạc, chú thích ảnh */
+  --fs-sm: .9375rem;   /* 15 — phụ */
+  --fs-md: 1.0625rem;  /* 17 — thân bài */
+  --fs-lg: 1.3125rem;  /* 21 — lead */
+  --fs-xl: 1.75rem;    /* 28 — H3 */
+  --fs-2xl: clamp(2rem, 1.4rem + 2.4vw, 2.75rem);      /* H2 */
+  --fs-3xl: clamp(2.5rem, 1.6rem + 4.2vw, 4.25rem);    /* H1 */
+  --lh-tight: 1.12;
+  --lh-body: 1.6;
+  --measure: 64ch;
+
+  /* --- Khoảng cách (bội 4px) --- */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px;
+  --sp-6: 32px; --sp-7: 48px; --sp-8: 64px; --sp-9: 96px;
+
+  /* --- Hình khối --- */
+  --radius-s: 4px;     /* nút, ô nhập: góc gần vuông như hộp chữ */
+  --radius-m: 8px;     /* khung form, khối QR */
+  --border: 1px solid var(--rule);
+  --dash: 1.5px dashed var(--teal);
+
+  /* --- Chuyển động --- */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --dur-1: 120ms; --dur-2: 220ms; --dur-3: 480ms;
+
+  --container: 1180px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --board: #0d1719; --paper: #152427; --ink: #e4eef0; --ink-2: #9db2b5; --rule: #2a3e42;
+    --teal: #3fb3c4; --teal-ink: #78d3e0; --teal-wash: #12323a; --on-teal: #06282e;
+    --mark: #c9d8da; --error: #ff8a92; --error-wash: #3a1a1e; --pass: #6fd39b; --focus: #78d3e0;
+    --field-border: #678589; --deep: #081215; --on-deep: #e4eef0; --on-deep-accent: #78d3e0;
+    --shadow-page: 0 1px 2px rgb(0 0 0 / .4), 0 16px 40px -12px rgb(0 0 0 / .7);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --board: #0d1719; --paper: #152427; --ink: #e4eef0; --ink-2: #9db2b5; --rule: #2a3e42;
+  --teal: #3fb3c4; --teal-ink: #78d3e0; --teal-wash: #12323a; --on-teal: #06282e;
+  --mark: #c9d8da; --error: #ff8a92; --error-wash: #3a1a1e; --pass: #6fd39b; --focus: #78d3e0;
+    --field-border: #678589; --deep: #081215; --on-deep: #e4eef0; --on-deep-accent: #78d3e0;
+  --shadow-page: 0 1px 2px rgb(0 0 0 / .4), 0 16px 40px -12px rgb(0 0 0 / .7);
+  color-scheme: dark;
+}
