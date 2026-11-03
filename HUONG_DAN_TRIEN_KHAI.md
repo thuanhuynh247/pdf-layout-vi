@@ -48,7 +48,7 @@ Quay lại Mailtrap, bấm **Re-check DNS Records**. DNS thường cập nhật 
 
 1. Mở [drive.google.com](https://drive.google.com) → **Mới → Tải tệp lên** → chọn `pdf-translation-layout-v3.0.1.zip` (thư mục `release-website/release/`).
 2. Chuột phải vào tệp → **Chia sẻ → Chia sẻ** → **Quyền truy cập chung**: chọn **Bất kỳ ai có đường liên kết**, vai trò **Người xem** → **Sao chép đường liên kết** → **Xong**.
-
+https://drive.google.com/file/d/1r_LG2brc-KKeJssTjEInCVAel8B1vCNV/view?usp=sharing
 > Có bản mới: chuột phải tệp → **Thông tin tệp → Quản lý phiên bản → Tải phiên bản mới lên**. Link giữ nguyên.
 
 ---
@@ -85,7 +85,7 @@ Quay lại Mailtrap, bấm **Re-check DNS Records**. DNS thường cập nhật 
 Mở `config.js` bằng Notepad, dán URL ở Bước 3.8:
 
 ```js
-APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfy.../exec",
+APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfy.../exec", 
 ```
 
 ---

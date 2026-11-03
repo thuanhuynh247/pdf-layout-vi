@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Đo chất lượng · PDF Translation Layout</title>
+<meta name="description" content="Cách đo chất lượng một PDF dịch sang tiếng Việt: ký tự lỗi dấu, liên kết, lớp chữ thật, dòng đè nhau, độ trùng bố cục. Kết quả đo công khai kèm file để kiểm lại, và cách tự chấm bất kỳ bản dịch nào.">
+<meta name="theme-color" content="#eef2f2">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Đo chất lượng PDF dịch tiếng Việt">
+<meta property="og:description" content="Kết quả đo công khai kèm file gốc, file kết quả và bộ chấm mở để ai cũng kiểm lại được.">
+<meta property="og:url" content="https://pdf.huynhanhthuan.com/chat-luong">
+<meta property="og:image" content="https://pdf.huynhanhthuan.com/assets/img/og.png">
+<link rel="canonical" href="https://pdf.huynhanhthuan.com/chat-luong">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="preload" href="assets/fonts/pjs-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="config.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="pdf-translation-layout, về trang chủ">
+      <img src="assets/img/favicon.svg" alt="" width="26" height="26">
+      <span>pdf-translation-layout <span class="mono" data-version>v3.1.0</span></span>
+    </a>
+    <nav class="nav" aria-label="Mục lục">
+      <a href="#do-gi">Đo gì</a>
+      <a href="#ket-qua">Kết quả</a>
+      <a href="#tu-cham">Tự chấm</a>
+      <a href="dich">Dịch trên web</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="dung-voi-claude">Dùng ngay</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="section page-hero">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Đo chất lượng · cập nhật 02/11/2026</p>
+        <h1>Một bản dịch PDF tiếng Việt tốt trông như thế nào, đo bằng số</h1>
+        <p>Dịch đúng nghĩa là một chuyện. Bản PDF còn phải hiện đủ dấu, chữ nằm đúng chỗ, vẫn bôi đen và tìm kiếm được, liên kết còn bấm được. Trang này công bố cách đo, kết quả đo và mọi file để bạn kiểm lại.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="vi-du" aria-labelledby="vi-du-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Nhìn tận mắt</p>
+        <h2 id="vi-du-h">Cùng một bản dịch, hai cách ghép vào PDF</h2>
+        <p>Ba ảnh cắt cùng một vùng của trang 3 trong file mẫu. Bản dịch giống hệt nhau; chỉ khác cách đưa chữ vào trang.</p>
+      </div>
+      <div class="versus">
+        <figure><img src="assets/img/so-sanh-goc.webp" width="828" height="384" loading="lazy" alt="Bản gốc tiếng Anh: tiêu đề Chapter 2. Build a simple budget và danh sách gạch đầu dòng."><figcaption><strong>Bản gốc</strong>Tiếng Anh, phông có chân và không chân.</figcaption></figure>
+        <figure><img src="assets/img/so-sanh-tho.webp" width="828" height="384" loading="lazy" alt="Cách thay chữ thô: tiêu đề hiện thành Ch??ng 2. L?p m?t ngân sách ??n gi?n, mất màu chữ, chữ to nhỏ không đều."><figcaption><strong>Thay chữ thô</strong>Phông có sẵn trong PDF không có chữ Việt: “Ch??ng 2. L?p m?t…”.</figcaption></figure>
+        <figure><img src="assets/img/so-sanh-ptl.webp" width="828" height="384" loading="lazy" alt="pdf-translation-layout: tiêu đề Chương 2. Lập một ngân sách đơn giản, đủ dấu, giữ màu và cỡ chữ."><figcaption><strong>pdf-translation-layout 3.1</strong>Đủ dấu, giữ màu, cỡ chữ và vị trí.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="do-gi" aria-labelledby="do-gi-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Bộ chấm</p>
+        <h2 id="do-gi-h">Bảy chỉ số, chấm được PDF của bất kỳ công cụ nào</h2>
+        <p>Bộ chấm là mã nguồn mở, nằm trong chính công cụ. Nó không chấm văn dịch hay hay dở; phần đó cần người đọc.</p>
+      </div>
+      <div class="matrix-wrap">
+        <table class="matrix">
+          <thead><tr><th scope="col">Chỉ số</th><th scope="col">Đo gì</th><th scope="col">Tốt khi</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Ký tự lỗi phông</th><td>Ký tự hiện thành ô vuông, dấu hỏi hoặc mất dấu vì phông không có chữ Việt</td><td>0</td></tr>
+            <tr><th scope="row">Tỷ lệ từ có dấu</th><td>Phần trăm từ có dấu tiếng Việt trong toàn bộ chữ của bản dịch</td><td>Mẫu của dự án đạt 0,85; dưới 0,5 là dấu hiệu mất dấu</td></tr>
+            <tr><th scope="row">Từ tiếng Anh còn sót</th><td>Từ chức năng tiếng Anh (the, and, of…) còn lại sau khi dịch</td><td>Gần 0</td></tr>
+            <tr><th scope="row">Liên kết</th><td>Số liên kết còn bấm được so với bản gốc</td><td>Bằng nhau</td></tr>
+            <tr><th scope="row">Trang mất lớp chữ</th><td>Trang bị biến thành ảnh: không bôi đen, không tìm kiếm được</td><td>0</td></tr>
+            <tr><th scope="row">Dòng đè nhau</th><td>Cặp dòng chữ chồng lên nhau quá 25% diện tích</td><td>0</td></tr>
+            <tr><th scope="row">Độ trùng bố cục</th><td>Chữ dịch có nằm đúng những vùng chữ gốc chiếm hay không (lưới 24 × 32 ô mỗi trang)</td><td>Gần 1; luôn đọc cùng hai chỉ số về dấu</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="ket-qua" aria-labelledby="ket-qua-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Kết quả đo</p>
+        <h2 id="ket-qua-h">pdf-translation-layout 3.1 trên ba tài liệu mẫu</h2>
+        <p>Đối chiếu với cách thay chữ thô dùng cùng bản dịch, cùng vị trí. Bản dịch do tác giả dịch tay, nên các số dưới đây đo phần dựng trang, không đo văn dịch của một mô hình AI cụ thể.</p>
+      </div>
+      <div class="matrix-wrap">
+        <table class="matrix score-table">
+          <thead><tr><th scope="col">Tài liệu</th><th scope="col">Cách ghép chữ</th><th scope="col" class="num">Ký tự lỗi phông</th><th scope="col" class="num">Từ có dấu</th><th scope="col" class="num">Liên kết</th><th scope="col" class="num">Trang mất lớp chữ</th><th scope="col" class="num">Dòng đè nhau</th><th scope="col" class="num">Trùng bố cục</th></tr></thead>
+          <tbody>
+            <tr><th scope="row" rowspan="2">6 trang</th><td>pdf-translation-layout 3.1</td><td class="num good">0</td><td class="num good">0,85</td><td class="num good">11/11</td><td class="num">0</td><td class="num">0</td><td class="num">0,87</td></tr>
+            <tr><td>Thay chữ thô</td><td class="num bad">384</td><td class="num bad">0,22</td><td class="num bad">2/11</td><td class="num">0</td><td class="num">0</td><td class="num">0,91</td></tr>
+            <tr><th scope="row" rowspan="2">60 trang</th><td>pdf-translation-layout 3.1</td><td class="num good">0</td><td class="num good">0,85</td><td class="num good">76/76</td><td class="num">0</td><td class="num">0</td><td class="num">0,87</td></tr>
+            <tr><td>Thay chữ thô</td><td class="num bad">4.039</td><td class="num bad">0,22</td><td class="num bad">2/76</td><td class="num">0</td><td class="num">0</td><td class="num">0,90</td></tr>
+            <tr><th scope="row" rowspan="2">150 trang</th><td>pdf-translation-layout 3.1</td><td class="num good">0</td><td class="num good">0,85</td><td class="num good">184/184</td><td class="num">0</td><td class="num">0</td><td class="num">0,87</td></tr>
+            <tr><td>Thay chữ thô</td><td class="num bad">10.087</td><td class="num bad">0,22</td><td class="num bad">2/184</td><td class="num">0</td><td class="num">0</td><td class="num">0,90</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="footnote">Cách thay chữ thô có độ trùng bố cục cao hơn một chút vì nó ép chữ vào đúng khung cũ bằng cách thu nhỏ cỡ chữ; pdf-translation-layout cho đoạn dịch giãn sang khoảng trống bên cạnh để giữ cỡ chữ và có thêm dòng chân trang. Phiếu kiểm định của pdf-translation-layout trên cả ba mẫu: Đạt, 0 đoạn tràn khung. Đo ngày 02/11/2026 trên PyMuPDF 2.0 và 1.26, kết quả như nhau.</p>
+      <p class="gate"><span class="pass">Giới hạn</span><span><strong>Bộ mẫu do chính tác giả công cụ tạo</strong> (tài liệu tự viết, phạm vi công cộng CC0), nên có thiên lệch. Các công cụ dịch tài liệu khác chưa được đo; khi đo sẽ công bố kèm file kết quả gốc để ai cũng kiểm lại được.</span></p>
+    </div>
+  </section>
+
+  <section class="section" id="tai-ve" aria-labelledby="tai-ve-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Kiểm lại</p>
+        <h2 id="tai-ve-h">Tải mọi file đã dùng để đo</h2>
+      </div>
+      <ul class="downloads">
+        <li><a href="benchmark/mau_6trang.pdf" download>mau_6trang.pdf</a> <span>· bản gốc tiếng Anh, 6 bố cục: bìa, 2 cột, danh sách, bảng, biểu đồ, hộp tô nền</span></li>
+        <li><a href="benchmark/mau_6trang_VI.pdf" download>mau_6trang_VI.pdf</a> <span>· kết quả pdf-translation-layout 3.1</span></li>
+        <li><a href="benchmark/mau_6trang_duong-co-so.pdf" download>mau_6trang_duong-co-so.pdf</a> <span>· kết quả cách thay chữ thô</span></li>
+        <li><a href="benchmark/mau_6trang_phieu-kiem-dinh.md" download>mau_6trang_phieu-kiem-dinh.md</a> <span>· phiếu kiểm định công cụ tự xuất</span></li>
+        <li><a href="benchmark/ket_qua_2026-11-02.csv" download>ket_qua_2026-11-02.csv</a> <span>· số liệu đầy đủ cả ba tài liệu</span></li>
+        <li><a data-github hidden href="#">Mã nguồn, giao thức đo, bản dịch tham chiếu</a></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="tu-cham" aria-labelledby="tu-cham-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Tự chấm</p>
+        <h2 id="tu-cham-h">Chấm bản dịch từ công cụ bạn đang dùng</h2>
+        <p><strong>Cách nhanh nhất:</strong> mở <a href="dich#cham">trang chấm trên web</a>, chọn file gốc và file đã dịch (từ bất kỳ công cụ nào). Bảy chỉ số hiện ngay, tài liệu không rời máy bạn.</p>
+        <p>Hoặc, nếu đã tải kỹ năng lên Claude theo <a href="dung-voi-claude">bốn bước</a>, đính kèm cả hai file rồi nhắn:</p>
+      </div>
+      <div class="prompt-grid">
+        <p class="prompt"><span class="label">Câu nhắn</span><code>Đây là file gốc và bản dịch tiếng Việt, chấm chất lượng bản dịch giúp tôi</code></p>
+        <p class="prompt"><span class="label">Claude trả lời</span><code>Bảy chỉ số ở trên, kèm giải thích bằng lời thường và những trang nên tự xem lại</code></p>
+      </div>
+      <p class="footnote">Dùng máy tính và quen dòng lệnh: <span class="mono">python dich_pdf.py cham-diem --goc goc.pdf --dich ban-dich.pdf --csv ket_qua.csv</span>. Giao thức đo đầy đủ nằm trong thư mục <span class="mono">benchmark/</span> của mã nguồn.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div>
+      <p><strong>pdf-translation-layout</strong> · Huỳnh Anh Thuận · mã nguồn MIT, khi chạy dùng PyMuPDF (AGPL-3.0) · © <span id="year">2026</span></p>
+      <p>Liên hệ: <a href="mailto:hello@huynhanhthuan.com">hello@huynhanhthuan.com</a></p>
+      <p class="credit">File mẫu do tác giả tự viết, phát hành phạm vi công cộng (CC0). Nội dung mẫu là ví dụ, không phải lời khuyên tài chính.</p>
+    </div>
+    <nav aria-label="Liên kết cuối trang">
+      <a href="./">Trang chủ</a>
+      <a href="dung-voi-claude">Dùng với Claude</a>
+      <a data-github hidden href="#">Mã nguồn</a>
+      <a href="privacy.html">Chính sách dữ liệu</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

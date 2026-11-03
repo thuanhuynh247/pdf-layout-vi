@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dùng với Claude · PDF Translation Layout</title>
+<meta name="description" content="Dịch PDF tiếng Anh sang tiếng Việt giữ nguyên bố cục ngay trong Claude.ai, bốn bước, không cài Python, không gõ lệnh. Có bản song ngữ và phiếu kiểm định lỗi dấu.">
+<meta name="theme-color" content="#eef2f2">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Dịch PDF ngay trong Claude, bốn bước, không cài gì">
+<meta property="og:description" content="Tải một file lên mục Skills của Claude, gửi PDF và nhắn “dịch file này”. Nhận bản tiếng Việt đúng bố cục, bản song ngữ và phiếu kiểm định.">
+<meta property="og:url" content="https://pdf.huynhanhthuan.com/dung-voi-claude">
+<meta property="og:image" content="https://pdf.huynhanhthuan.com/assets/img/og.png">
+<link rel="canonical" href="https://pdf.huynhanhthuan.com/dung-voi-claude">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="preload" href="assets/fonts/pjs-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="config.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="pdf-translation-layout, về trang chủ">
+      <img src="assets/img/favicon.svg" alt="" width="26" height="26">
+      <span>pdf-translation-layout <span class="mono" data-version>v3.1.0</span></span>
+    </a>
+    <nav class="nav" aria-label="Mục lục">
+      <a href="#buoc">Bốn bước</a>
+      <a href="#ket-qua">Bạn nhận được gì</a>
+      <a href="#loi">Khi gặp lỗi</a>
+      <a href="chat-luong">Đo chất lượng</a>
+      <a href="dich">Dịch trên web</a>
+    </nav>
+    <a class="btn btn-ghost btn-sm" href="./?nen-tang=Claude.ai#dang-ky">Nhận qua email</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="section page-hero">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Claude.ai · Claude Desktop · không cài gì</p>
+        <h1>Dịch PDF ngay trong Claude, bốn bước</h1>
+        <p>Không cài Python, không gõ lệnh, không cần khóa API. Chính Claude là người dịch; công cụ tách chữ khỏi trang PDF rồi ghép bản dịch vào đúng chỗ, kèm phiếu kiểm định lỗi dấu và tràn khung.</p>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary" data-direct href="tai-ve/pdf-translation-layout.zip" download>Tải file kỹ năng (3,6 MB)</a>
+        <a class="btn btn-primary" data-via-email hidden href="./?nen-tang=Claude.ai#dang-ky">Nhận file qua email</a>
+        <a class="btn btn-ghost" href="#buoc">Xem bốn bước</a>
+      </div>
+      <p class="meta-row"><span>Gói Free, Pro, Max</span><span>Không tốn thêm tiền</span><span class="num">pdf-translation-layout.zip · v3.1.0</span></p>
+    </div>
+  </section>
+
+  <section class="section" id="buoc" aria-labelledby="buoc-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Làm một lần</p>
+        <h2 id="buoc-h">Bốn bước, khoảng năm phút</h2>
+        <p>Bước 1 đến 3 chỉ làm một lần. Những lần sau bạn chỉ cần bước 4.</p>
+      </div>
+      <ol class="steps steps-wrap">
+        <li><div><h3>Tải file kỹ năng</h3><p>Bấm nút tải ở đầu trang. Giữ nguyên file .zip, <strong>không cần giải nén</strong>.</p></div><code>pdf-translation-layout.zip   3,6 MB</code></li>
+        <li><div><h3>Bật chạy mã trong Claude</h3><p>Trên claude.ai, mở Settings, mục Capabilities, bật “Code execution and file creation”. Gói Free, Pro, Max thường đã bật sẵn; bạn chỉ cần kiểm tra.</p></div><code>Settings → Capabilities
+→ Code execution and file creation: bật</code></li>
+        <li><div><h3>Tải kỹ năng lên Claude</h3><p>Mở Customize, chọn Skills, bấm dấu +, chọn Create skill rồi Upload a skill, chọn file zip vừa tải. Thấy <strong>pdf-translation-layout</strong> trong danh sách kỹ năng là xong.</p></div><code>Customize → Skills → +
+→ Create skill → Upload a skill
+→ chọn pdf-translation-layout.zip</code></li>
+        <li><div><h3>Gửi PDF và nhắn một câu</h3><p>Mở cuộc trò chuyện mới, đính kèm PDF và nhắn câu bên cạnh. Claude tự chạy công cụ, dịch, dựng PDF, kiểm định, rồi đưa file để bạn tải.</p></div><code>Dịch file này sang tiếng Việt,
+giữ nguyên bố cục</code></li>
+      </ol>
+      <p class="gate"><span class="pass">Lô</span><span><strong>Tài liệu dài được dịch theo lô 10–20 trang.</strong> Sau mỗi 2–3 lô, Claude báo tiến độ và mời bạn nhắn “tiếp”. Tiến độ được lưu trong cuộc trò chuyện, nên bạn cứ nhắn “tiếp” cho đến khi Claude báo đã dựng xong file.</span></p>
+      <p class="footnote">Tên các mục trên giao diện Claude là tiếng Anh và có thể thay đổi nhẹ theo phiên bản. Claude Desktop làm y như vậy.</p>
+    </div>
+  </section>
+
+  <section class="section" id="ket-qua" aria-labelledby="ket-qua-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Đầu ra</p>
+        <h2 id="ket-qua-h">Bạn nhận được năm file</h2>
+        <p>Chữ trong mọi bản dịch là chữ thật: bôi đen, tìm kiếm, sao chép được. Ảnh, bảng, nét vẽ và liên kết giữ nguyên.</p>
+      </div>
+      <ul class="get-list out-list">
+        <li><span class="ic">VI</span><div><strong>…_VI.pdf</strong><span>Bản tiếng Việt thay chỗ bản gốc, đúng từng trang.</span></div></li>
+        <li><span class="ic">1|1</span><div><strong>…_song-ngu-doi-trang.pdf</strong><span>Trang gốc rồi trang dịch xen kẽ, mở chế độ xem hai trang để đọc đối chiếu.</span></div></li>
+        <li><span class="ic">◧</span><div><strong>…_song-ngu-hai-cot.pdf</strong><span>Gốc bên trái, dịch bên phải trên một trang ngang, tiện in.</span></div></li>
+        <li><span class="ic">≡</span><div><strong>…_song-ngu-xen-doan.pdf</strong><span>Mỗi đoạn gốc kèm bản dịch ngay dưới, hợp để học tiếng Anh.</span></div></li>
+        <li><span class="ic">QA</span><div><strong>…_phieu-kiem-dinh.md</strong><span>Kết luận Đạt hoặc Chưa đạt: ký tự lỗi phông, đoạn tràn khung, đoạn còn tiếng Anh hay lệch số liệu, liên kết, lớp chữ thật.</span></div></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" id="cau-nhan" aria-labelledby="cau-nhan-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Câu nhắn mẫu</p>
+        <h2 id="cau-nhan-h">Muốn khác đi, cứ nhắn bằng tiếng Việt</h2>
+      </div>
+      <div class="prompt-grid">
+        <p class="prompt"><span class="label">Chỉ dịch vài trang</span><code>Chỉ dịch trang 1–10 của file này</code></p>
+        <p class="prompt"><span class="label">Chỉ cần bản tiếng Việt</span><code>Dịch file này, chỉ xuất bản tiếng Việt, không cần song ngữ</code></p>
+        <p class="prompt"><span class="label">Văn phong, thuật ngữ</span><code>Dịch theo văn phong học thuật, giữ thuật ngữ tiếng Anh trong ngoặc ở lần đầu xuất hiện</code></p>
+        <p class="prompt"><span class="label">Chấm bản dịch có sẵn</span><code>Đây là file gốc và bản dịch của tôi, kiểm tra lỗi dấu và tràn chữ giúp tôi</code></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="loi" aria-labelledby="loi-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Khi gặp lỗi</p>
+        <h2 id="loi-h">Những lỗi hay gặp và cách xử lý</h2>
+      </div>
+      <div class="faq">
+        <details><summary>Không thấy mục Skills hoặc nút Upload a skill</summary><div><p>Kiểm tra lại bước 2: Skills chỉ hiện khi “Code execution and file creation” đang bật. Bật xong, tải lại trang. Nếu bạn dùng tài khoản công ty (gói Team, Enterprise), quản trị viên có thể đã tắt tính năng này.</p></div></details>
+        <details><summary>Claude báo không cài được thư viện PyMuPDF</summary><div><p>Môi trường chạy mã của Claude đang không được ra mạng để tải thư viện. Trong Settings, mục Capabilities, phần quyền truy cập mạng của Code execution, chọn mức cho phép tải từ kho thư viện (package managers), rồi mở cuộc trò chuyện mới. Tài khoản công ty có thể bị chặn mục này.</p></div></details>
+        <details><summary>Claude dừng giữa chừng hoặc báo hết lượt</summary><div><p>Nhắn “tiếp” để làm lô kế tiếp. Nếu gói của bạn đã hết lượt dùng trong ngày, chờ lượt mới rồi quay lại đúng cuộc trò chuyện đó và nhắn “tiếp”. Nếu Claude báo mất tiến độ (môi trường bị làm mới sau thời gian dài), đính kèm lại file và nhắn như lần đầu.</p></div></details>
+        <details><summary>File kết quả quá lớn, không tải về được</summary><div><p>Claude.ai cho tải về tối đa 30 MB mỗi file. Bản song ngữ đối trang có số trang gấp đôi nên dễ lớn nhất. Nhắn “chỉ xuất bản tiếng Việt”, hoặc nhờ dịch từng phần, ví dụ “chỉ dịch trang 1–50”.</p></div></details>
+        <details><summary>Claude báo PDF là bản scan</summary><div><p>Trang là ảnh chụp, không có lớp chữ, nên công cụ chưa dịch được. Cách nhận biết: mở PDF, thử bôi đen một dòng chữ; không bôi đen được là bản scan.</p></div></details>
+        <details><summary>Chữ trong hình, biểu đồ vẫn là tiếng Anh</summary><div><p>Đúng như thiết kế của bản này: chữ nằm trong ảnh được giữ nguyên. Gói nâng cao chạy trên máy (Claude Code, Antigravity) có bước Việt hóa nhãn biểu đồ.</p></div></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="noi-khac" aria-labelledby="noi-khac-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Nền tảng khác</p>
+        <h2 id="noi-khac-h">Không dùng Claude.ai?</h2>
+      </div>
+      <div class="platform-cards">
+        <div class="pcard">
+          <h3>Trang web, mọi AI</h3>
+          <p>Kéo PDF vào trang dịch của website, chép câu nhắn sang ChatGPT, Gemini hay Copilot rồi dán câu trả lời về. Tài liệu không rời máy bạn.</p>
+          <p><a class="btn btn-ghost btn-sm" href="dich">Mở trang dịch</a></p>
+        </div>
+        <div class="pcard">
+          <h3>ChatGPT</h3>
+          <p data-gpt-off>GPT dựng sẵn đang được thử nghiệm. Để lại email để nhận link khi chạy ổn định; trong lúc chờ, tài khoản Claude miễn phí dùng được ngay.</p>
+          <p><a class="btn btn-ghost btn-sm" data-gpt hidden href="#" data-gpt-label="Mở GPT “Dịch PDF giữ bố cục”">Mở GPT</a><a class="btn btn-ghost btn-sm" data-gpt-off href="./?nen-tang=ChatGPT#dang-ky">Báo tôi khi có link</a></p>
+        </div>
+        <div class="pcard">
+          <h3>Antigravity</h3>
+          <p>Cài plugin, trợ lý tự cài thư viện ở lần đầu. Máy cần Python 3.9 trở lên; kết quả nằm ngay cạnh file gốc.</p>
+          <p><a class="btn btn-ghost btn-sm" href="tai-ve/pdf-translation-layout-antigravity.zip" download>Tải plugin</a></p>
+          <code class="cmd">agy plugin install ./pdf-translation-layout</code>
+        </div>
+        <div class="pcard">
+          <h3>Claude Code</h3>
+          <p>Giải nén file kỹ năng vào <span class="mono">~/.claude/skills/</span> rồi nhắn như trên. Cần video đọc sách: dùng gói nâng cao gửi qua email.</p>
+          <p><a class="btn btn-ghost btn-sm" href="./?nen-tang=Claude%20Code#dang-ky">Nhận hướng dẫn</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="rieng-tu" aria-labelledby="rieng-tu-h">
+    <div class="wrap">
+      <div class="note-grid">
+        <div>
+          <h2 id="rieng-tu-h" class="h3">Tài liệu của bạn đi đâu</h2>
+          <p>Trên Claude.ai, file chỉ đi vào tài khoản Claude của bạn và được xử lý theo chính sách của Anthropic. Tác giả công cụ không nhận, không lưu gì; trang web này không có máy chủ nhận tài liệu.</p>
+        </div>
+        <div>
+          <h2 class="h3">Bản quyền nội dung</h2>
+          <p>Bản dịch là tác phẩm phái sinh, phục vụ đọc hiểu cá nhân; mỗi trang có dòng chân trang nhỏ “Bản dịch cá nhân bằng AI · không phân phối”. Muốn đăng, chia sẻ công khai hoặc bán bản dịch sách, bài báo có bản quyền, bạn cần sự đồng ý của chủ sở hữu bản quyền.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div>
+      <p><strong>pdf-translation-layout</strong> · Huỳnh Anh Thuận · mã nguồn MIT, khi chạy dùng PyMuPDF (AGPL-3.0) · © <span id="year">2026</span></p>
+      <p>Liên hệ: <a href="mailto:hello@huynhanhthuan.com">hello@huynhanhthuan.com</a></p>
+      <p class="credit">Claude là nhãn hiệu của Anthropic. Công cụ này do cá nhân phát triển, không liên kết với Anthropic.</p>
+    </div>
+    <nav aria-label="Liên kết cuối trang">
+      <a href="./">Trang chủ</a>
+      <a href="chat-luong">Đo chất lượng</a>
+      <a data-github hidden href="#">Mã nguồn</a>
+      <a href="privacy.html">Chính sách dữ liệu</a>
+      <a href="./#ung-ho">Ủng hộ</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

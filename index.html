@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>PDF Translation Layout</title>
-<meta name="description" content="Gói kỹ năng AI miễn phí dịch PDF sang tiếng Việt mà vẫn giữ nguyên bố cục, chữ vector thật, xuất bản song ngữ và video đọc sách. Dùng cho Antigravity, Claude Code và ChatGPT.">
+<meta name="description" content="Dịch PDF tiếng Anh sang tiếng Việt giữ nguyên bố cục, ngay trên trình duyệt hoặc trong Claude, ChatGPT bạn đang dùng. Không cài gì, tài liệu không rời máy. Có bản song ngữ và phiếu kiểm định lỗi dấu. Miễn phí, mã nguồn mở.">
 <meta name="theme-color" content="#eef2f2">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Dịch PDF sang tiếng Việt, giữ nguyên từng trang">
-<meta property="og:description" content="Gói kỹ năng AI miễn phí v3.0.1 cho Antigravity, Claude Code và ChatGPT. Chữ vector thật, song ngữ, video đọc sách.">
+<meta property="og:description" content="Kéo PDF vào trang hoặc gửi cho Claude, nhận bản tiếng Việt đúng bố cục kèm song ngữ và phiếu kiểm định. Không cài gì, tài liệu không rời máy. Miễn phí.">
 <meta property="og:url" content="https://pdf.huynhanhthuan.com/">
 <meta property="og:image" content="https://pdf.huynhanhthuan.com/assets/img/og.png">
 <meta property="og:image:width" content="1200">
@@ -33,15 +33,17 @@
   <div class="wrap">
     <a class="brand" href="#top" aria-label="pdf-translation-layout, về đầu trang">
       <img src="assets/img/favicon.svg" alt="" width="26" height="26">
-      <span>pdf-translation-layout <span class="mono" data-version>v3.0.1</span></span>
+      <span>pdf-translation-layout <span class="mono" data-version>v3.1.0</span></span>
     </a>
     <nav class="nav" aria-label="Mục lục">
+      <a href="dich">Dịch trên web</a>
+      <a href="dung-voi-claude">Dùng với Claude</a>
       <a href="#che-do">Chế độ xuất bản</a>
-      <a href="#cach-hoat-dong">Cách hoạt động</a>
       <a href="#nen-tang">Nền tảng</a>
+      <a href="chat-luong">Đo chất lượng</a>
       <a href="#hoi-dap">Hỏi đáp</a>
     </nav>
-    <a class="btn btn-primary btn-sm" href="#dang-ky">Nhận miễn phí</a>
+    <a class="btn btn-primary btn-sm" href="dich">Dịch ngay</a>
   </div>
 </header>
 
@@ -51,14 +53,14 @@
   <section class="hero">
     <div class="wrap">
       <div class="hero-copy">
-        <p class="eyebrow">Gói kỹ năng AI · miễn phí · giấy phép MIT</p>
+        <p class="eyebrow">Không cài gì · miễn phí · mã nguồn mở</p>
         <h1>Dịch PDF sang tiếng Việt, giữ nguyên <span class="bbox">từng trang</span><span class="bbox-tag" aria-hidden="true">sc 0.94</span></h1>
-        <p class="lead">Bản dịch được dàn lại bằng chữ vector thật: vẫn bôi đen, tìm kiếm và in sắc nét. Tiếng Việt dài hơn bản gốc 12–18%, nên engine tự nới dòng, chỉnh giãn dòng rồi mới co chữ theo bậc để mọi đoạn nằm gọn trong khung cũ.</p>
+        <p class="lead">Kéo PDF vào trang web, hoặc gửi PDF cho Claude. Chính AI bạn chọn là người dịch; công cụ dàn bản dịch lại bằng chữ thật, vẫn bôi đen, tìm kiếm và in sắc nét, kèm phiếu kiểm định lỗi dấu và tràn khung. Tài liệu không rời máy bạn.</p>
         <div class="cta-row">
-          <a class="btn btn-primary" href="#dang-ky">Nhận gói kỹ năng qua email</a>
-          <a class="btn btn-ghost" href="#demo"><span class="play-ico" aria-hidden="true"></span>Xem video đọc song ngữ</a>
+          <a class="btn btn-primary" href="dich">Dịch ngay trên web</a>
+          <a class="btn btn-ghost" href="dung-voi-claude">Dùng với Claude</a>
         </div>
-        <p class="meta-row"><span>Antigravity</span><span>Claude Code</span><span>ChatGPT</span><span class="num">550 KB · 39 tệp</span></p>
+        <p class="meta-row"><span>Trình duyệt</span><span>Claude.ai</span><span>ChatGPT</span><span>Antigravity</span><span>Claude Code</span><span class="num">không cần Python</span></p>
       </div>
 
       <figure class="proof" aria-labelledby="proof-cap">
@@ -115,11 +117,11 @@
 
       <div class="answer">
         <div>
-          <h3>Gói kỹ năng này xử lý cả ba</h3>
+          <h3>Công cụ này xử lý cả ba</h3>
           <ul>
-            <li><span><strong>Giữ lớp chữ vector.</strong> Không có trang nào bị chụp thành ảnh. Liên kết, bảng, hình minh họa giữ nguyên vị trí.</span></li>
-            <li><span><strong>Co giãn theo bậc.</strong> Nới bề ngang dòng tối đa 18 pt, chỉnh giãn dòng, thu khoảng cách đoạn, sau cùng mới co cỡ chữ trong khoảng 1.0 → 0.67.</span></li>
-            <li><span><strong>Nhúng font đủ dấu.</strong> Plus Jakarta Sans được nhúng dạng CID, kèm bước kiểm tra 0 ký tự tofu trước khi giao file.</span></li>
+            <li><span><strong>Giữ lớp chữ thật.</strong> Không có trang nào bị chụp thành ảnh. Liên kết, bảng, hình minh họa giữ nguyên vị trí.</span></li>
+            <li><span><strong>Nới khung trước, co chữ sau cùng.</strong> Đoạn dịch được giãn sang khoảng trống bên cạnh và bên dưới; chỉ khi hết chỗ mới thu nhỏ cỡ chữ, và đoạn nào phải thu dưới 80% đều ghi vào phiếu kiểm định.</span></li>
+            <li><span><strong>Phông đủ dấu, cùng bề ngang.</strong> Phông có đủ chữ Việt và rộng bằng Times New Roman, Arial, Courier New, Calibri, nên bản dịch chiếm chỗ gần như bản gốc. Phiếu kiểm định đếm ký tự lỗi trước khi giao file.</span></li>
           </ul>
         </div>
         <figure class="zoom">
@@ -136,7 +138,7 @@
       <div class="section-head">
         <p class="eyebrow">Kiểm chứng</p>
         <h2 id="qa-h">Mỗi file đều qua cổng kiểm định 4 tầng</h2>
-        <p>Số liệu dưới đây là kết quả thật trên bản dịch thử một cuốn cẩm nang 163 trang.</p>
+        <p>Số liệu dưới đây là kết quả thật của gói nâng cao 3.0.1 trên bản dịch thử một cuốn cẩm nang 163 trang. Bản 3.1 không cài gì kèm phiếu kiểm định 7 mục cho mỗi file: xem <a href="chat-luong">kết quả đo và cách tự chấm</a>.</p>
       </div>
       <div class="qa-wrap">
         <table class="qa">
@@ -178,8 +180,8 @@
             </video>
           </div>
           <span class="mono">cli.py video --mode bilingual · trang 13 · 1:10 · 1080p</span>
-          <h3>Video đọc sách</h3>
-          <p id="video-desc">Xuất thẳng từ bản v3.0.1, không chỉnh sửa: Andrew đọc từng đoạn tiếng Anh, Đức Trí đọc lại đoạn tiếng Việt tương ứng. Khung chữ đang đọc chuyển màu cam ở bản gốc, xanh teal ở bản dịch, phụ đề chạy bên dưới. Có thể nhân bản giọng của chính bạn từ một đoạn ghi âm 3–8 giây.</p>
+          <h3>Video đọc sách · gói nâng cao</h3>
+          <p id="video-desc">Xuất thẳng từ gói nâng cao 3.0.1 chạy trên máy, không chỉnh sửa: Andrew đọc từng đoạn tiếng Anh, Đức Trí đọc lại đoạn tiếng Việt tương ứng. Khung chữ đang đọc chuyển màu cam ở bản gốc, xanh teal ở bản dịch, phụ đề chạy bên dưới. Có thể nhân bản giọng của chính bạn từ một đoạn ghi âm 3–8 giây.</p>
         </div>
         <figure class="mode">
           <img class="mode-img" src="assets/img/mode-interleaved.webp" width="700" height="906" loading="lazy" alt="Bố cục xen đoạn: mỗi đoạn tiếng Anh đi liền đoạn dịch tiếng Việt màu xanh teal.">
@@ -217,9 +219,9 @@
   <section class="section" id="cach-hoat-dong" aria-labelledby="how-h">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Quy trình</p>
-        <h2 id="how-h">Bạn ra lệnh một câu, agent làm sáu bước</h2>
-        <p>Ví dụ: “Dịch file bao-cao.pdf sang tiếng Việt, giữ nguyên layout, xuất thêm bản đối trang.” Agent tự chạy các lệnh dưới đây và báo lại khi xong.</p>
+        <p class="eyebrow">Chế độ nâng cao · chạy trên máy</p>
+        <h2 id="how-h">Cần video đọc sách? Agent trên máy làm sáu bước</h2>
+        <p>Dành cho Claude Code và Antigravity với gói nâng cao 3.0.1 (cần Python 3.10+). Ví dụ: “Dịch file bao-cao.pdf sang tiếng Việt, giữ nguyên layout, xuất thêm bản đối trang.” Agent tự chạy các lệnh dưới đây và báo lại khi xong. Chỉ cần dịch PDF thì <a href="dung-voi-claude">bản không cài gì</a> là đủ.</p>
       </div>
       <ol class="steps">
         <li><div><h3>Kiểm kê file gốc</h3><p>Đếm trang, khổ giấy, font, ảnh, bảng, liên kết. File gốc chỉ được đọc, không bị sửa.</p></div><code>python scripts/cli.py inspect --source book.pdf</code></li>
@@ -240,23 +242,24 @@ data/translations.json</code></li>
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Tương thích</p>
-        <h2 id="nen-tang-h">Chạy trên ba nền tảng AI</h2>
-        <p>Email hướng dẫn sẽ gửi đúng các bước cho nền tảng bạn chọn khi đăng ký.</p>
+        <h2 id="nen-tang-h">Chạy ngay trong AI bạn đang dùng</h2>
+        <p>Cùng một bộ công cụ, đóng gói cho từng nơi. Email hướng dẫn gửi đúng các bước cho nền tảng bạn chọn khi đăng ký.</p>
       </div>
       <div class="matrix-wrap">
         <table class="matrix">
-          <thead><tr><th scope="col"><span class="visually-hidden">Tính năng</span></th><th scope="col">Antigravity<span>IDE · máy của bạn</span></th><th scope="col">Claude Code<span>CLI · máy của bạn</span></th><th scope="col">ChatGPT<span>Custom GPT · trên mây</span></th></tr></thead>
+          <thead><tr><th scope="col"><span class="visually-hidden">Tính năng</span></th><th scope="col">Trang web<span>pdf.huynhanhthuan.com/dich</span></th><th scope="col">Claude.ai<span>Web, Desktop · tự động nhất</span></th><th scope="col">ChatGPT<span>GPT dựng sẵn</span></th><th scope="col">Antigravity<span>Plugin · máy của bạn</span></th><th scope="col">Claude Code<span>Skill · máy của bạn</span></th></tr></thead>
           <tbody>
-            <tr><th scope="row">Dịch đơn ngữ giữ bố cục</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td></tr>
-            <tr><th scope="row">Song ngữ đối trang, xen đoạn</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td></tr>
-            <tr><th scope="row">Việt hóa nhãn biểu đồ</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td></tr>
-            <tr><th scope="row">Giọng đọc AI, video 1080p</th><td class="yes">Có</td><td class="yes">Có</td><td class="no">Không</td></tr>
-            <tr><th scope="row">Sách trên 100 trang</th><td>Theo lô 20–25 trang</td><td>Theo lô 20–25 trang</td><td>10–20 trang mỗi lượt</td></tr>
-            <tr><th scope="row">Cách cài</th><td>Chép thư mục vào skills</td><td>Gõ <code class="mono">claude</code> trong thư mục</td><td>Dán Instructions vào Custom GPT</td></tr>
+            <tr><th scope="row">Cách bắt đầu</th><td>Kéo PDF vào trang</td><td>Tải 1 file zip lên mục Skills</td><td>Mở link GPT, gửi PDF</td><td>Cài plugin vài cú bấm</td><td>Chép thư mục vào skills</td></tr>
+            <tr><th scope="row">Cần cài Python</th><td class="yes">Không</td><td class="yes">Không</td><td class="yes">Không</td><td>Có, trợ lý tự cài thư viện</td><td>Có, trợ lý tự cài thư viện</td></tr>
+            <tr><th scope="row">Dịch giữ bố cục, 4 kiểu xuất</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td><td class="yes">Có</td><td class="yes">Có</td></tr>
+            <tr><th scope="row">Phiếu kiểm định lỗi dấu, tràn khung</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td><td class="yes">Có</td><td class="yes">Có</td></tr>
+            <tr><th scope="row">Tài liệu dài</th><td>Dán từng lô, hoặc tự động bằng khóa API</td><td>Theo lô, bạn nhắn “tiếp”</td><td>Theo lô, bạn nhắn “tiếp”</td><td>Theo lô</td><td>Theo lô</td></tr>
+            <tr><th scope="row">Giọng đọc, video đọc sách</th><td class="no">Không</td><td class="no">Không</td><td class="no">Không</td><td>Gói nâng cao</td><td>Gói nâng cao</td></tr>
+            <tr><th scope="row">Tài liệu của bạn đi đâu</th><td>Ở lại trong trình duyệt; chỉ phần chữ tới AI bạn chọn</td><td>Chỉ vào tài khoản Claude của bạn</td><td>Chỉ vào tài khoản ChatGPT của bạn</td><td>Trang dựng trên máy; chỉ phần chữ tới AI</td><td>Trang dựng trên máy; chỉ phần chữ tới AI</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="footnote">* Trên ChatGPT, GPT dựng lại quy trình theo đặc tả trong Code Interpreter. Mỗi lượt chạy giới hạn khoảng 60–120 giây và sandbox thiếu ffmpeg, nên chất lượng phụ thuộc từng phiên. Tài liệu dài nên dùng Claude Code hoặc Antigravity.</p>
+      <p class="footnote">* GPT dựng sẵn <span data-gpt-off>đang thử nghiệm; trong lúc chờ, email hướng dẫn dùng Claude.ai.</span><a data-gpt hidden href="#">đã mở, bấm để dùng.</a> Claude.ai cho tải về tối đa 30 MB mỗi file. Không tốn thêm tiền: chỉ dùng hạn mức gói AI bạn đang có.</p>
     </div>
   </section>
 
@@ -265,12 +268,12 @@ data/translations.json</code></li>
     <div class="wrap">
       <div>
         <div class="section-head">
-          <p class="eyebrow">Nhận gói kỹ năng</p>
-          <h2 id="dang-ky-h">Để lại email, nhận gói kỹ năng và hướng dẫn cài</h2>
+          <p class="eyebrow">Nhận qua email</p>
+          <h2 id="dang-ky-h">Để lại email, nhận file và hướng dẫn cho đúng nền tảng</h2>
         </div>
         <ul class="get-list">
-          <li><span class="ic">zip</span><div><strong>pdf-translation-layout-v<span data-version-plain>3.0.1</span>.zip</strong><span>550 KB, 39 tệp: script, font, đặc tả, hướng dẫn cho 3 nền tảng.</span></div></li>
-          <li><span class="ic">1·2·3</span><div><strong>Các bước cài cho đúng nền tảng của bạn</strong><span>Kèm câu lệnh chạy thử đầu tiên để biết đã cài đúng.</span></div></li>
+          <li><span class="ic">zip</span><div><strong>File cho đúng nơi bạn dùng</strong><span>Claude.ai: một file 3,6 MB tải lên là dùng. ChatGPT: link GPT dựng sẵn. Antigravity: plugin. Claude Code: skill kèm gói nâng cao có video.</span></div></li>
+          <li><span class="ic">1·2·3</span><div><strong>Bốn bước cho đúng nền tảng của bạn</strong><span>Kèm câu nhắn mẫu để thử ngay với file PDF đầu tiên.</span></div></li>
           <li><span class="ic">v+</span><div><strong>Báo khi có phiên bản mới</strong><span>Chỉ khi bạn chọn nhận. Vài lần mỗi năm, không quảng cáo.</span></div></li>
         </ul>
         <p class="register-note">Email gửi từ <strong>hello@huynhanhthuan.com</strong>, thường đến trong 1–2 phút. Không thấy thì xem thêm mục Quảng cáo hoặc Spam.</p>
@@ -294,9 +297,10 @@ data/translations.json</code></li>
           <fieldset id="f-platform" aria-describedby="e-platform">
             <legend>Bạn đang dùng nền tảng AI nào?</legend>
             <div class="chips">
+              <label class="chip"><input type="radio" name="platform" id="p-cai" value="Claude.ai"><span>Claude.ai</span></label>
+              <label class="chip"><input type="radio" name="platform" id="p-gpt" value="ChatGPT"><span>ChatGPT</span></label>
               <label class="chip"><input type="radio" name="platform" id="p-ag" value="Antigravity"><span>Antigravity</span></label>
               <label class="chip"><input type="radio" name="platform" id="p-cc" value="Claude Code"><span>Claude Code</span></label>
-              <label class="chip"><input type="radio" name="platform" id="p-gpt" value="ChatGPT"><span>ChatGPT</span></label>
               <label class="chip"><input type="radio" name="platform" id="p-none" value="Chưa dùng"><span>Chưa dùng cái nào</span></label>
             </div>
             <p class="err" id="e-platform" hidden></p>
@@ -321,7 +325,7 @@ data/translations.json</code></li>
           </label>
           <label class="check" for="f-consent">
             <input type="checkbox" id="f-consent" name="consent" required aria-describedby="e-consent">
-            <span><strong>Tôi đồng ý</strong> để Huỳnh Anh Thuận lưu họ tên, email và các câu trả lời trên nhằm gửi gói kỹ năng và hỗ trợ sử dụng. Xem <a href="privacy.html">chính sách dữ liệu</a>.</span>
+            <span><strong>Tôi đồng ý</strong> để Huỳnh Anh Thuận lưu họ tên, email và các câu trả lời trên nhằm gửi file, hướng dẫn và hỗ trợ sử dụng. Xem <a href="privacy.html">chính sách dữ liệu</a>.</span>
           </label>
           <p class="err" id="e-consent" hidden></p>
 
@@ -331,7 +335,7 @@ data/translations.json</code></li>
           </div>
 
           <div class="form-foot">
-            <button class="btn btn-primary" type="submit" id="submit-btn">Gửi gói kỹ năng cho tôi</button>
+            <button class="btn btn-primary" type="submit" id="submit-btn">Gửi hướng dẫn cho tôi</button>
             <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
           </div>
         </form>
@@ -339,9 +343,9 @@ data/translations.json</code></li>
         <div class="done" id="done" hidden tabindex="-1">
           <span class="tick" aria-hidden="true">✓</span>
           <h3 id="done-title">Đã nhận đăng ký</h3>
-          <p id="done-text">Gói kỹ năng đang trên đường tới hộp thư của bạn.</p>
+          <p id="done-text">Hướng dẫn đang trên đường tới hộp thư của bạn.</p>
           <p class="demo-note" id="demo-note" hidden>Đây là bản xem trước: trang chưa kết nối máy chủ nên chưa có email nào được gửi.</p>
-          <p>Trong lúc chờ: nếu gói kỹ năng giúp bạn tiết kiệm thời gian, <a href="#ung-ho">mời mình một ly cà phê</a>.</p>
+          <p>Không muốn chờ? <a href="dung-voi-claude">Làm theo 4 bước trên trang</a>. Nếu công cụ giúp bạn tiết kiệm thời gian, <a href="#ung-ho">mời mình một ly cà phê</a>.</p>
           <button class="btn btn-ghost btn-sm" type="button" id="again-btn">Đăng ký cho email khác</button>
         </div>
       </div>
@@ -390,12 +394,13 @@ data/translations.json</code></li>
         <h2 id="hoi-dap-h">Câu hỏi thường gặp</h2>
       </div>
       <div class="faq">
-        <details><summary>Có thật sự miễn phí không?</summary><div><p>Có. Gói kỹ năng phát hành theo giấy phép MIT: bạn được dùng, sửa và chia sẻ, kể cả cho công việc có thu nhập. Ủng hộ cà phê là hoàn toàn tự nguyện.</p></div></details>
-        <details><summary>Tôi không biết lập trình, có dùng được không?</summary><div><p>Được, nếu bạn dùng Claude Code hoặc Antigravity. Bạn ra lệnh bằng tiếng Việt, agent tự chạy các câu lệnh. Bạn chỉ cần cài Python 3.10 trở lên một lần, email có hướng dẫn từng bước.</p></div></details>
-        <details><summary>Tài liệu của tôi có bị gửi đi đâu không?</summary><div><p>Các script chạy trên máy của bạn. Phần dịch do AI bạn đang dùng (Claude, Gemini hoặc ChatGPT) thực hiện, nên nội dung đi qua nhà cung cấp AI đó theo chính sách của họ. Trang web này không nhận và không lưu tài liệu của bạn.</p></div></details>
+        <details><summary>Có thật sự miễn phí không?</summary><div><p>Công cụ miễn phí, mã nguồn mở theo giấy phép MIT: bạn được dùng, sửa và chia sẻ, kể cả cho công việc có thu nhập. Việc dịch dùng hạn mức gói AI bạn đang có (Claude, ChatGPT…), nên không tốn thêm tiền; gói miễn phí của các hãng sẽ chạm trần lượt dùng nhanh hơn với tài liệu dài. Ủng hộ cà phê là hoàn toàn tự nguyện.</p></div></details>
+        <details><summary>Tôi không biết lập trình, có dùng được không?</summary><div><p>Được. Cách dễ nhất là <a href="dich">trang dịch trên web</a>: kéo PDF vào, chép câu nhắn sang ChatGPT hay Gemini, dán câu trả lời về. Với Claude.ai bạn chỉ tải một file lên mục Skills, rồi gửi PDF và nhắn bằng tiếng Việt; không cài Python, không gõ lệnh. Xem <a href="dung-voi-claude">4 bước có hướng dẫn</a>. Chế độ nâng cao (video đọc sách) mới cần cài Python trên máy.</p></div></details>
+        <details><summary>Tài liệu của tôi có bị gửi đi đâu không?</summary><div><p>Tùy cách dùng. Trên trang dịch của website, file PDF được mở và dựng lại ngay trong trình duyệt; phần chữ chỉ rời máy khi bạn dán sang AI của mình hoặc dùng khóa API của bạn. Trên Claude.ai và ChatGPT, file chỉ đi vào tài khoản AI của bạn, theo chính sách của nhà cung cấp đó; tác giả công cụ không nhận, không lưu gì. Với Antigravity và Claude Code, trang PDF được dựng trên máy bạn, chỉ phần chữ cần dịch được gửi tới AI bạn đang dùng. Trang web này không nhận tài liệu của bạn.</p></div></details>
+        <details><summary>Khác gì dịch tài liệu bằng Google Dịch hay các trang dịch PDF?</summary><div><p>Người dịch là trợ lý AI bạn chọn, bạn có thể dặn thêm văn phong, thuật ngữ. Mỗi lần dịch có phiếu kiểm định đếm ký tự lỗi dấu, đoạn tràn khung, liên kết bị mất. Bộ chấm này dùng được cho PDF của bất kỳ công cụ nào: xem <a href="chat-luong">trang đo chất lượng</a> để tự kiểm tra.</p></div></details>
         <details><summary>File PDF nào dịch được?</summary><div><p>PDF có lớp chữ, tức là bạn bôi đen được chữ trong file. PDF scan dạng ảnh chụp cần chạy nhận dạng chữ (OCR) trước, phiên bản này chưa làm bước đó.</p></div></details>
         <details><summary>Đăng ký rồi mà chưa thấy email?</summary><div><p>Tìm thư từ hello@huynhanhthuan.com, kể cả trong mục Quảng cáo hoặc Spam. Nếu hôm đó số người đăng ký vượt hạn mức gửi trong ngày, hệ thống tự gửi cho bạn trong vòng 24 giờ. Vẫn không thấy thì gửi email tới hello@huynhanhthuan.com.</p></div></details>
-        <details><summary>Tôi có được dịch sách đang có bản quyền không?</summary><div><p>Công cụ không thay đổi quyền tác giả của tài liệu gốc. Bạn tự chịu trách nhiệm về quyền sử dụng tài liệu mình dịch; muốn chia sẻ hoặc phát hành bản dịch, bạn cần sự cho phép của chủ sở hữu.</p></div></details>
+        <details><summary>Tôi có được dịch sách đang có bản quyền không?</summary><div><p>Bản dịch là tác phẩm phái sinh. Công cụ phục vụ đọc hiểu cá nhân: mỗi trang bản dịch có dòng chân trang nhỏ “Bản dịch cá nhân bằng AI · không phân phối”. Muốn đăng, chia sẻ công khai hoặc bán bản dịch sách, bài báo có bản quyền, bạn cần sự đồng ý của chủ sở hữu bản quyền.</p></div></details>
       </div>
     </div>
   </section>
@@ -404,13 +409,16 @@ data/translations.json</code></li>
 <footer class="footer">
   <div class="wrap">
     <div>
-      <p><strong>pdf-translation-layout</strong> · Huỳnh Anh Thuận · giấy phép MIT · © <span id="year">2026</span></p>
+      <p><strong>pdf-translation-layout</strong> · Huỳnh Anh Thuận · mã nguồn MIT, khi chạy dùng PyMuPDF (AGPL-3.0) · © <span id="year">2026</span></p>
       <p>Liên hệ: <a href="mailto:hello@huynhanhthuan.com">hello@huynhanhthuan.com</a></p>
       <p class="credit">Trang mẫu là bản dịch thử “Starter Guide” của 80,000 Hours, dùng để minh họa kỹ thuật dàn trang. Trang web này không liên kết với 80,000 Hours.</p>
     </div>
     <nav aria-label="Liên kết cuối trang">
+      <a href="dich">Dịch trên web</a>
+      <a href="dung-voi-claude">Dùng với Claude</a>
+      <a href="chat-luong">Đo chất lượng</a>
+      <a data-github hidden href="#">Mã nguồn</a>
       <a href="privacy.html">Chính sách dữ liệu</a>
-      <a href="#dang-ky">Nhận gói kỹ năng</a>
       <a href="#ung-ho">Ủng hộ</a>
     </nav>
   </div>
