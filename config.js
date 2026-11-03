@@ -8,7 +8,7 @@ window.SITE_CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxOZPeGValKjmm_12FGldg6DmmjPApAyJlDd6k1S4G21mwjtumo2HnSEmSy8V2e7xmk/exec",
 
   // Phiên bản hiển thị trên trang
-  VERSION: "3.1.0",
+  VERSION: "3.2.0",
 
   // Trang "Dùng với Claude": true = hiện nút tải thẳng file zip (không cần email);
   // false = nút dẫn tới form đăng ký, file gửi qua email.
@@ -24,7 +24,7 @@ window.SITE_CONFIG = {
   GPT_URL: "",
 
   // Link kho mã nguồn công khai (dạng https://github.com/<tên>/pdf-translation-layout). Để trống = ẩn link.
-  GITHUB_URL: "https://github.com/thuanhuynh247/pdf-translation-layout",
+  GITHUB_URL: "",
 
   // Chỉ hiện dòng "Đã có N người nhận" khi N đạt ngưỡng này (0 = không bao giờ hiện)
   SHOW_COUNT_FROM: 30,
