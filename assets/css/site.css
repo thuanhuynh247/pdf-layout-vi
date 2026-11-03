@@ -496,7 +496,7 @@ fieldset[aria-invalid="true"] .chip span { border-color: var(--error); }
 .mode-card:has(input:checked) { border-color: var(--teal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent); }
 .mode-card input { position: absolute; top: var(--sp-4); right: var(--sp-4); accent-color: var(--teal); width: 18px; height: 18px; }
 .mc-h { font-weight: 700; padding-right: var(--sp-6); }
-.mc-h em { font-style: normal; font: 600 11px/1 var(--font-mono); color: var(--pass); background: color-mix(in srgb, var(--pass) 12%, transparent); padding: 3px 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; }
+.mc-h em { font-style: normal; font: 600 11px/1 var(--font-mono); color: var(--pass); background: color-mix(in srgb, var(--pass) 12%, transparent); padding: 3px 6px; border-radius: 3px; margin-left: 6px; vertical-align: 2px; white-space: nowrap; display: inline-block; }
 .mc-p { color: var(--ink-2); font-size: var(--fs-sm); }
 .pane { margin-top: var(--sp-5); display: grid; gap: var(--sp-4); }
 .mini-steps { margin: 0; padding-left: 1.3em; display: grid; gap: var(--sp-2); color: var(--ink-2); }
@@ -518,3 +518,10 @@ fieldset[aria-invalid="true"] .chip span { border-color: var(--error); }
 .qa-table .no-bad { color: var(--error); font-weight: 700; }
 #files { margin: var(--sp-5) 0; }
 #files a { font-family: var(--font-mono); font-size: var(--fs-sm); overflow-wrap: anywhere; }
+
+/* Chiều dịch (trang /dich) */
+.dir-pick { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3) var(--sp-5); margin: var(--sp-4) 0; }
+.dir-pick .label { margin: 0; }
+.dir-pick .check { display: inline-grid; align-items: center; }
+.dir-pick .check input { margin: 0; }
+.dir-note { font-size: var(--fs-sm); color: var(--ink-2); }

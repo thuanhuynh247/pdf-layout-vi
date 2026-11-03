@@ -22,7 +22,7 @@
 const CONFIG = {
   // Địa chỉ website (không có dấu / ở cuối)
   SITE_URL: 'https://pdf.huynhanhthuan.com',
-  VERSION: '3.1.0',
+  VERSION: '3.2.0',
 
   // Bản 3.1 "không cài gì": các file zip nằm sẵn trên website, thư mục tai-ve/
   CLAUDE_ZIP_URL: 'https://pdf.huynhanhthuan.com/tai-ve/pdf-translation-layout.zip',
@@ -65,8 +65,8 @@ const CONFIG = {
   },
 
   // Nội dung thông báo phiên bản mới (dùng cho guiThongBaoPhienBanMoi)
-  UPDATE_SUBJECT: 'Dịch PDF ngay trong Claude, không cần cài gì',
-  UPDATE_MESSAGE: 'Bản 3.1 không cần cài gì nữa. Dịch ngay trên web tại pdf.huynhanhthuan.com/dich: kéo PDF vào, chép câu nhắn sang ChatGPT, Gemini hay Claude, dán câu trả lời về; tài liệu không rời máy bạn. Hoặc tải một file lên mục Skills của Claude.ai rồi nhắn “Dịch file này sang tiếng Việt, giữ nguyên bố cục”. Mỗi lần dịch kèm bản song ngữ và phiếu kiểm định lỗi dấu, tràn khung.',
+  UPDATE_SUBJECT: 'Dịch PDF hai chiều Anh – Việt, không cần cài gì',
+  UPDATE_MESSAGE: 'Bản 3.2 dịch được cả hai chiều: tiếng Anh sang tiếng Việt, và tiếng Việt sang tiếng Anh (hồ sơ năng lực, công văn, khóa luận…); PDF tiếng Việt dùng phông cũ .VnTime hay VNI được tự chuyển sang Unicode. Không cần cài gì: dịch ngay trên web tại pdf.huynhanhthuan.com/dich: kéo PDF vào, chép câu nhắn sang ChatGPT, Gemini hay Claude, dán câu trả lời về; tài liệu không rời máy bạn. Hoặc tải một file lên mục Skills của Claude.ai rồi nhắn “Dịch file này sang tiếng Việt, giữ nguyên bố cục”. Mỗi lần dịch kèm bản song ngữ và phiếu kiểm định lỗi dấu, tràn khung.',
   UPDATE_URL: 'https://pdf.huynhanhthuan.com/dich',
   UPDATE_BUTTON: 'Dịch ngay trên web',
 
@@ -528,7 +528,7 @@ function buildWelcomeEmail_(name, platform) {
 
   const html = shell_(
     '<p style="margin:0 0 16px">Chào ' + esc_(first) + ',</p>' +
-    '<p style="margin:0 0 20px">Cảm ơn bạn đã đăng ký. <b>pdf-translation-layout v' + CONFIG.VERSION + '</b> dịch PDF tiếng Anh sang tiếng Việt mà vẫn giữ nguyên bố cục trang, chữ thật bôi đen được, kèm bản song ngữ và phiếu kiểm định lỗi dấu, tràn khung. Chính trợ lý AI của bạn là người dịch.</p>' +
+    '<p style="margin:0 0 20px">Cảm ơn bạn đã đăng ký. <b>pdf-translation-layout v' + CONFIG.VERSION + '</b> dịch PDF tiếng Anh sang tiếng Việt, hoặc tiếng Việt sang tiếng Anh, mà vẫn giữ nguyên bố cục trang, chữ thật bôi đen được, kèm bản song ngữ và phiếu kiểm định lỗi dấu, tràn khung. Chính trợ lý AI của bạn là người dịch.</p>' +
     button_(g.button.url, g.button.label) +
     '<h2 style="margin:28px 0 12px;font:700 18px/1.3 Arial,Helvetica,sans-serif;color:#13282b">' + esc_(g.title) + '</h2>' +
     '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%">' + steps + '</table>' +
