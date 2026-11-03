@@ -24,7 +24,7 @@ window.SITE_CONFIG = {
   GPT_URL: "",
 
   // Link kho mã nguồn công khai (dạng https://github.com/<tên>/pdf-translation-layout). Để trống = ẩn link.
-  GITHUB_URL: "",
+  GITHUB_URL: "https://github.com/thuanhuynh247/pdf-translation-layout",
 
   // Chỉ hiện dòng "Đã có N người nhận" khi N đạt ngưỡng này (0 = không bao giờ hiện)
   SHOW_COUNT_FROM: 30,
