@@ -12,6 +12,18 @@
   }
   var yearEl = $("#year"); if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 
+  /* ---------- Liên kết theo cấu hình: GPT, mã nguồn, tải thẳng ---------- */
+  $$("[data-gpt]").forEach(function (el) {
+    if (!CFG.GPT_URL) return;
+    el.href = CFG.GPT_URL; el.hidden = false;
+    if (el.getAttribute("data-gpt-label")) el.textContent = el.getAttribute("data-gpt-label");
+  });
+  $$("[data-gpt-off]").forEach(function (el) { el.hidden = !!CFG.GPT_URL; });
+  $$("[data-github]").forEach(function (el) { if (CFG.GITHUB_URL) { el.href = CFG.GITHUB_URL; el.hidden = false; } });
+  $$("[data-github-off]").forEach(function (el) { el.hidden = !!CFG.GITHUB_URL; });
+  $$("[data-direct]").forEach(function (el) { el.hidden = CFG.CLAUDE_DIRECT_DOWNLOAD === false; });
+  $$("[data-via-email]").forEach(function (el) { el.hidden = CFG.CLAUDE_DIRECT_DOWNLOAD !== false; });
+
   /* ---------- So sánh EN / VI ---------- */
   var compare = $("#compare");
   var range = $("#compare-range");
@@ -155,6 +167,11 @@
   /* ---------- Form đăng ký ---------- */
   var form = $("#signup");
   if (!form) return;
+  // Chọn sẵn nền tảng khi đến từ link dạng ./?nen-tang=Claude.ai#dang-ky
+  try {
+    var want = new URLSearchParams(location.search).get("nen-tang");
+    $$('input[name="platform"]', form).forEach(function (r) { if (want && r.value === want) r.checked = true; });
+  } catch (e) { /* trình duyệt cũ: bỏ qua */ }
   var btn = $("#submit-btn");
   var status = $("#form-status");
   var done = $("#done");
@@ -221,13 +238,13 @@
     var title = $("#done-title"), text = $("#done-text");
     if (result && result.queued) {
       title.textContent = "Đã nhận, email sẽ đến trong 24 giờ";
-      text.textContent = "Hệ thống đã ghi nhận đăng ký và sẽ tự gửi gói kỹ năng tới " + d.email + " trong vòng 24 giờ, từ địa chỉ hello@huynhanhthuan.com.";
+      text.textContent = "Hệ thống đã ghi nhận đăng ký và sẽ tự gửi hướng dẫn tới " + d.email + " trong vòng 24 giờ, từ địa chỉ hello@huynhanhthuan.com.";
     } else if (result && result.duplicate) {
       title.textContent = "Email này đã đăng ký rồi";
-      text.textContent = "Gói kỹ năng đã được gửi tới " + d.email + " trước đó. Hãy tìm thư từ hello@huynhanhthuan.com, kể cả trong mục Spam.";
+      text.textContent = "Hướng dẫn đã được gửi tới " + d.email + " trước đó. Hãy tìm thư từ hello@huynhanhthuan.com, kể cả trong mục Spam.";
     } else {
       title.textContent = "Đã gửi, kiểm tra hộp thư nhé";
-      text.textContent = "Gói kỹ năng và hướng dẫn cài cho " + d.platform + " đang tới " + d.email + " từ hello@huynhanhthuan.com. Thường mất 1–2 phút.";
+      text.textContent = "File và hướng dẫn cho " + d.platform + " đang tới " + d.email + " từ hello@huynhanhthuan.com. Thường mất 1–2 phút.";
     }
     $("#demo-note").hidden = !demo;
     done.focus();

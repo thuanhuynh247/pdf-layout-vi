@@ -20,12 +20,24 @@
 
 /* ======================= CẤU HÌNH — CHỈ SỬA PHẦN NÀY ======================= */
 const CONFIG = {
-  // Link Google Drive của tệp zip, chia sẻ "Bất kỳ ai có đường liên kết" → Người xem
-  DOWNLOAD_URL: 'DAN_LINK_GOOGLE_DRIVE_VAO_DAY',
   // Địa chỉ website (không có dấu / ở cuối)
   SITE_URL: 'https://pdf.huynhanhthuan.com',
+  VERSION: '3.1.0',
 
-  VERSION: '3.0.1',
+  // Bản 3.1 "không cài gì": các file zip nằm sẵn trên website, thư mục tai-ve/
+  CLAUDE_ZIP_URL: 'https://pdf.huynhanhthuan.com/tai-ve/pdf-translation-layout.zip',
+  CLAUDE_ZIP_SIZE: '3,6 MB',
+  ANTIGRAVITY_ZIP_URL: 'https://pdf.huynhanhthuan.com/tai-ve/pdf-translation-layout-antigravity.zip',
+  // Link GPT dựng sẵn (dạng https://chatgpt.com/g/...). Để trống = email ChatGPT hướng người dùng sang Claude.ai.
+  GPT_URL: '',
+  // Trang hướng dẫn 4 bước trên website
+  GUIDE_URL: 'https://pdf.huynhanhthuan.com/dung-voi-claude',
+  // Trang dịch ngay trên trình duyệt (tài liệu không rời máy, dán qua AI bất kỳ)
+  WEB_URL: 'https://pdf.huynhanhthuan.com/dich',
+
+  // Chế độ nâng cao (bản 3.0.1 chạy trên máy, có video đọc sách).
+  // Link Google Drive, chia sẻ "Bất kỳ ai có đường liên kết" → Người xem. Phải bắt đầu bằng https://
+  DOWNLOAD_URL: 'https://drive.google.com/file/d/1r_LG2brc-KKeJssTjEInCVAel8B1vCNV/view?usp=sharing',
   PACKAGE_NAME: 'pdf-translation-layout-v3.0.1.zip',
   PACKAGE_SIZE: '550 KB',
 
@@ -53,8 +65,10 @@ const CONFIG = {
   },
 
   // Nội dung thông báo phiên bản mới (dùng cho guiThongBaoPhienBanMoi)
-  UPDATE_SUBJECT: 'pdf-translation-layout có phiên bản mới',
-  UPDATE_MESSAGE: 'Phiên bản mới đã sẵn sàng với các cải tiến và sửa lỗi. Tải bản mới qua link bên dưới, giải nén đè lên thư mục cũ là xong.',
+  UPDATE_SUBJECT: 'Dịch PDF ngay trong Claude, không cần cài gì',
+  UPDATE_MESSAGE: 'Bản 3.1 không cần cài gì nữa. Dịch ngay trên web tại pdf.huynhanhthuan.com/dich: kéo PDF vào, chép câu nhắn sang ChatGPT, Gemini hay Claude, dán câu trả lời về; tài liệu không rời máy bạn. Hoặc tải một file lên mục Skills của Claude.ai rồi nhắn “Dịch file này sang tiếng Việt, giữ nguyên bố cục”. Mỗi lần dịch kèm bản song ngữ và phiếu kiểm định lỗi dấu, tràn khung.',
+  UPDATE_URL: 'https://pdf.huynhanhthuan.com/dich',
+  UPDATE_BUTTON: 'Dịch ngay trên web',
 
   // Kỹ thuật (thường không cần sửa)
   SHEET_NAME: 'DangKy',
@@ -71,7 +85,7 @@ const HEADERS = ['Thời gian', 'Họ tên', 'Email', 'Nền tảng', 'Mục đ�
 const C = {}; HEADERS.forEach(function (h, i) { C[h] = i + 1; });
 
 const STATUS = { SENT: 'Đã gửi', QUEUED: 'Chờ gửi', ERROR: 'Lỗi gửi', STOPPED: 'Ngừng gửi' };
-const PLATFORMS = ['Antigravity', 'Claude Code', 'ChatGPT', 'Chưa dùng'];
+const PLATFORMS = ['Claude.ai', 'ChatGPT', 'Antigravity', 'Claude Code', 'Chưa dùng'];
 const PURPOSES = ['', 'Dịch sách, tài liệu học tập', 'Tài liệu công việc, báo cáo', 'Học tiếng Anh qua bản song ngữ',
   'Làm video đọc sách', 'Nghiên cứu, tìm hiểu kỹ thuật', 'Mục đích khác'];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
@@ -395,16 +409,17 @@ function caiDat() {
   const token = PropertiesService.getScriptProperties().getProperty('MAILTRAP_TOKEN');
   const msg = 'Cài đặt xong.' +
     (token ? '' : '\n⚠ Chưa có MAILTRAP_TOKEN: Cài đặt dự án (bánh răng) → Thuộc tính tập lệnh → Thêm thuộc tính.') +
-    (CONFIG.DOWNLOAD_URL.indexOf('http') !== 0 ? '\n⚠ Chưa điền DOWNLOAD_URL trong CONFIG.' : '') +
+    (CONFIG.DOWNLOAD_URL.indexOf('https://') !== 0 ? '\n⚠ DOWNLOAD_URL phải bắt đầu bằng https:// (kiểm tra có gõ thừa ký tự ở đầu không).' : '') +
+    (CONFIG.GPT_URL && CONFIG.GPT_URL.indexOf('https://') !== 0 ? '\n⚠ GPT_URL phải bắt đầu bằng https://' : '') +
     '\nBước tiếp theo: chạy guiThuChoToi() để gửi thử qua Mailtrap.';
   console.log(msg);
   try { SpreadsheetApp.getUi().alert(msg); } catch (e) { /* chạy từ trình soạn thảo thì không có UI */ }
 }
 
-/** Gửi 1 email mẫu (nền tảng Claude Code) qua Mailtrap tới Gmail đang chạy script, in kết quả dễ hiểu. */
+/** Gửi 1 email mẫu (nền tảng Claude.ai) qua Mailtrap tới Gmail đang chạy script, in kết quả dễ hiểu. */
 function guiThuChoToi() {
   const me = Session.getEffectiveUser().getEmail();
-  const res = mailtrapSend_(me, 'Huỳnh Anh Thuận', buildWelcomeEmail_('Huỳnh Anh Thuận', 'Claude Code'), { category: 'test' });
+  const res = mailtrapSend_(me, 'Huỳnh Anh Thuận', buildWelcomeEmail_('Huỳnh Anh Thuận', 'Claude.ai'), { category: 'test' });
   if (res.ok) {
     console.log('✓ Mailtrap đã nhận email thử gửi tới ' + me + '. Mở Gmail, nếu thư vào Spam hãy bấm "Không phải thư rác". ' +
       'Kiểm tra xác thực: mở thư → ⋮ → Hiển thị bản gốc → SPF, DKIM, DMARC đều phải là PASS.');
@@ -439,61 +454,86 @@ function guiThongBaoPhienBanMoi() {
 
 /* ============================ MẪU EMAIL ============================ */
 
-const GUIDES = {
-  'Antigravity': {
-    file: 'GUIDE_ANTIGRAVITY.md',
-    steps: [
-      'Giải nén tệp zip, bạn có thư mục <b>pdf-translation-layout</b>.',
-      'Chép thư mục đó vào <code>%USERPROFILE%\\.gemini\\config\\skills\\</code> (macOS/Linux: <code>~/.gemini/config/skills/</code>), rồi khởi động lại Antigravity.',
-      'Mở terminal trong thư mục skill, chạy <code>pip install -r requirements.txt</code> (cần Python 3.10 trở lên).',
-      'Trong khung chat, gõ <code>/pdf-translation-layout</code> hoặc nói: “Dịch file D:\\Tai-lieu\\bao-cao.pdf sang tiếng Việt, giữ nguyên layout”.',
-    ],
-  },
-  'Claude Code': {
-    file: 'GUIDE_CLAUDE.md',
-    steps: [
-      'Giải nén tệp zip, bạn có thư mục <b>pdf-translation-layout</b>.',
-      'Mở terminal trong thư mục đó, chạy <code>pip install -r requirements.txt</code> (cần Python 3.10 trở lên).',
-      'Gõ <code>claude</code> ngay trong thư mục: Claude Code tự đọc tệp CLAUDE.md. Muốn dùng ở mọi nơi, chép thư mục vào <code>~/.claude/skills/</code>.',
-      'Ra lệnh: “Dịch ./bao-cao.pdf sang tiếng Việt, giữ nguyên layout, rồi chạy QA.”',
-    ],
-  },
-  'ChatGPT': {
-    file: 'GUIDE_CHATGPT.md',
-    steps: [
-      'Giải nén tệp zip. Tạo Custom GPT cần gói ChatGPT Plus, Team hoặc Enterprise.',
-      'Mở chatgpt.com/gpts/editor → Configure, dán phần Instructions trong <code>chatgpt-system-instructions.md</code>.',
-      'Bật <b>Code Interpreter &amp; Data Analysis</b>, tải 3 tệp trong thư mục <code>references/</code> lên mục Knowledge.',
-      'Đính kèm PDF rồi ra lệnh. Tài liệu dài nên chia 10–20 trang mỗi lượt. ChatGPT không xuất được video đọc sách.',
-    ],
-  },
-  'Chưa dùng': {
-    file: 'BAT_DAU_TAI_DAY.md',
-    steps: [
-      'Nếu mới bắt đầu, mình gợi ý Claude Code hoặc Antigravity vì chạy đủ tính năng ngay trên máy bạn.',
-      'Giải nén tệp zip, mở tệp <code>BAT_DAU_TAI_DAY.md</code>: có bảng cài cho từng nền tảng.',
-      'Cài Python 3.10 trở lên (python.org), rồi chạy <code>pip install -r requirements.txt</code> trong thư mục.',
-      'Chạy thử: <code>python scripts/cli.py inspect --source tai-lieu.pdf</code>. Thấy dòng “Kiểm kê hoàn tất” là xong.',
-    ],
-  },
-};
+/** Hướng dẫn theo nền tảng. Mỗi mục: tiêu đề, nút chính, các bước, ghi chú. */
+function guide_(platform) {
+  const claudeBtn = { url: CONFIG.CLAUDE_ZIP_URL, label: 'Tải pdf-translation-layout.zip (' + CONFIG.CLAUDE_ZIP_SIZE + ')' };
+  const claudeSteps = [
+    'Tải file zip ở nút trên. <b>Không cần giải nén.</b>',
+    'Vào claude.ai → <b>Settings → Capabilities</b>, bật <b>Code execution and file creation</b>.',
+    'Vào <b>Customize → Skills</b>, bấm <b>+ → Create skill → Upload a skill</b>, chọn file zip vừa tải.',
+    'Mở cuộc trò chuyện mới, đính kèm PDF và nhắn: “Dịch file này sang tiếng Việt, giữ nguyên bố cục”. Tài liệu dài, Claude dịch theo lô và mời bạn nhắn “tiếp”.',
+  ];
+  const webBtn = { url: CONFIG.WEB_URL, label: 'Mở trang dịch trên web' };
+  const webSteps = [
+    'Bấm nút trên để mở trang dịch, kéo file PDF vào. File được mở ngay trong trình duyệt, không gửi lên máy chủ nào.',
+    'Chọn <b>Dán qua AI bạn đang dùng</b>, bấm <b>Chép câu nhắn</b>.',
+    'Mở ChatGPT (hoặc Gemini, Claude), dán và gửi. Chép câu trả lời, dán về trang, bấm <b>Nạp bản dịch</b>. Lặp lại đến khi trang báo đã dịch xong.',
+    'Bấm <b>Dựng PDF</b> để tải bản tiếng Việt, các bản song ngữ và phiếu kiểm định.',
+  ];
+  const advanced = 'Muốn làm video đọc sách hoặc dịch tài liệu rất dài trên máy: tải <a href="' + esc_(CONFIG.DOWNLOAD_URL) + '" style="color:#0a7a8c">gói nâng cao ' + esc_(CONFIG.PACKAGE_NAME) + '</a> (cần Python, dành cho Claude Code và Antigravity).';
+  const G = {
+    'Claude.ai': {
+      title: 'Dùng trong Claude.ai, không cần cài gì', button: claudeBtn, steps: claudeSteps,
+      note: 'Dùng được với gói Free, Pro, Max; Claude Desktop làm y như vậy. Không tốn thêm tiền, chỉ dùng hạn mức gói Claude bạn đang có. Hướng dẫn có hình: <a href="' + esc_(CONFIG.GUIDE_URL) + '" style="color:#0a7a8c">' + esc_(CONFIG.GUIDE_URL.replace(/^https?:\/\//, '')) + '</a>.',
+    },
+    'ChatGPT': CONFIG.GPT_URL ? {
+      title: 'Dùng trong ChatGPT, không cần cài gì', button: { url: CONFIG.GPT_URL, label: 'Mở GPT “Dịch PDF giữ bố cục”' },
+      steps: [
+        'Bấm nút trên để mở GPT dựng sẵn (cần đăng nhập ChatGPT, gói nào cũng mở được).',
+        'Đính kèm file PDF.',
+        'Nhắn: “Dịch file này sang tiếng Việt, giữ nguyên bố cục”. GPT tự chạy công cụ và trả về link tải.',
+        'Tài liệu dài, GPT dịch theo lô và mời bạn nhắn “tiếp”.',
+      ],
+      note: 'Gói ChatGPT Free bị giới hạn số file tải lên mỗi ngày. Nếu GPT báo lỗi, dùng Claude.ai theo hướng dẫn tại <a href="' + esc_(CONFIG.GUIDE_URL) + '" style="color:#0a7a8c">' + esc_(CONFIG.GUIDE_URL.replace(/^https?:\/\//, '')) + '</a>.',
+    } : {
+      title: 'Dùng với ChatGPT ngay hôm nay', button: webBtn, steps: webSteps,
+      note: 'GPT dựng sẵn đang được thử; mình sẽ gửi link khi chạy ổn định. Muốn tự động hơn, dùng Claude.ai theo hướng dẫn tại <a href="' + esc_(CONFIG.GUIDE_URL) + '" style="color:#0a7a8c">' + esc_(CONFIG.GUIDE_URL.replace(/^https?:\/\//, '')) + '</a>.',
+    },
+    'Antigravity': {
+      title: 'Cài plugin cho Antigravity', button: { url: CONFIG.ANTIGRAVITY_ZIP_URL, label: 'Tải plugin cho Antigravity' },
+      steps: [
+        'Tải file zip ở nút trên, giải nén ra thư mục <b>pdf-translation-layout</b>.',
+        'Trong Antigravity mở <b>Customizations → Plugins</b> và cài từ thư mục vừa giải nén. Hoặc trong terminal: <code>agy plugin install ./pdf-translation-layout</code>.',
+        'Máy cần Python 3.9 trở lên. Lần đầu dùng, trợ lý tự cài thư viện PyMuPDF; bạn chỉ bấm cho phép.',
+        'Mở thư mục có PDF làm workspace và nhắn: “Dịch file tai-lieu.pdf sang tiếng Việt, giữ nguyên bố cục”. Kết quả nằm ngay cạnh file gốc.',
+      ],
+      note: advanced,
+    },
+    'Claude Code': {
+      title: 'Dùng với Claude Code', button: claudeBtn,
+      steps: [
+        'Tải file zip ở nút trên, giải nén ra thư mục <b>pdf-translation-layout</b>.',
+        'Chép thư mục đó vào <code>~/.claude/skills/</code> (Windows: <code>%USERPROFILE%\\.claude\\skills\\</code>).',
+        'Máy cần Python 3.9 trở lên; Claude Code tự cài PyMuPDF ở lần đầu, bạn chỉ bấm cho phép.',
+        'Ra lệnh: “Dịch ./bao-cao.pdf sang tiếng Việt, giữ nguyên bố cục”. Kết quả nằm cạnh file gốc kèm phiếu kiểm định.',
+      ],
+      note: advanced,
+    },
+    'Chưa dùng': {
+      title: 'Bắt đầu nhanh nhất: dịch ngay trên web', button: webBtn, steps: webSteps,
+      note: 'Không cài gì, không tốn thêm tiền. Muốn tự động hơn với tài liệu dài, dùng Claude.ai theo hướng dẫn tại <a href="' + esc_(CONFIG.GUIDE_URL) + '" style="color:#0a7a8c">' + esc_(CONFIG.GUIDE_URL.replace(/^https?:\/\//, '')) + '</a>.',
+    },
+  };
+  return G[platform] || G['Chưa dùng'];
+}
 
 function buildWelcomeEmail_(name, platform) {
-  const g = GUIDES[platform] || GUIDES['Chưa dùng'];
+  const g = guide_(platform);
   const first = firstName_(name);
-  const subject = 'pdf-translation-layout v' + CONFIG.VERSION + ': link tải và hướng dẫn cài cho ' + (platform === 'Chưa dùng' ? 'người mới' : platform);
+  const subject = 'Dịch PDF giữ bố cục: hướng dẫn cho ' + (platform === 'Chưa dùng' ? 'người mới' : platform);
   const steps = g.steps.map(function (s, i) {
-    return '<tr><td valign="top" style="width:28px;padding:0 0 12px;font:600 13px/1.6 Menlo,Consolas,monospace;color:#0a7a8c">0' + (i + 1) + '</td>' +
+    return '<tr><td valign="top" style="width:28px;padding:0 0 12px;font:600 13px/1.6 Menlo,Consolas,monospace;color:#0a7a8c">' + (i < 9 ? '0' : '') + (i + 1) + '</td>' +
       '<td style="padding:0 0 12px;font:15px/1.6 Arial,Helvetica,sans-serif;color:#13282b">' + s + '</td></tr>';
   }).join('');
 
   const html = shell_(
     '<p style="margin:0 0 16px">Chào ' + esc_(first) + ',</p>' +
-    '<p style="margin:0 0 20px">Cảm ơn bạn đã đăng ký. Đây là gói kỹ năng <b>pdf-translation-layout v' + CONFIG.VERSION + '</b>: dịch PDF sang tiếng Việt mà vẫn giữ nguyên bố cục, chữ vector thật, xuất bản song ngữ và video đọc sách.</p>' +
-    button_(CONFIG.DOWNLOAD_URL, 'Tải ' + CONFIG.PACKAGE_NAME + ' (' + CONFIG.PACKAGE_SIZE + ')') +
-    '<h2 style="margin:28px 0 12px;font:700 18px/1.3 Arial,Helvetica,sans-serif;color:#13282b">Cài cho ' + esc_(platform === 'Chưa dùng' ? 'người mới bắt đầu' : platform) + ' trong 5 phút</h2>' +
+    '<p style="margin:0 0 20px">Cảm ơn bạn đã đăng ký. <b>pdf-translation-layout v' + CONFIG.VERSION + '</b> dịch PDF tiếng Anh sang tiếng Việt mà vẫn giữ nguyên bố cục trang, chữ thật bôi đen được, kèm bản song ngữ và phiếu kiểm định lỗi dấu, tràn khung. Chính trợ lý AI của bạn là người dịch.</p>' +
+    button_(g.button.url, g.button.label) +
+    '<h2 style="margin:28px 0 12px;font:700 18px/1.3 Arial,Helvetica,sans-serif;color:#13282b">' + esc_(g.title) + '</h2>' +
     '<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%">' + steps + '</table>' +
-    '<p style="margin:4px 0 0;color:#4a5f62;font-size:14px">Hướng dẫn chi tiết nằm trong tệp <code>' + g.file + '</code> của gói.</p>' +
+    '<p style="margin:4px 0 0;color:#4a5f62;font-size:14px">' + g.note + '</p>' +
+    '<p style="margin:16px 0 0;color:#4a5f62;font-size:14px">Bản dịch dùng để đọc hiểu cá nhân; mỗi trang có dòng chân trang nhỏ ghi rõ điều này. Muốn đăng hoặc chia sẻ công khai bản dịch sách, bài báo có bản quyền, bạn cần sự đồng ý của chủ sở hữu bản quyền.</p>' +
     coffee_() +
     '<p style="margin:24px 0 0">Gặp lỗi hay có góp ý, bạn cứ trả lời thẳng email này.<br>Chúc bạn dịch suôn sẻ,<br><b>' + esc_(CONFIG.SENDER_NAME) + '</b></p>',
     'Bạn nhận email này vì đã đăng ký tại ' + CONFIG.SITE_URL.replace(/^https?:\/\//, '') + '. Muốn ngừng nhận thông báo phiên bản mới, trả lời email này với chữ “Hủy”.'
@@ -502,10 +542,10 @@ function buildWelcomeEmail_(name, platform) {
   const text = [
     'Chào ' + first + ',', '',
     'Cảm ơn bạn đã đăng ký pdf-translation-layout v' + CONFIG.VERSION + '.',
-    'Tải gói kỹ năng: ' + CONFIG.DOWNLOAD_URL, '',
-    'Cài cho ' + platform + ':',
+    g.button.label + ': ' + g.button.url, '',
+    g.title + ':',
   ].concat(g.steps.map(function (s, i) { return (i + 1) + '. ' + stripTags_(s); }))
-    .concat(['', 'Hướng dẫn chi tiết: tệp ' + g.file + ' trong gói.', '',
+    .concat(['', stripTags_(g.note), '',
       'Ủng hộ một ly cà phê (tùy tâm): ' + CONFIG.BANK.NAME + ' · ' + CONFIG.BANK.ACCOUNT + ' · ' + CONFIG.BANK.OWNER + ' · nội dung: ' + CONFIG.BANK.NOTE, '',
       CONFIG.SENDER_NAME]).join('\n');
 
@@ -518,12 +558,12 @@ function buildUpdateEmail_(name) {
   const html = shell_(
     '<p style="margin:0 0 16px">Chào ' + esc_(first) + ',</p>' +
     '<p style="margin:0 0 20px">' + esc_(CONFIG.UPDATE_MESSAGE) + '</p>' +
-    button_(CONFIG.DOWNLOAD_URL, 'Tải ' + CONFIG.PACKAGE_NAME) +
+    button_(CONFIG.UPDATE_URL, CONFIG.UPDATE_BUTTON) +
     coffee_() +
     '<p style="margin:24px 0 0">' + esc_(CONFIG.SENDER_NAME) + '</p>',
     'Bạn nhận email này vì đã chọn nhận thông báo phiên bản mới. Trả lời “Hủy” để ngừng nhận.'
   );
-  const text = 'Chào ' + first + ',\n\n' + CONFIG.UPDATE_MESSAGE + '\n\nTải bản mới: ' + CONFIG.DOWNLOAD_URL + '\n\n' + CONFIG.SENDER_NAME;
+  const text = 'Chào ' + first + ',\n\n' + stripTags_(CONFIG.UPDATE_MESSAGE) + '\n\n' + CONFIG.UPDATE_BUTTON + ': ' + CONFIG.UPDATE_URL + '\n\n' + CONFIG.SENDER_NAME;
   return { subject: subject, html: html, text: text };
 }
 
@@ -549,7 +589,7 @@ function button_(url, label) {
 
 function coffee_() {
   const b = CONFIG.BANK;
-  const qrSrc = qrBase64_() ? 'cid:vietqr' : (CONFIG.SITE_URL + '/assets/img/vietqr-any.png');
+  const qrSrc = 'cid:vietqr';
   return '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-top:28px;background:#e3f1f3;border-radius:8px"><tr>' +
     '<td style="padding:20px 20px 20px 24px;font:15px/1.6 Arial,Helvetica,sans-serif;color:#13282b;vertical-align:top">' +
     '<b style="font-size:16px">Mời mình một ly cà phê</b><br>' +
@@ -566,21 +606,12 @@ function coffee_() {
 
 /* ============================ TIỆN ÍCH ============================ */
 
+/** Ảnh VietQR (PNG 410×410) nhúng sẵn trong mã, gửi kèm email dạng ảnh inline (cid:vietqr):
+ *  không phụ thuộc website, Gmail/Outlook đều hiện được. Đổi tài khoản thì tạo lại chuỗi này. */
+const QR_PNG_BASE64 = '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';
+
 function qrBase64_() {
-  if (qrBase64_.cached !== undefined) return qrBase64_.cached;
-  const cache = CacheService.getScriptCache();
-  let b64 = cache.get('qr_png');
-  if (!b64) {
-    try {
-      const res = UrlFetchApp.fetch(CONFIG.SITE_URL + '/assets/img/vietqr-any.png', { muteHttpExceptions: true });
-      if (res.getResponseCode() === 200) {
-        b64 = Utilities.base64Encode(res.getContent());
-        cache.put('qr_png', b64, 21600);
-      }
-    } catch (e) { /* website chưa lên: email dùng link ảnh thay thế */ }
-  }
-  qrBase64_.cached = b64 || null;
-  return qrBase64_.cached;
+  return QR_PNG_BASE64;
 }
 
 function parseBody_(e) {

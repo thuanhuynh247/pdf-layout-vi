@@ -244,7 +244,7 @@ test('chặn chèn công thức vào Sheets, escape HTML tên người', () => {
   env.post(Object.assign({}, base, { email: 'a@b.com', platform: 'ChatGPT', name: 'Lê <b>Hoa</b>' }));
   assert.ok(String(env.rows[1][1]).startsWith("'="));
   const html = env.mailtrap[1].body.html;
-  assert.ok(html.includes('Hoa&lt;/b&gt;') && !html.includes('<b>Hoa</b>') && html.includes('gpts/editor'));
+  assert.ok(html.includes('Hoa&lt;/b&gt;') && !html.includes('<b>Hoa</b>'));
 });
 
 test('giới hạn 20 đăng ký/phút chống bot', () => {
@@ -281,10 +281,48 @@ test('thông báo bị gián đoạn do hạn mức thì gửi tiếp ở lần 
   for (let i = 0; i < 3; i++) { env.post(Object.assign({}, base, { email: 'p' + i + '@x.com' })); env.clearRate(); }
   env.props.QUOTA = JSON.stringify({ dayKey: '2026-11-01', monthKey: '2026-11', day: 144, month: 144 });
   env.api.guiThongBaoPhienBanMoi();
-  assert.strictEqual(env.props.ANNOUNCE_VERSION, '3.0.1');
+  assert.strictEqual(env.props.ANNOUNCE_VERSION, env.api.CONFIG.VERSION);
   env.advance(24 * 3600 * 1000); env.api.xuLyHangDoi();
   assert.strictEqual(env.props.ANNOUNCE_VERSION, undefined);
   assert.strictEqual(env.mailtrap.filter((m) => m.url.includes('bulk')).length, 3);
+});
+
+test('email theo từng nền tảng: đúng nút tải, đúng các bước', () => {
+  const env = makeEnv(); env.api.caiDat();
+  const want = {
+    'Claude.ai': ['tai-ve/pdf-translation-layout.zip', 'Upload a skill', 'Code execution and file creation'],
+    'ChatGPT': ['pdf.huynhanhthuan.com/dich', 'Chép câu nhắn', 'đang được thử'],
+    'Antigravity': ['tai-ve/pdf-translation-layout-antigravity.zip', 'agy plugin install', 'gói nâng cao', 'drive.google.com'],
+    'Claude Code': ['.claude/skills', 'gói nâng cao'],
+    'Chưa dùng': ['pdf.huynhanhthuan.com/dich', 'Dựng PDF', 'dung-voi-claude'],
+  };
+  Object.keys(want).forEach((p, i) => {
+    env.clearRate();
+    assert.ok(env.post(Object.assign({}, base, { email: 'n' + i + '@x.com', platform: p })).sent, p);
+    const m = env.mailtrap[env.mailtrap.length - 1].body;
+    want[p].forEach((w) => assert.ok(m.html.includes(w), p + ' thiếu: ' + w));
+    assert.ok(m.text.includes('http'), p + ': bản chữ thiếu link');
+    assert.ok(!m.html.includes('Dhttps'), p + ': link hỏng');
+    assert.ok(m.html.includes('chủ sở hữu bản quyền'), p + ': thiếu lời nhắc bản quyền');
+  });
+});
+
+test('ChatGPT có GPT_URL: nút mở GPT', () => {
+  const env = makeEnv(); env.api.caiDat();
+  env.api.CONFIG.GPT_URL = 'https://chatgpt.com/g/g-abc-dich-pdf';
+  env.post(Object.assign({}, base, { platform: 'ChatGPT' }));
+  const html = env.mailtrap[0].body.html;
+  assert.ok(html.includes('https://chatgpt.com/g/g-abc-dich-pdf') && !html.includes('đang được thử'));
+});
+
+test('ảnh QR nhúng sẵn trong mã: không cần tải từ website', () => {
+  const env = makeEnv(); env.api.caiDat();
+  env.post(base);
+  const att = env.mailtrap[0].body.attachments[0];
+  const png = Buffer.from(att.content, 'base64');
+  assert.strictEqual(png.slice(1, 4).toString(), 'PNG');
+  assert.ok(png.length > 2000);
+  assert.strictEqual(att.type, 'image/png');
 });
 
 test('guiThuChoToi gửi qua Mailtrap tới Gmail chủ', () => {
@@ -295,5 +333,5 @@ test('guiThuChoToi gửi qua Mailtrap tới Gmail chủ', () => {
 });
 
 console.log('\n' + passed + ' kiểm thử đạt.');
-const env = makeEnv(); env.api.caiDat(); env.post(base);
+const env = makeEnv(); env.api.caiDat(); env.post(Object.assign({}, base, { platform: 'Claude.ai' }));
 fs.writeFileSync(path.join(__dirname, 'email-preview.html'), env.mailtrap[0].body.html.replace('cid:vietqr', '../../assets/img/vietqr-any.png'));
