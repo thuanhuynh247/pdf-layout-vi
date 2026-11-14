@@ -14,7 +14,7 @@
       <div class="tb-brand">
         <img src="icon.png" alt="" class="tb-icon" width="20" height="20">
         <span class="tb-title">PDF Layout VI Studio</span>
-        <span class="tb-ver">v3.4.0</span>
+        <span class="tb-ver">v3.5.0</span>
       </div>
       <div class="tb-right">
         <button class="pill pill-connector" id="top-connector-btn" type="button" title="Chuyển nhanh hoặc cấu hình nền tảng AI">
@@ -82,6 +82,7 @@
                   <p class="sub">Chọn CLI hoặc API bạn đang đăng nhập trên Windows. Chọn xong có thể bấm <strong>Vào dịch PDF ngay</strong>.</p>
                 </div>
                 <div class="head-actions">
+                  <button class="btn btn-ghost" id="btn-ping-all" type="button">Ping các AI sẵn sàng</button>
                   <button class="btn btn-ghost" id="btn-refresh-engines" type="button">Quét lại máy</button>
                   <button class="btn btn-primary" id="btn-go-translate" type="button">Vào dịch PDF →</button>
                 </div>
@@ -167,8 +168,8 @@
                 </div>
                 <dl class="kv-grid" id="ws-doc-meta" hidden>
                   <div><dt>Số trang</dt><dd id="meta-pages">—</dd></div>
-                  <div><dt>Số đoạn chữ</dt><dd id="meta-items">—</dd></div>
-                  <div><dt>Liên kết</dt><dd id="meta-links">—</dd></div>
+                  <div><dt>Đoạn / Từ</dt><dd id="meta-items">—</dd></div>
+                  <div><dt>Số lô dự kiến</dt><dd id="meta-batches">—</dd></div>
                   <div><dt>Chiều phát hiện</dt><dd id="meta-dir">—</dd></div>
                 </dl>
                 <div class="ws-warn" id="ws-scan-warn" hidden></div>
@@ -227,6 +228,28 @@
             <!-- Right Live Translation Monitor & Output Stage -->
             <div class="ws-monitor">
               <div class="mon-header">
+                <div class="bento-kpis">
+                  <div class="bento-card">
+                    <span class="bento-lbl">Tiến độ đoạn</span>
+                    <strong class="bento-val mono" id="kpi-seg">0 / 0</strong>
+                    <span class="bento-sub" id="kpi-seg-sub">0% hoàn tất</span>
+                  </div>
+                  <div class="bento-card">
+                    <span class="bento-lbl">Tốc độ xử lý</span>
+                    <strong class="bento-val mono" id="kpi-speed">—</strong>
+                    <span class="bento-sub" id="kpi-speed-sub">ký tự / giây</span>
+                  </div>
+                  <div class="bento-card">
+                    <span class="bento-lbl">Độ trễ TB / lô</span>
+                    <strong class="bento-val mono" id="kpi-latency">—</strong>
+                    <span class="bento-sub" id="kpi-latency-sub">chưa chạy lô nào</span>
+                  </div>
+                  <div class="bento-card">
+                    <span class="bento-lbl">Cảnh báo QA</span>
+                    <strong class="bento-val mono" id="kpi-warn">0</strong>
+                    <span class="bento-sub" id="kpi-warn-sub">đoạn cần kiểm tra</span>
+                  </div>
+                </div>
                 <div class="mon-progress-wrap">
                   <div class="mon-status-row">
                     <strong id="mon-status-title">Chưa nạp tài liệu PDF</strong>
@@ -234,6 +257,7 @@
                   </div>
                   <div class="progress-track"><div class="progress-fill" id="mon-progress-bar"></div></div>
                 </div>
+                <div class="lieflat-card" id="ws-latency-chart" hidden></div>
                 <div class="mon-tabs">
                   <button class="tab-btn is-active" data-mon-tab="segments" type="button">Xem bản dịch trực tiếp</button>
                   <button class="tab-btn" data-mon-tab="results" type="button">Kết quả &amp; Phiếu QA</button>
@@ -276,6 +300,7 @@
                     <button class="btn btn-primary btn-sm" id="res-open-dir" type="button">Mở thư mục</button>
                   </div>
                   <div class="out-files-grid" id="res-files-list"></div>
+                  <div class="lieflat-card" id="res-lieflat-chart" hidden></div>
                   <h3 class="qa-subh">Phiếu kiểm định chất lượng (8 tiêu chí)</h3>
                   <table class="qa-table">
                     <thead><tr><th>Hạng mục</th><th>Kết quả</th><th>Chi tiết</th></tr></thead>
@@ -314,6 +339,7 @@
               </div>
             </div>
             <div class="qa-score-out" id="qa-score-out" hidden>
+              <div class="lieflat-card" id="qa-lieflat-chart" hidden></div>
               <table class="qa-table">
                 <thead><tr><th>Chỉ số</th><th>Giá trị</th><th>Đánh giá</th></tr></thead>
                 <tbody id="qa-score-tbody"></tbody>
@@ -338,6 +364,7 @@
       </main>
     </div>
   </div>
+  <script src="helpers.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

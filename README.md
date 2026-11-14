@@ -31,15 +31,18 @@ docs/ADR-003-…md             Trang /dich tải bộ máy từ jsDelivr và PyP
 docs/DESIGN_SYSTEM.md        Design system "Proof Sheet"
 release/                     Gói nâng cao v3.0.1 đã làm sạch (zip để tải lên Drive, không đưa lên web)
 HUONG_DAN_TRIEN_KHAI.md      Hướng dẫn từng bước cho người không lập trình
-desktop/                     PDF Layout VI Studio (.exe trên Windows, tách biệt hoàn toàn layout website): desktop/app/ + Electron + ELECTRON_RUN_AS_NODE=1 kết nối 10 nền tảng AI (Codex, Claude Code, Gemini, Antigravity, Muse, Ollama, OpenCode, Copilot, Qwen, OpenRouter)
-.github/workflows/package-win.yml  CI tự động đóng gói PDF-Layout-VI-*-setup.exe & portable.exe trên GitHub Releases
+desktop/                     PDF Layout VI Studio v3.5.0 (.exe trên Windows, tách biệt hoàn toàn layout website): desktop/app/ + Electron + ELECTRON_RUN_AS_NODE=1 kết nối 10 nền tảng AI, Bento KPI & LieFlat QA Charts, Checkpoint auto-resume, kiểm thử npm test & Alibaba ocr_guard
+docs/ADR-004-…md             Kiến trúc Desktop Studio v3.5.0, schema web_api & đường biên bảo mật
+CONTEXT.md                   Ngôn ngữ Miền Thống nhất (Ubiquitous Language) cho dự án
+.github/workflows/package-win.yml  CI tự động test & đóng gói PDF-Layout-VI-*-setup.exe & portable.exe trên GitHub Releases
 ```
 
 Chạy thử bản web trên máy: `python -m http.server 8000` trong thư mục này rồi mở http://localhost:8000.  
-Chạy / đóng gói app Windows Desktop (`.exe`):
+Chạy / kiểm thử / đóng gói app Windows Desktop (`.exe`):
 ```bash
 cd desktop
 npm install
-npm start       # Mở ứng dụng Electron + AI CLI Bridge
+npm test           # Chạy kiểm thử unit & HTTP seam (node:test)
+npm start          # Mở ứng dụng Electron + AI CLI Bridge
 npm run build:win  # Đóng gói NSIS Setup & Portable .exe vào desktop/release/
 ```

@@ -141,7 +141,7 @@ export function createAppServer() {
         return sendJson(res, 200, {
           ok: true,
           app: "pdf-layout-vi-desktop",
-          version: "3.4.0",
+          version: "3.5.0",
           platform: process.platform,
           desktopDir: DESKTOP_DIR,
           engineDir: ENGINE_DIR,
@@ -206,18 +206,35 @@ export function createAppServer() {
         return sendJson(res, 200, { ok: true, engine: eng.id, text });
       }
 
-      // Save built PDF/QA files directly into a clean Windows output folder
+      // Save built PDF/QA files directly into a clean Windows output folder (strict path traversal defense)
       if (pathname === "/api/output/save" && req.method === "POST") {
         const body = await readJsonBody(req);
-        const baseName = String(body.folderName || `PDF-${Date.now()}`).replace(/[<>:"/\\|?*]+/g, "_");
+        const rawFolder = String(body.folderName || `PDF-${Date.now()}`).trim();
+        const baseName = rawFolder.replace(/[<>:"/\\|?*\x00-\x1F]+/g, "_");
+        if (!baseName || baseName === "." || baseName === ".." || /^\.+$/.test(baseName)) {
+          return sendJson(res, 400, { ok: false, error: "Tên thư mục xuất không hợp lệ." });
+        }
         const cfg = getPublicConfig();
-        const rootOut = body.outputDir || cfg.outputDir || defaultOutputDir();
-        const targetDir = path.join(rootOut, baseName);
+        const rootOut = path.resolve(body.outputDir || cfg.outputDir || defaultOutputDir());
+        const targetDir = path.resolve(rootOut, baseName);
+        if (!targetDir.startsWith(rootOut + path.sep)) {
+          return sendJson(res, 400, { ok: false, error: "Đường dẫn thư mục vượt phạm vi cho phép." });
+        }
         fs.mkdirSync(targetDir, { recursive: true });
         const saved = [];
         for (const f of body.files || []) {
-          const safeFile = path.basename(String(f.name || "output.pdf"));
-          const dest = path.join(targetDir, safeFile);
+          const rawFile = String(f.name || "output.pdf");
+          if (rawFile.includes("..") || rawFile.includes("/") || rawFile.includes("\\")) {
+            return sendJson(res, 400, { ok: false, error: `Tên file không hợp lệ: ${rawFile}` });
+          }
+          const safeFile = path.basename(rawFile).replace(/[<>:"/\\|?*\x00-\x1F]+/g, "_");
+          if (!safeFile || safeFile === "." || safeFile === "..") {
+            return sendJson(res, 400, { ok: false, error: "Tên file rỗng hoặc không hợp lệ." });
+          }
+          const dest = path.resolve(targetDir, safeFile);
+          if (!dest.startsWith(targetDir + path.sep)) {
+            return sendJson(res, 400, { ok: false, error: "Đường dẫn file không hợp lệ." });
+          }
           fs.writeFileSync(dest, Buffer.from(String(f.base64 || ""), "base64"));
           saved.push({ name: safeFile, path: dest, size: fs.statSync(dest).size });
         }

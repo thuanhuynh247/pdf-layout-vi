@@ -38,6 +38,10 @@ jobs:
           npm install --no-audit --no-fund
           node -e "const fs=require('fs'),cp=require('child_process'); if(!fs.existsSync('node_modules/electron/dist/electron.exe')) cp.execFileSync('node',['node_modules/electron/install.js'],{stdio:'inherit'});"
 
+      - name: Run unit & HTTP seam tests
+        working-directory: desktop
+        run: npm test
+
       - name: Smoke test local AI CLI server
         working-directory: desktop
         shell: pwsh

@@ -20,7 +20,16 @@
     stop: false,
     qaSrcFile: null,
     qaDstFile: null,
+    pingResults: {},   // id -> { status: "ok"|"fail"|"busy", label: "..." }
+    batchLatencies: [],
+    charsDone: 0,
+    startedAt: 0,
+    checkpointKey: "",
   };
+
+  function redact(s) {
+    return (window.PTLHelpers && window.PTLHelpers.redactSecrets) ? window.PTLHelpers.redactSecrets(s) : String(s || "");
+  }
 
   function esc(s) {
     return String(s || "").replace(/[&<>"']/g, function (c) {
@@ -36,7 +45,7 @@
     var pre = $("#logs-pre");
     if (!pre) return;
     var ts = new Date().toLocaleTimeString("vi-VN", { hour12: false });
-    pre.textContent += "[" + ts + "] " + msg + "\n";
+    pre.textContent += "[" + ts + "] " + redact(msg) + "\n";
     pre.scrollTop = pre.scrollHeight;
   }
 
@@ -170,9 +179,13 @@
       var chipTxt = ready ? "Sẵn sàng" : (e.installed ? "Cần đăng nhập" : "Chưa cài");
       var isActive = STATE.config.activeEngine === e.id;
       var isInsp = STATE.inspectedId === e.id;
+      var ping = STATE.pingResults[e.id];
+      var pingHtml = ping
+        ? "<span class='conn-ping-tag " + esc(ping.status) + "'>" + esc(ping.label) + "</span>"
+        : "";
       return "<div class='conn-card" + (isInsp ? " is-inspected" : "") + (isActive ? " is-active-engine" : "") + "' data-card-eng='" + esc(e.id) + "'>" +
         "<div class='conn-card-top'><div><div class='conn-name'>" + esc(e.name) + "</div><div class='conn-vendor'>" + esc(e.vendor) + "</div></div>" +
-        "<span class='status-chip " + chipCls + "'>" + chipTxt + "</span></div>" +
+        pingHtml + "<span class='status-chip " + chipCls + "'>" + chipTxt + "</span></div>" +
         "<div class='conn-detail'>" + esc(e.detail) + "</div>" +
         "<div class='conn-foot'><span class='active-pill'>" + (isActive ? "● Đang chọn dịch chính" : "") + "</span>" +
         "<span class='rail-conn-tag'>" + esc((STATE.config.models && STATE.config.models[e.id]) || e.defaultModel || "mặc định") + "</span></div>" +
@@ -185,6 +198,33 @@
         renderConnectorsGrid();
         renderInspector();
       });
+    });
+  }
+
+  function pingAllReady() {
+    var readyEngines = STATE.engines.filter(function (e) { return e.installed && e.loggedIn; });
+    if (!readyEngines.length) {
+      logLine("Chưa có nền tảng AI nào sẵn sàng để ping.");
+      return;
+    }
+    var btn = $("#btn-ping-all");
+    if (btn) btn.disabled = true;
+    readyEngines.forEach(function (e) { STATE.pingResults[e.id] = { status: "busy", label: "Đang ping…" }; });
+    renderConnectorsGrid();
+
+    Promise.all(readyEngines.map(function (e) {
+      var mdl = (STATE.config.models && STATE.config.models[e.id]) || "";
+      return api("/api/cli/ping", { engine: e.id, model: mdl }).then(function (r) {
+        STATE.pingResults[e.id] = { status: "ok", label: "✓ " + (r.latencyMs / 1000).toFixed(1) + "s" };
+        logLine("Ping " + e.name + ": OK (" + r.latencyMs + " ms)");
+      }).catch(function (err) {
+        STATE.pingResults[e.id] = { status: "fail", label: "✘ Lỗi" };
+        logLine("Ping " + e.name + " lỗi: " + err.message);
+      }).then(function () {
+        renderConnectorsGrid();
+      });
+    })).then(function () {
+      if (btn) btn.disabled = false;
     });
   }
 
@@ -271,7 +311,7 @@
     STATE.jobTimer = setInterval(function () {
       api("/api/cli/job?id=" + encodeURIComponent(jobId)).then(function (d) {
         var j = d.job;
-        $("#cli-console-log").textContent = j.output || "(đang chờ phản hồi…)";
+        $("#cli-console-log").textContent = redact(j.output || "(đang chờ phản hồi…)");
         $("#cli-console-log").scrollTop = $("#cli-console-log").scrollHeight;
         $("#cli-console-urls").innerHTML = (j.urls || []).map(function (u) {
           return "<button class='btn-xs' data-open-url='" + esc(u) + "' type='button'>Mở link OAuth trên trình duyệt ↗</button>";
@@ -296,18 +336,96 @@
     }, 600);
   }
 
-  /* ---------------- PDF Workspace ---------------- */
+  /* ---------------- PDF Workspace, Checkpoints & Telemetry ---------------- */
+  function checkpointStorageKey(name, bytesLen, pages, huong) {
+    return "ptl_ckpt_v1:" + [name || "", bytesLen || 0, pages || "", huong || "tu-dong"].join("|");
+  }
+
+  function loadCheckpointMap(key) {
+    try {
+      var raw = localStorage.getItem(key);
+      if (!raw) return null;
+      var parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveStudioCheckpoint(translatedObj) {
+    if (!STATE.checkpointKey || !translatedObj || typeof translatedObj !== "object") return;
+    try {
+      var cur = loadCheckpointMap(STATE.checkpointKey) || {};
+      Object.keys(translatedObj).forEach(function (k) {
+        if (translatedObj[k]) cur[k] = translatedObj[k];
+      });
+      localStorage.setItem(STATE.checkpointKey, JSON.stringify(cur));
+    } catch {
+      /* localStorage quota exceeded or unavailable */
+    }
+  }
+
+  function clearStudioCheckpoint(key) {
+    try { if (key) localStorage.removeItem(key); } catch { /* ignore */ }
+  }
+
+  function updateBentoKpis(done, total, warnCount) {
+    var d = Number(done || 0), t = Number(total || 0);
+    var pct = t > 0 ? Math.round((100 * d) / t) : 0;
+    if ($("#kpi-seg")) $("#kpi-seg").textContent = d.toLocaleString("vi-VN") + " / " + t.toLocaleString("vi-VN");
+    if ($("#kpi-seg-sub")) $("#kpi-seg-sub").textContent = pct + "% hoàn tất";
+
+    if (STATE.startedAt && STATE.charsDone > 0 && $("#kpi-speed")) {
+      var elapsedSec = Math.max(0.5, (Date.now() - STATE.startedAt) / 1000);
+      var cps = Math.round(STATE.charsDone / elapsedSec);
+      $("#kpi-speed").textContent = cps.toLocaleString("vi-VN");
+      $("#kpi-speed-sub").textContent = STATE.charsDone.toLocaleString("vi-VN") + " ký tự · " + Math.round(elapsedSec) + "s";
+    } else if ($("#kpi-speed")) {
+      $("#kpi-speed").textContent = "—";
+      $("#kpi-speed-sub").textContent = "ký tự / giây";
+    }
+
+    var lats = STATE.batchLatencies || [];
+    if (lats.length && $("#kpi-latency")) {
+      var avgMs = Math.round(lats.reduce(function (a, b) { return a + b; }, 0) / lats.length);
+      $("#kpi-latency").textContent = (avgMs / 1000).toFixed(1) + "s";
+      $("#kpi-latency-sub").textContent = "TB qua " + lats.length + " lô gần nhất";
+      var chartEl = $("#ws-latency-chart");
+      if (chartEl && window.PTLHelpers && window.PTLHelpers.buildBatchLatencySvg) {
+        var svg = window.PTLHelpers.buildBatchLatencySvg(lats);
+        if (svg) {
+          chartEl.innerHTML = svg;
+          chartEl.hidden = false;
+        }
+      }
+    } else if ($("#kpi-latency")) {
+      $("#kpi-latency").textContent = "—";
+      $("#kpi-latency-sub").textContent = "chưa chạy lô nào";
+      if ($("#ws-latency-chart")) { $("#ws-latency-chart").hidden = true; $("#ws-latency-chart").innerHTML = ""; }
+    }
+
+    var wc = typeof warnCount === "number" ? warnCount : STATE.warnIds.length;
+    if ($("#kpi-warn")) $("#kpi-warn").textContent = String(wc);
+    if ($("#kpi-warn-sub")) $("#kpi-warn-sub").textContent = wc === 0 ? "sạch cảnh báo" : "đoạn cần kiểm tra";
+  }
+
   function loadPdfBuffer(arrayBuffer, fileName) {
     STATE.pdfBytes = arrayBuffer;
     STATE.pdfName = fileName;
     STATE.segments = [];
     STATE.segMap = {};
+    STATE.warnIds = [];
+    STATE.batchLatencies = [];
+    STATE.charsDone = 0;
+    STATE.startedAt = 0;
     $("#ws-file-name").textContent = fileName;
     $("#ws-file-sub").textContent = fmtSize(arrayBuffer.byteLength) + " · Đang phân tích cấu trúc…";
     $("#mon-status-title").textContent = "Đang khởi động bộ máy PDF & phân tích trang…";
     $("#seg-tbody").innerHTML = "<tr><td colspan='4' class='empty-cell'>Đang bóc tách khung chữ từ PDF…</td></tr>";
     $("#res-empty").hidden = false;
     $("#res-content").hidden = true;
+    $("#ws-warn-bar").hidden = true;
+    updateBentoKpis(0, 0, 0);
     switchMonTab("segments");
     preparePdf();
   }
@@ -320,30 +438,65 @@
     var copy = STATE.pdfBytes.slice(0);
     logLine("Phân tích PDF: " + STATE.pdfName + (pages ? " (trang " + pages + ")" : ""));
     callWorker("prepare", copy, STATE.pdfName, 15, pages, huong).then(function (r) {
-      if (!r.ok) throw new Error(r.error || "Không đọc được file PDF.");
+      if (!r.ok) throw new Error(r.error || r.message || "Không đọc được file PDF.");
       STATE.docInfo = r;
+      var summary = (window.PTLHelpers && window.PTLHelpers.mapPrepareSummary)
+        ? window.PTLHelpers.mapPrepareSummary(r, STATE.pdfBytes.byteLength)
+        : {
+          pages: r.pages || 0,
+          totalSegments: r.total || 0,
+          words: r.words || 0,
+          batchesTotal: r.batches_total || 0,
+          scannedPages: r.scanned || [],
+          huong: r.huong || "en-vi",
+        };
+      STATE.docInfo.summary = summary;
+      STATE.checkpointKey = checkpointStorageKey(STATE.pdfName, STATE.pdfBytes.byteLength, pages, summary.huong);
+
       $("#ws-file-sub").textContent = fmtSize(STATE.pdfBytes.byteLength) + " · Sẵn sàng dịch";
       $("#ws-doc-meta").hidden = false;
-      $("#meta-pages").textContent = String(r.pages) + (r.subset_pages ? " (chọn " + r.subset_pages + ")" : "");
-      $("#meta-items").textContent = r.items.toLocaleString("vi-VN") + " đoạn";
-      $("#meta-links").textContent = String(r.links || 0);
-      $("#meta-dir").textContent = r.huong === "vi-en" ? "Việt → Anh" : "Anh → Việt";
-      if (r.huong === "vi-en") $('input[name="ws-dir"][value="vi-en"]').checked = true;
+      $("#meta-pages").textContent = String(summary.pages);
+      $("#meta-items").textContent = summary.totalSegments.toLocaleString("vi-VN") + " đoạn · " + summary.words.toLocaleString("vi-VN") + " từ";
+      $("#meta-batches").textContent = String(summary.batchesTotal) + " lô";
+      $("#meta-dir").textContent = summary.huong === "vi-en" ? "Việt → Anh" : "Anh → Việt";
+      if (summary.huong === "vi-en") $('input[name="ws-dir"][value="vi-en"]').checked = true;
       else $('input[name="ws-dir"][value="en-vi"]').checked = true;
 
-      if (r.scanned_pages && r.scanned_pages.length) {
+      if (summary.scannedPages && summary.scannedPages.length) {
         $("#ws-scan-warn").hidden = false;
-        $("#ws-scan-warn").textContent = "Cảnh báo: phát hiện " + r.scanned_pages.length + " trang dạng ảnh scan (không có lớp chữ vector).";
+        $("#ws-scan-warn").textContent = "Cảnh báo: phát hiện " + summary.scannedPages.length + " trang dạng ảnh scan (không có lớp chữ vector).";
       } else {
         $("#ws-scan-warn").hidden = true;
       }
 
       $("#ws-run-btn").disabled = false;
       $("#ws-build-only-btn").disabled = false;
-      updateProgressUI({ done: 0, total: r.items, batches_done: 0, batches_total: r.batches });
+      updateProgressUI({ done: 0, total: summary.totalSegments, batches_done: 0, batches_total: summary.batchesTotal });
+      updateBentoKpis(0, summary.totalSegments, 0);
+
+      var savedCkpt = loadCheckpointMap(STATE.checkpointKey);
+      var ckptKeys = savedCkpt ? Object.keys(savedCkpt) : [];
+      if (ckptKeys.length > 0) {
+        return callWorker("load", JSON.stringify(savedCkpt)).then(function (lr) {
+          if (lr && lr.ok) {
+            updateProgressUI(lr);
+            STATE.warnIds = Object.keys(lr.warnings || {});
+            updateBentoKpis(lr.done || 0, lr.total || summary.totalSegments, STATE.warnIds.length);
+            var previewRows = ckptKeys.slice(0, 150).map(function (id) {
+              return { id: id, text: "(đã nạp từ checkpoint phiên trước)" };
+            });
+            appendSegmentRows(previewRows, savedCkpt, lr.warnings);
+            $("#mon-status-title").textContent = "Đã khôi phục " + (lr.done || 0) + "/" + summary.totalSegments + " đoạn từ checkpoint · bấm Bắt đầu để dịch tiếp";
+            logLine("Khôi phục checkpoint: " + (lr.done || 0) + "/" + summary.totalSegments + " đoạn.");
+          }
+        }).catch(function () {
+          $("#mon-status-title").textContent = "Đã sẵn sàng · bấm \"Bắt đầu dịch & dựng PDF\"";
+        });
+      }
+
       $("#mon-status-title").textContent = "Đã sẵn sàng · bấm \"Bắt đầu dịch & dựng PDF\"";
-      $("#seg-tbody").innerHTML = "<tr><td colspan='4' class='empty-cell'>Đã bóc tách " + r.items.toLocaleString("vi-VN") + " đoạn văn bản. Bấm Bắt đầu để AI dịch từng lô.</td></tr>";
-      logLine("Phân tích xong: " + r.pages + " trang, " + r.items + " đoạn.");
+      $("#seg-tbody").innerHTML = "<tr><td colspan='4' class='empty-cell'>Đã bóc tách " + summary.totalSegments.toLocaleString("vi-VN") + " đoạn (" + summary.words.toLocaleString("vi-VN") + " từ). Bấm Bắt đầu để AI dịch từng lô.</td></tr>";
+      logLine("Phân tích xong: " + summary.pages + " trang, " + summary.totalSegments + " đoạn, " + summary.batchesTotal + " lô.");
     }).catch(function (e) {
       $("#mon-status-title").textContent = "Lỗi phân tích PDF: " + e.message;
       logLine("Lỗi prepare PDF: " + e.message);
@@ -354,7 +507,7 @@
     if (!p || !p.total) return;
     var pct = Math.round((100 * p.done) / p.total);
     $("#mon-progress-bar").style.width = pct + "%";
-    $("#mon-progress-nums").textContent = p.done.toLocaleString("vi-VN") + "/" + p.total.toLocaleString("vi-VN") + " đoạn · " + pct + "% (lô " + p.batches_done + "/" + p.batches_total + ")";
+    $("#mon-progress-nums").textContent = p.done.toLocaleString("vi-VN") + "/" + p.total.toLocaleString("vi-VN") + " đoạn · " + pct + "% (lô " + (p.batches_done || 0) + "/" + (p.batches_total || 0) + ")";
   }
 
   function appendSegmentRows(items, translatedObj, warnings) {
@@ -379,12 +532,29 @@
   }
 
   function stripCodeFences(s) {
-    var t = String(s || "").trim();
-    var m = /^```(?:json)?\s*([\s\S]*?)\s*```$/i.exec(t);
-    if (m) return m[1].trim();
-    var i = t.indexOf("{"), j = t.lastIndexOf("}");
-    if (i >= 0 && j > i) return t.slice(i, j + 1);
-    return t;
+    if (window.PTLHelpers && window.PTLHelpers.extractJsonText) {
+      return window.PTLHelpers.extractJsonText(s);
+    }
+    return String(s || "").trim();
+  }
+
+  function translateBatchWithRetry(engineId, model, prompt, maxRetries) {
+    var attempt = 0;
+    var limit = typeof maxRetries === "number" ? maxRetries : 2;
+    function runOnce() {
+      var t0 = Date.now();
+      return api("/api/cli/translate", { engine: engineId, model: model, prompt: prompt }).then(function (ans) {
+        if (!ans || !String(ans.text || "").trim()) throw new Error("CLI trả về phản hồi rỗng.");
+        return { text: ans.text, latencyMs: Date.now() - t0 };
+      }).catch(function (err) {
+        if (STATE.stop || attempt >= limit) throw err;
+        attempt++;
+        var waitMs = attempt === 1 ? 800 : 1800;
+        logLine("Thử lại lần " + attempt + "/" + limit + " sau " + waitMs + "ms (" + err.message + ")");
+        return new Promise(function (resolve) { setTimeout(resolve, waitMs); }).then(runOnce);
+      });
+    }
+    return runOnce();
   }
 
   function u8ToBase64(u8) {
@@ -465,6 +635,25 @@
       return "<tr><td>" + esc(c.muc) + "</td><td class='" + cls + "'>" + mark + "</td><td>" + esc(c.chi_tiet) + "</td></tr>";
     }).join("");
 
+    var qaChartEl = $("#res-lieflat-chart");
+    if (qaChartEl && window.PTLHelpers && window.PTLHelpers.buildLieFlatMetricsSvg && qa.checks && qa.checks.length) {
+      var totalChecks = qa.checks.length;
+      var passedChecks = qa.checks.filter(function (c) { return !!c.dat; }).length;
+      var hardChecks = qa.checks.filter(function (c, idx) { return !(c.canh_bao !== undefined ? c.canh_bao : idx >= 6); });
+      var hardPassed = hardChecks.filter(function (c) { return !!c.dat; }).length;
+      var warnCleanPct = totalChecks ? Math.round((100 * passedChecks) / totalChecks) : 100;
+      var hardPct = hardChecks.length ? Math.round((100 * hardPassed) / hardChecks.length) : 100;
+      var segDone = STATE.segments.length;
+      var warnSegs = STATE.warnIds.length;
+      var segCleanPct = segDone > 0 ? Math.max(0, Math.round((100 * (segDone - warnSegs)) / segDone)) : 100;
+      qaChartEl.innerHTML = window.PTLHelpers.buildLieFlatMetricsSvg("Tỷ lệ Đạt kiểm định PDF (LieFlat 0–100%)", [
+        { label: "Cấu trúc bắt buộc", pct: hardPct, valueText: hardPassed + "/" + hardChecks.length + " đạt", color: hardPct === 100 ? "#22c55e" : "#f43f5e" },
+        { label: "Tổng 8 tiêu chí QA", pct: warnCleanPct, valueText: passedChecks + "/" + totalChecks + " mục", color: "#14b8a6" },
+        { label: "Đoạn văn sạch cảnh báo", pct: segCleanPct, valueText: segCleanPct + "%", color: "#38bdf8" },
+      ]);
+      qaChartEl.hidden = false;
+    }
+
     switchMonTab("results");
     $("#mon-status-title").textContent = "Hoàn tất · đã lưu " + (saved.files || []).length + " file PDF & QA!";
     logLine("Hoàn tất xuất PDF tại: " + saved.dir);
@@ -486,6 +675,7 @@
     var chunkChars = Math.max(2000, Math.min(16000, Number($("#ws-chunk").value) || 7000));
     STATE.stop = false;
     STATE.running = true;
+    if (!STATE.startedAt) STATE.startedAt = Date.now();
     $("#ws-run-btn").disabled = true;
     $("#ws-stop-btn").hidden = false;
     switchMonTab("segments");
@@ -496,11 +686,12 @@
         STATE.running = false;
         $("#ws-run-btn").disabled = false;
         $("#ws-stop-btn").hidden = true;
-        $("#mon-status-title").textContent = "Đã tạm dừng. Bấm Bắt đầu để chạy tiếp.";
+        $("#mon-status-title").textContent = "Đã tạm dừng (đã lưu checkpoint). Bấm Bắt đầu để chạy tiếp.";
         return Promise.resolve();
       }
       return callWorker("nextItems", chunkChars).then(function (r) {
         updateProgressUI(r);
+        updateBentoKpis(r.done, r.total, STATE.warnIds.length);
         if (!r.items.length) return buildAndSavePdfs();
         if (r.done === lastDone) stuck++; else stuck = 0;
         lastDone = r.done;
@@ -509,21 +700,26 @@
         batchNo++;
         var rules = ((STATE.docInfo && STATE.docInfo.rules) || "").replace("trong cuộc trò chuyện này", "trong toàn bộ tài liệu");
         var rulesEnd = ((STATE.docInfo && STATE.docInfo.rules_end) || "").replace("{n}", r.items.length).replace(/\{\{/g, "{").replace(/\}\}/g, "}");
-        var prompt = rules + "\n" + rulesEnd + "\n\n" + r.items.map(function (it) { return JSON.stringify(it); }).join("\n");
+        var batchPayload = r.items.map(function (it) { return JSON.stringify(it); }).join("\n");
+        var prompt = rules + "\n" + rulesEnd + "\n\n" + batchPayload;
 
         $("#mon-status-title").textContent = "Lô #" + batchNo + ": đang dịch " + r.items.length + " đoạn qua " + eng.name + (model ? " (" + model + ")" : "") + "…";
         logLine("Gửi lô #" + batchNo + " (" + r.items.length + " đoạn) -> " + eng.name);
 
-        return api("/api/cli/translate", { engine: eng.id, model: model, prompt: prompt }).then(function (ans) {
+        return translateBatchWithRetry(eng.id, model, prompt, 2).then(function (ans) {
+          STATE.batchLatencies.push(ans.latencyMs);
+          STATE.charsDone += batchPayload.length;
           var cleaned = stripCodeFences(ans.text);
           var parsed = {};
           try { parsed = JSON.parse(cleaned); } catch { /* web_api.load handles repairs */ }
+          saveStudioCheckpoint(parsed);
           return callWorker("load", cleaned).then(function (lr) {
             if (!lr.ok) throw new Error(lr.error || "JSON trả về chưa đọc được");
             updateProgressUI(lr);
             appendSegmentRows(r.items, parsed, lr.warnings);
             var wKeys = Object.keys(lr.warnings || {});
             wKeys.forEach(function (k) { if (STATE.warnIds.indexOf(k) < 0) STATE.warnIds.push(k); });
+            updateBentoKpis(lr.done, lr.total, STATE.warnIds.length);
             if (STATE.warnIds.length) {
               $("#ws-warn-bar").hidden = false;
               $("#ws-warn-summary").textContent = STATE.warnIds.length + " đoạn có cảnh báo QA (đã nạp tạm).";
@@ -571,6 +767,22 @@
       $("#qa-score-tbody").innerHTML = rows.map(function (x) {
         return "<tr><td>" + esc(x[0]) + "</td><td class='mono'>" + esc(x[1]) + "</td><td class='" + (x[2] ? "qa-yes" : "qa-bad") + "'>" + (x[2] ? "✔ Đạt" : "✘ Cần xem") + "</td></tr>";
       }).join("");
+      var qaSvgBox = $("#qa-lieflat-chart");
+      if (qaSvgBox && window.PTLHelpers && window.PTLHelpers.buildLieFlatMetricsSvg) {
+        var accentPct = Math.round(Number(r.ty_le_tu_co_dau || 0) * 100);
+        var layoutPct = r.do_trung_bo_cuc === "" ? 100 : Math.round(Number(r.do_trung_bo_cuc || 0) * 100);
+        var cleanTofuPct = r.ky_tu_loi_phong === 0 ? 100 : Math.max(0, 100 - Math.min(100, Number(r.ky_tu_loi_phong) * 5));
+        var vectorPct = r.trang_mat_lop_chu === 0 ? 100 : 0;
+        var noOverlapPct = r.cap_dong_chong_nhau === 0 ? 100 : Math.max(0, 100 - Math.min(100, Number(r.cap_dong_chong_nhau) * 10));
+        qaSvgBox.innerHTML = window.PTLHelpers.buildLieFlatMetricsSvg("Chỉ số Bảo toàn Bố cục & Tiếng Việt (0–100%)", [
+          { label: "Sạch lỗi phông (Tofu)", pct: cleanTofuPct, valueText: r.ky_tu_loi_phong + " lỗi", color: "#22c55e" },
+          { label: "Lớp chữ Vector", pct: vectorPct, valueText: r.trang_mat_lop_chu + " trang mất", color: "#14b8a6" },
+          { label: "Không chồng dòng", pct: noOverlapPct, valueText: r.cap_dong_chong_nhau + " cặp", color: "#38bdf8" },
+          { label: "Độ trùng bố cục", pct: layoutPct, valueText: r.do_trung_bo_cuc === "" ? "N/A" : layoutPct + "%", color: "#a855f7" },
+          { label: "Từ tiếng Việt có dấu", pct: accentPct || 100, valueText: (accentPct || 100) + "%", color: "#f59e0b" },
+        ]);
+        qaSvgBox.hidden = false;
+      }
       $("#qa-score-out").hidden = false;
     }).catch(function (e) { logLine("Lỗi chấm QA: " + e.message); })
       .then(function () { $("#qa-run-btn").disabled = false; });
@@ -590,6 +802,7 @@
       switchView("connectors");
     });
 
+    if ($("#btn-ping-all")) $("#btn-ping-all").addEventListener("click", pingAllReady);
     $("#btn-refresh-engines").addEventListener("click", loadEngines);
     $("#rail-refresh-btn").addEventListener("click", loadEngines);
 
@@ -722,13 +935,15 @@
         var retryHint = "\n- Đây là lượt sửa cảnh báo: hãy dịch đủ tiếng Việt có dấu (hoặc tiếng Anh đúng chiều), giữ nguyên số liệu/tên riêng.";
         var prompt = rules + retryHint + "\n" + rulesEnd + "\n\n" + items.map(function (it) { return JSON.stringify(it); }).join("\n");
         $("#mon-status-title").textContent = "Đang dịch lại " + items.length + " đoạn cảnh báo…";
-        return api("/api/cli/translate", { engine: engId, model: model, prompt: prompt }).then(function (ans) {
+        return translateBatchWithRetry(engId, model, prompt, 2).then(function (ans) {
           var cleaned = stripCodeFences(ans.text);
           var parsed = {};
           try { parsed = JSON.parse(cleaned); } catch { /* ignore */ }
+          saveStudioCheckpoint(parsed);
           return callWorker("load", cleaned).then(function (lr) {
             appendSegmentRows(items, parsed, lr.warnings);
             STATE.warnIds = Object.keys(lr.warnings || {});
+            updateBentoKpis(lr.done || 0, lr.total || 0, STATE.warnIds.length);
             $("#ws-warn-bar").hidden = !STATE.warnIds.length;
             $("#mon-status-title").textContent = "Đã cập nhật lại các đoạn cảnh báo.";
           });
