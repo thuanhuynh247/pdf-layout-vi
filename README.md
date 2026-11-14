@@ -31,7 +31,7 @@ docs/ADR-003-…md             Trang /dich tải bộ máy từ jsDelivr và PyP
 docs/DESIGN_SYSTEM.md        Design system "Proof Sheet"
 release/                     Gói nâng cao v3.0.1 đã làm sạch (zip để tải lên Drive, không đưa lên web)
 HUONG_DAN_TRIEN_KHAI.md      Hướng dẫn từng bước cho người không lập trình
-desktop/                     Ứng dụng Windows (.exe) dùng Electron + ELECTRON_RUN_AS_NODE=1 AI CLI Bridge (Claude Code, Codex, Gemini CLI, Antigravity, Muse, OpenCode, Copilot, Qwen, Ollama)
+desktop/                     PDF Layout VI Studio (.exe trên Windows, tách biệt hoàn toàn layout website): desktop/app/ + Electron + ELECTRON_RUN_AS_NODE=1 kết nối 10 nền tảng AI (Codex, Claude Code, Gemini, Antigravity, Muse, Ollama, OpenCode, Copilot, Qwen, OpenRouter)
 .github/workflows/package-win.yml  CI tự động đóng gói PDF-Layout-VI-*-setup.exe & portable.exe trên GitHub Releases
 ```
 

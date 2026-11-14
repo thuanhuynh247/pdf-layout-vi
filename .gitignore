@@ -1,6 +1,7 @@
 # Node & Electron build artifacts
 desktop/node_modules/
 desktop/release/
+desktop/_Archive/
 npm-debug.log*
 *.tsbuildinfo
 

@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF Layout VI Studio</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Windows 11 Integrated Titlebar -->
+    <header class="titlebar">
+      <div class="tb-brand">
+        <img src="icon.png" alt="" class="tb-icon" width="20" height="20">
+        <span class="tb-title">PDF Layout VI Studio</span>
+        <span class="tb-ver">v3.4.0</span>
+      </div>
+      <div class="tb-right">
+        <button class="pill pill-connector" id="top-connector-btn" type="button" title="Chuyển nhanh hoặc cấu hình nền tảng AI">
+          <span class="dot" id="top-connector-dot"></span>
+          <span id="top-connector-label">Đang dò nền tảng AI…</span>
+        </button>
+        <div class="pill pill-engine" id="top-engine-pill" title="Trạng thái bộ máy PDF cục bộ">
+          <span class="dot is-idle" id="top-engine-dot"></span>
+          <span id="top-engine-label">Bộ máy PDF: Chờ khởi động</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Desktop Workspace Frame -->
+    <div class="app-body">
+      <!-- Left Navigation & Live Platform Switcher Rail -->
+      <aside class="rail">
+        <nav class="rail-nav" aria-label="Điều hướng chính">
+          <button class="nav-btn is-active" data-view="connectors" type="button">
+            <span class="nav-ic">⚡</span>
+            <span class="nav-txt">Kết nối AI</span>
+            <span class="nav-badge" id="badge-ready">0</span>
+          </button>
+          <button class="nav-btn" data-view="workspace" type="button">
+            <span class="nav-ic">📄</span>
+            <span class="nav-txt">Dịch PDF</span>
+          </button>
+          <button class="nav-btn" data-view="qa" type="button">
+            <span class="nav-ic">✓</span>
+            <span class="nav-txt">Kiểm định QA</span>
+          </button>
+          <button class="nav-btn" data-view="logs" type="button">
+            <span class="nav-ic">&gt;_</span>
+            <span class="nav-txt">Nhật ký &amp; CLI</span>
+          </button>
+        </nav>
+
+        <div class="rail-section">
+          <div class="rail-sec-head">
+            <span>Nền tảng đã bật</span>
+            <button class="link-btn" id="rail-refresh-btn" type="button" title="Quét lại CLI trên máy">Làm mới</button>
+          </div>
+          <div class="rail-connectors" id="rail-connectors"></div>
+        </div>
+
+        <div class="rail-foot">
+          <div class="rail-out-label">Thư mục xuất PDF</div>
+          <div class="rail-out-path" id="rail-output-dir" title="">Documents\PDF-Layout-VI</div>
+          <div class="rail-out-actions">
+            <button class="btn-xs" id="pick-output-btn" type="button">Đổi thư mục</button>
+            <button class="btn-xs" id="open-output-root-btn" type="button">Mở Explorer</button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Active View Stage -->
+      <main class="stage">
+        <!-- VIEW 1: AI PLATFORM CONNECTORS (OpenMausBot Style) -->
+        <section class="view is-active" id="view-connectors">
+          <div class="view-split connectors-split">
+            <div class="pane-scroll">
+              <div class="pane-head">
+                <div>
+                  <h1>Kết nối nền tảng AI</h1>
+                  <p class="sub">Chọn CLI hoặc API bạn đang đăng nhập trên Windows. Chọn xong có thể bấm <strong>Vào dịch PDF ngay</strong>.</p>
+                </div>
+                <div class="head-actions">
+                  <button class="btn btn-ghost" id="btn-refresh-engines" type="button">Quét lại máy</button>
+                  <button class="btn btn-primary" id="btn-go-translate" type="button">Vào dịch PDF →</button>
+                </div>
+              </div>
+              <div class="connectors-grid" id="connectors-grid"></div>
+            </div>
+
+            <!-- Right Inspector Panel for Selected Platform -->
+            <aside class="inspector" id="connector-inspector">
+              <div class="insp-empty" id="insp-empty">Chọn một nền tảng bên trái để xem chi tiết, đăng nhập OAuth hoặc kiểm tra kết nối.</div>
+              <div class="insp-body" id="insp-body" hidden>
+                <div class="insp-head">
+                  <div>
+                    <div class="insp-kicker" id="insp-vendor"></div>
+                    <h2 id="insp-name"></h2>
+                  </div>
+                  <span class="status-chip" id="insp-chip"></span>
+                </div>
+
+                <div class="insp-meta" id="insp-meta"></div>
+
+                <div class="insp-field">
+                  <label for="insp-model">Mô hình mặc định cho nền tảng này</label>
+                  <div class="insp-row">
+                    <input class="input mono" id="insp-model" list="insp-model-list" placeholder="Để trống = dùng mặc định của CLI">
+                    <datalist id="insp-model-list"></datalist>
+                    <button class="btn btn-ghost" id="insp-save-model" type="button">Lưu</button>
+                  </div>
+                </div>
+
+                <div class="insp-field" id="insp-key-wrap" hidden>
+                  <label for="insp-api-key" id="insp-key-label">API Key (lưu cục bộ trên máy)</label>
+                  <div class="insp-row">
+                    <input class="input mono" id="insp-api-key" type="password" autocomplete="off" placeholder="Nhập khóa API…">
+                    <button class="btn btn-ghost" id="insp-save-key" type="button">Lưu khóa</button>
+                    <button class="btn btn-ghost" id="insp-clear-key" type="button">Xóa</button>
+                  </div>
+                  <p class="hint" id="insp-key-hint"></p>
+                </div>
+
+                <div class="insp-actions">
+                  <button class="btn btn-primary" id="insp-activate" type="button">Đặt làm nền tảng dịch chính</button>
+                  <button class="btn btn-ghost" id="insp-ping" type="button">Kiểm tra kết nối (Ping)</button>
+                  <button class="btn btn-ghost" id="insp-login" type="button">Đăng nhập OAuth</button>
+                  <button class="btn btn-ghost" id="insp-login-term" type="button">Mở Terminal</button>
+                  <button class="btn btn-ghost" id="insp-install" type="button">Cài đặt CLI</button>
+                </div>
+
+                <div class="ping-box" id="insp-ping-box" hidden></div>
+
+                <!-- Embedded Auth / Install Live Terminal -->
+                <div class="cli-console" id="insp-console" hidden>
+                  <div class="cli-console-head">
+                    <span id="cli-console-title">Phiên CLI</span>
+                    <button class="btn-xs" id="cli-console-stop" type="button">Dừng</button>
+                  </div>
+                  <pre class="cli-console-log" id="cli-console-log"></pre>
+                  <div class="cli-console-urls" id="cli-console-urls"></div>
+                  <div class="cli-console-input" id="cli-console-input" hidden>
+                    <input class="input mono" id="cli-stdin-field" placeholder="Dán mã OAuth từ trình duyệt vào đây rồi bấm Gửi…">
+                    <button class="btn btn-primary" id="cli-stdin-send" type="button">Gửi mã</button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- VIEW 2: PDF TRANSLATION STUDIO WORKSPACE -->
+        <section class="view" id="view-workspace">
+          <div class="view-split workspace-split">
+            <!-- Left Control Dock -->
+            <div class="ws-controls">
+              <div class="ws-card">
+                <div class="ws-card-h">1. Tài liệu nguồn</div>
+                <div class="dropzone" id="ws-drop">
+                  <div class="drop-main">
+                    <strong id="ws-file-name">Kéo thả file PDF vào đây</strong>
+                    <span id="ws-file-sub">Hoặc bấm chọn file từ máy tính</span>
+                  </div>
+                  <button class="btn btn-primary btn-sm" id="ws-pick-btn" type="button">Chọn PDF…</button>
+                  <input type="file" id="ws-file-input" accept="application/pdf,.pdf" hidden>
+                </div>
+                <dl class="kv-grid" id="ws-doc-meta" hidden>
+                  <div><dt>Số trang</dt><dd id="meta-pages">—</dd></div>
+                  <div><dt>Số đoạn chữ</dt><dd id="meta-items">—</dd></div>
+                  <div><dt>Liên kết</dt><dd id="meta-links">—</dd></div>
+                  <div><dt>Chiều phát hiện</dt><dd id="meta-dir">—</dd></div>
+                </dl>
+                <div class="ws-warn" id="ws-scan-warn" hidden></div>
+              </div>
+
+              <div class="ws-card">
+                <div class="ws-card-h">2. Thiết lập dàn trang</div>
+                <div class="field-group">
+                  <label>Chiều dịch</label>
+                  <div class="seg-group">
+                    <label class="seg"><input type="radio" name="ws-dir" value="en-vi" checked><span>Anh → Việt</span></label>
+                    <label class="seg"><input type="radio" name="ws-dir" value="vi-en"><span>Việt → Anh</span></label>
+                  </div>
+                </div>
+                <div class="field-row">
+                  <div class="field-group">
+                    <label for="ws-pages">Phạm vi trang</label>
+                    <input class="input mono" id="ws-pages" placeholder="Tất cả (vd: 1-5, 13)">
+                  </div>
+                  <div class="field-group">
+                    <label for="ws-chunk">Ký tự / lô</label>
+                    <input class="input mono" id="ws-chunk" type="number" min="2000" max="16000" step="500" value="7000">
+                  </div>
+                </div>
+                <div class="field-group">
+                  <label>Xuất kèm song ngữ (ngoài bản đơn ngữ)</label>
+                  <div class="checks-grid">
+                    <label class="chk"><input type="checkbox" name="ws-out" value="doi-trang" checked><span>Đối trang</span></label>
+                    <label class="chk"><input type="checkbox" name="ws-out" value="hai-cot" checked><span>Hai cột</span></label>
+                    <label class="chk"><input type="checkbox" name="ws-out" value="xen-doan" checked><span>Xen đoạn</span></label>
+                  </div>
+                  <label class="chk mt-1"><input type="checkbox" id="ws-own-doc"><span>Bỏ chân trang ghi chú bản dịch AI</span></label>
+                </div>
+              </div>
+
+              <div class="ws-card">
+                <div class="ws-card-h">
+                  <span>3. Nền tảng dịch đang chọn</span>
+                  <button class="link-btn" id="ws-change-ai" type="button">Đổi cấu hình</button>
+                </div>
+                <div class="active-ai-box">
+                  <select class="select" id="ws-engine-select"></select>
+                  <input class="input mono mt-1" id="ws-model-input" placeholder="Mô hình (trống = mặc định CLI)">
+                </div>
+              </div>
+
+              <div class="ws-actions">
+                <button class="btn btn-primary btn-lg" id="ws-run-btn" type="button" disabled>Bắt đầu dịch &amp; dựng PDF</button>
+                <div class="ws-actions-sub">
+                  <button class="btn btn-ghost" id="ws-stop-btn" type="button" hidden>Dừng dịch</button>
+                  <button class="btn btn-ghost" id="ws-build-only-btn" type="button" disabled>Dựng PDF từ phần đã dịch</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Live Translation Monitor & Output Stage -->
+            <div class="ws-monitor">
+              <div class="mon-header">
+                <div class="mon-progress-wrap">
+                  <div class="mon-status-row">
+                    <strong id="mon-status-title">Chưa nạp tài liệu PDF</strong>
+                    <span class="mono" id="mon-progress-nums">0/0 đoạn · 0%</span>
+                  </div>
+                  <div class="progress-track"><div class="progress-fill" id="mon-progress-bar"></div></div>
+                </div>
+                <div class="mon-tabs">
+                  <button class="tab-btn is-active" data-mon-tab="segments" type="button">Xem bản dịch trực tiếp</button>
+                  <button class="tab-btn" data-mon-tab="results" type="button">Kết quả &amp; Phiếu QA</button>
+                </div>
+              </div>
+
+              <!-- Live Segments Table -->
+              <div class="mon-panel is-active" id="mon-tab-segments">
+                <div class="mon-warn-bar" id="ws-warn-bar" hidden>
+                  <span id="ws-warn-summary"></span>
+                  <button class="btn-xs" id="ws-retry-warn" type="button">Dịch lại các đoạn cảnh báo</button>
+                </div>
+                <div class="table-wrap">
+                  <table class="seg-table">
+                    <thead>
+                      <tr>
+                        <th style="width:84px">ID</th>
+                        <th>Văn bản gốc</th>
+                        <th>Bản dịch AI</th>
+                        <th style="width:120px">Trạng thái</th>
+                      </tr>
+                    </thead>
+                    <tbody id="seg-tbody">
+                      <tr><td colspan="4" class="empty-cell">Kéo thả hoặc chọn file PDF ở cột trái để bắt đầu.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <!-- Build Results & QA Scorecard -->
+              <div class="mon-panel" id="mon-tab-results">
+                <div class="empty-panel" id="res-empty">Sau khi dịch xong, hệ thống tự dựng PDF vector, kiểm định 8 tiêu chí QA và lưu thẳng vào thư mục Windows của bạn.</div>
+                <div class="res-content" id="res-content" hidden>
+                  <div class="qa-banner" id="res-qa-banner"></div>
+                  <div class="saved-dir-card" id="res-dir-card" hidden>
+                    <div>
+                      <div class="saved-dir-label">Đã lưu toàn bộ file xuất ra tại Windows:</div>
+                      <div class="mono saved-dir-path" id="res-dir-path"></div>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="res-open-dir" type="button">Mở thư mục</button>
+                  </div>
+                  <div class="out-files-grid" id="res-files-list"></div>
+                  <h3 class="qa-subh">Phiếu kiểm định chất lượng (8 tiêu chí)</h3>
+                  <table class="qa-table">
+                    <thead><tr><th>Hạng mục</th><th>Kết quả</th><th>Chi tiết</th></tr></thead>
+                    <tbody id="res-qa-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 3: STANDALONE QA INSPECTOR -->
+        <section class="view" id="view-qa">
+          <div class="qa-view">
+            <div class="pane-head">
+              <div>
+                <h1>Kiểm định chất lượng PDF đã dịch</h1>
+                <p class="sub">Chấm 7 chỉ số kỹ thuật (tofu, chữ sót, tràn lề, chồng dòng, liên kết, lớp chữ vector, độ trùng bố cục) ngay trên máy.</p>
+              </div>
+            </div>
+            <div class="qa-pickers">
+              <div class="ws-card">
+                <div class="ws-card-h">File PDF gốc</div>
+                <button class="btn btn-ghost" id="qa-pick-src" type="button">Chọn file gốc…</button>
+                <span class="mono qa-picked-name" id="qa-src-name">Chưa chọn</span>
+                <input type="file" id="qa-src-file" accept=".pdf" hidden>
+              </div>
+              <div class="ws-card">
+                <div class="ws-card-h">File PDF đã dịch</div>
+                <button class="btn btn-ghost" id="qa-pick-dst" type="button">Chọn file đã dịch…</button>
+                <span class="mono qa-picked-name" id="qa-dst-name">Chưa chọn</span>
+                <input type="file" id="qa-dst-file" accept=".pdf" hidden>
+              </div>
+              <div class="qa-run-col">
+                <button class="btn btn-primary btn-lg" id="qa-run-btn" type="button">Chấm QA ngay</button>
+              </div>
+            </div>
+            <div class="qa-score-out" id="qa-score-out" hidden>
+              <table class="qa-table">
+                <thead><tr><th>Chỉ số</th><th>Giá trị</th><th>Đánh giá</th></tr></thead>
+                <tbody id="qa-score-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 4: ACTIVITY & CLI LOGS -->
+        <section class="view" id="view-logs">
+          <div class="logs-view">
+            <div class="pane-head">
+              <div>
+                <h1>Nhật ký hoạt động &amp; CLI</h1>
+                <p class="sub">Theo dõi thời gian thực từng lệnh gọi CLI, tải Pyodide và trạng thái dựng PDF.</p>
+              </div>
+              <button class="btn btn-ghost" id="logs-clear-btn" type="button">Xóa nhật ký</button>
+            </div>
+            <pre class="logs-pre" id="logs-pre"></pre>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

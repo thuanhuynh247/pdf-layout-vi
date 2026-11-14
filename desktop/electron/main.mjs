@@ -1,5 +1,5 @@
-// electron/main.mjs — OpenMausBot-style Electron shell + ELECTRON_RUN_AS_NODE=1 embedded server
-import { app, BrowserWindow, shell, dialog, Menu } from "electron";
+// electron/main.mjs — Dedicated Windows Desktop Shell (OpenMausBot ELECTRON_RUN_AS_NODE=1 + Fluent Window)
+import { app, BrowserWindow, shell, dialog, Menu, ipcMain } from "electron";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -16,28 +16,30 @@ function resolvePaths() {
   if (app.isPackaged) {
     return {
       serverEntry: path.join(process.resourcesPath, "server", "index.mjs"),
-      uiDir: path.join(process.resourcesPath, "app-ui"),
-      iconPath: path.join(process.resourcesPath, "app-ui", "assets", "img", "icon-256.png"),
+      desktopDir: path.join(process.resourcesPath, "app"),
+      engineDir: path.join(process.resourcesPath, "engine"),
+      iconPath: path.join(process.resourcesPath, "app", "icon.png"),
     };
   }
   const desktopRoot = path.resolve(__dirname, "..");
   return {
     serverEntry: path.join(desktopRoot, "server", "index.mjs"),
-    uiDir: path.resolve(desktopRoot, ".."),
+    desktopDir: path.join(desktopRoot, "app"),
+    engineDir: path.resolve(desktopRoot, "..", "engine"),
     iconPath: path.join(desktopRoot, "build", "icon.png"),
   };
 }
 
 function startEmbeddedServer() {
   return new Promise((resolve, reject) => {
-    const { serverEntry, uiDir } = resolvePaths();
-    // Preferred fixed port 47123 so web users can also detect desktop bridge; fall back cleanly to ephemeral 0 if busy
+    const { serverEntry, desktopDir, engineDir } = resolvePaths();
     const env = {
       ...process.env,
       ELECTRON_RUN_AS_NODE: "1",
       PORT: process.env.PORT || "47123",
       HOST: "127.0.0.1",
-      PDF_LAYOUT_UI_DIR: uiDir,
+      PDF_LAYOUT_DESKTOP_UI_DIR: desktopDir,
+      PDF_LAYOUT_ENGINE_DIR: engineDir,
     };
 
     const child = spawn(process.execPath, [serverEntry], {
@@ -69,7 +71,6 @@ function startEmbeddedServer() {
     child.stderr.on("data", (chunk) => {
       const msg = chunk.toString("utf8");
       if (/EADDRINUSE/i.test(msg) && !settled) {
-        // Retry cleanly on ephemeral port
         settled = true;
         clearTimeout(timeout);
         const fallback = spawn(process.execPath, [serverEntry], {
@@ -98,16 +99,69 @@ function startEmbeddedServer() {
   });
 }
 
+function registerIpc() {
+  ipcMain.handle("dialog:pickFolder", async () => {
+    const res = await dialog.showOpenDialog(mainWindow, {
+      title: "Chọn thư mục lưu file PDF xuất ra",
+      properties: ["openDirectory", "createDirectory"],
+    });
+    if (res.canceled || !res.filePaths.length) return { canceled: true };
+    return { canceled: false, path: res.filePaths[0] };
+  });
+
+  ipcMain.handle("dialog:pickPdf", async (_ev, multiple) => {
+    const res = await dialog.showOpenDialog(mainWindow, {
+      title: "Chọn tài liệu PDF",
+      filters: [{ name: "Tài liệu PDF", extensions: ["pdf"] }],
+      properties: multiple ? ["openFile", "multiSelections"] : ["openFile"],
+    });
+    if (res.canceled || !res.filePaths.length) return { canceled: true, files: [] };
+    const files = res.filePaths.map((p) => {
+      const buf = fs.readFileSync(p);
+      return {
+        path: p,
+        name: path.basename(p),
+        size: buf.length,
+        base64: buf.toString("base64"),
+      };
+    });
+    return { canceled: false, files };
+  });
+
+  ipcMain.handle("shell:openPath", async (_ev, targetPath) => {
+    if (!targetPath) return "";
+    return shell.openPath(String(targetPath));
+  });
+
+  ipcMain.handle("shell:openExternal", async (_ev, url) => {
+    if (url && /^https?:\/\//i.test(String(url))) {
+      await shell.openExternal(String(url));
+    }
+    return true;
+  });
+}
+
 function createWindow(baseUrl) {
   const { iconPath } = resolvePaths();
+  const isWin = process.platform === "win32";
   const winOpts = {
-    width: 1280,
-    height: 860,
-    minWidth: 960,
-    minHeight: 680,
-    title: "PDF Layout VI — Dịch PDF Giữ Nguyên Bố Cục",
+    width: 1360,
+    height: 880,
+    minWidth: 1024,
+    minHeight: 700,
+    title: "PDF Layout VI Studio",
     autoHideMenuBar: true,
-    backgroundColor: "#f7f5f0",
+    backgroundColor: "#0c1117",
+    ...(isWin
+      ? {
+          titleBarStyle: "hidden",
+          titleBarOverlay: {
+            color: "#0c1117",
+            symbolColor: "#cbd5e1",
+            height: 44,
+          },
+        }
+      : {}),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       contextIsolation: true,
@@ -120,7 +174,6 @@ function createWindow(baseUrl) {
   mainWindow = new BrowserWindow(winOpts);
   Menu.setApplicationMenu(null);
 
-  // Open external AI web links in default browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (!url.startsWith(baseUrl)) {
       shell.openExternal(url);
@@ -129,7 +182,7 @@ function createWindow(baseUrl) {
     return { action: "allow" };
   });
 
-  mainWindow.loadURL(`${baseUrl}/dich`);
+  mainWindow.loadURL(`${baseUrl}/`);
   mainWindow.on("closed", () => { mainWindow = null; });
 }
 
@@ -146,10 +199,11 @@ if (!gotLock) {
 
   app.whenReady().then(async () => {
     try {
+      registerIpc();
       const url = await startEmbeddedServer();
       createWindow(url);
     } catch (err) {
-      dialog.showErrorBox("PDF Layout VI Error", err && err.message ? err.message : String(err));
+      dialog.showErrorBox("PDF Layout VI Studio Error", err && err.message ? err.message : String(err));
       app.quit();
     }
   });

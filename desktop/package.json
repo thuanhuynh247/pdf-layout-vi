@@ -1,8 +1,8 @@
 {
   "name": "pdf-layout-vi-desktop",
-  "productName": "PDF Layout VI",
-  "version": "3.3.0",
-  "description": "Dịch PDF Anh–Việt giữ nguyên bố cục vector, tích hợp trực tiếp Claude Code, Codex, Gemini, Muse và AI CLI trên Windows.",
+  "productName": "PDF Layout VI Studio",
+  "version": "3.4.0",
+  "description": "Ứng dụng Windows Studio dịch PDF giữ nguyên bố cục vector, kết nối trực tiếp Claude Code, Codex, Gemini, Antigravity, Muse, Ollama và OpenRouter.",
   "main": "electron/main.mjs",
   "author": "Huynh Anh Thuan",
   "license": "MIT",

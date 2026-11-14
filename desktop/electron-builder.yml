@@ -1,5 +1,5 @@
 appId: com.huynhanhthuan.pdflayoutvi
-productName: PDF Layout VI
+productName: PDF Layout VI Studio
 copyright: Copyright © 2026 Huynh Anh Thuan
 directories:
   output: release
@@ -12,24 +12,10 @@ files:
 extraResources:
   - from: server
     to: server
-  - from: ../index.html
-    to: app-ui/index.html
-  - from: ../dich.html
-    to: app-ui/dich.html
-  - from: ../chat-luong.html
-    to: app-ui/chat-luong.html
-  - from: ../dung-voi-claude.html
-    to: app-ui/dung-voi-claude.html
-  - from: ../privacy.html
-    to: app-ui/privacy.html
-  - from: ../config.js
-    to: app-ui/config.js
-  - from: ../assets
-    to: app-ui/assets
+  - from: app
+    to: app
   - from: ../engine
-    to: app-ui/engine
-  - from: ../tai-ve
-    to: app-ui/tai-ve
+    to: engine
 asar: true
 win:
   icon: build/icon.ico
@@ -47,8 +33,8 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: PDF Layout VI
-  uninstallDisplayName: PDF Layout VI
+  shortcutName: PDF Layout VI Studio
+  uninstallDisplayName: PDF Layout VI Studio
 portable:
   artifactName: PDF-Layout-VI-${version}-${arch}-portable.${ext}
 publish:
