@@ -95,8 +95,11 @@
 
       <div class="modes-pick" role="radiogroup" aria-label="Cách dịch">
         <label class="mode-card"><input type="radio" name="mode" value="paste" checked>
-          <span class="mc-h">Dán qua AI bạn đang dùng <em>khuyên dùng</em></span>
+          <span class="mc-h">Dán qua AI bạn đang dùng <em>khuyên dùng trên web</em></span>
           <span class="mc-p">Trang tạo sẵn câu nhắn, bạn chép sang ChatGPT, Gemini hay Claude rồi dán câu trả lời về. Miễn phí, chất lượng tốt, làm theo từng lô.</span></label>
+        <label class="mode-card"><input type="radio" name="mode" value="cli">
+          <span class="mc-h">Tự động bằng AI CLI trên máy <em>khuyên dùng trên .exe</em></span>
+          <span class="mc-p" id="cli-mode-note">Dùng trực tiếp Claude Code, Codex, Gemini, Muse, Ollama đã đăng nhập trên Windows. Không tốn phí API riêng, tự chạy hết từng lô.</span></label>
         <label class="mode-card"><input type="radio" name="mode" value="api">
           <span class="mc-h">Tự động bằng khóa API</span>
           <span class="mc-p">Dùng khóa OpenRouter của bạn, trang tự gửi từng lô và nạp kết quả. Bạn trả phí theo lượng chữ cho OpenRouter.</span></label>
@@ -134,6 +137,37 @@
         <label class="label" for="answer">Câu trả lời của AI</label>
         <textarea class="ta" id="answer" rows="8" placeholder='Dán vào đây câu trả lời, dạng {"p1-1": "…", "p1-2": "…"}'></textarea>
         <div class="cta-row"><button class="btn btn-primary" type="button" id="load-answer">Nạp bản dịch</button><button class="btn btn-ghost" type="button" id="skip-build">Dựng luôn với phần đã dịch</button></div>
+      </div>
+
+      <!-- AI CLI trên máy (Desktop .exe / Local Bridge) -->
+      <div class="pane" id="pane-cli" hidden>
+        <div class="cli-head">
+          <p class="label" id="cli-bridge-status">Đang dò các công cụ AI CLI trên máy…</p>
+          <button class="btn btn-ghost btn-sm" type="button" id="cli-refresh">Làm mới trạng thái</button>
+        </div>
+        <div class="cli-banner" id="cli-banner" hidden></div>
+        <div class="cli-grid" id="cli-grid-primary"></div>
+        <details class="cli-more" id="cli-more">
+          <summary>Các AI CLI &amp; công cụ ngoại tuyến khác (Antigravity, OpenCode, Copilot, Qwen, Ollama)</summary>
+          <div class="cli-grid" id="cli-grid-extra"></div>
+        </details>
+        <div class="form-row">
+          <div class="field">
+            <label for="cli-model">Mô hình (để trống = mặc định của CLI)</label>
+            <input class="input mono" id="cli-model" list="cli-model-list" placeholder="mặc định">
+            <datalist id="cli-model-list"></datalist>
+            <p class="hint">Ví dụ: <span class="mono">sonnet</span> (Claude), <span class="mono">gpt-5.4-mini</span> (Codex), <span class="mono">gemini-2.5-flash</span> (Gemini).</p>
+          </div>
+          <div class="field">
+            <label for="cli-chars">Ký tự mỗi lô gửi CLI</label>
+            <input class="input mono" id="cli-chars" type="number" min="2000" max="16000" step="500" value="7000">
+            <p class="hint">Lô 6.000–8.000 ký tự cân bằng tốc độ và độ ổn định JSON.</p>
+          </div>
+        </div>
+        <div class="cta-row">
+          <button class="btn btn-primary" type="button" id="cli-run">Chạy tự động qua AI CLI</button>
+          <button class="btn btn-ghost" type="button" id="cli-stop" hidden>Dừng</button>
+        </div>
       </div>
 
       <!-- API -->

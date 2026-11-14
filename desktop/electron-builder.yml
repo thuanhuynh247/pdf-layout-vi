@@ -1,0 +1,57 @@
+appId: com.huynhanhthuan.pdflayoutvi
+productName: PDF Layout VI
+copyright: Copyright © 2026 Huynh Anh Thuan
+directories:
+  output: release
+  buildResources: build
+files:
+  - electron/**/*
+  - package.json
+  - "!release/**"
+  - "!node_modules/.cache/**"
+extraResources:
+  - from: server
+    to: server
+  - from: ../index.html
+    to: app-ui/index.html
+  - from: ../dich.html
+    to: app-ui/dich.html
+  - from: ../chat-luong.html
+    to: app-ui/chat-luong.html
+  - from: ../dung-voi-claude.html
+    to: app-ui/dung-voi-claude.html
+  - from: ../privacy.html
+    to: app-ui/privacy.html
+  - from: ../config.js
+    to: app-ui/config.js
+  - from: ../assets
+    to: app-ui/assets
+  - from: ../engine
+    to: app-ui/engine
+  - from: ../tai-ve
+    to: app-ui/tai-ve
+asar: true
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+nsis:
+  artifactName: PDF-Layout-VI-${version}-${arch}-setup.${ext}
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: PDF Layout VI
+  uninstallDisplayName: PDF Layout VI
+portable:
+  artifactName: PDF-Layout-VI-${version}-${arch}-portable.${ext}
+publish:
+  provider: github
+  owner: thuanhuynh247
+  repo: pdf-layout-vi

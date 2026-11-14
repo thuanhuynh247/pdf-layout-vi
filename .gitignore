@@ -1,0 +1,14 @@
+# Node & Electron build artifacts
+desktop/node_modules/
+desktop/release/
+npm-debug.log*
+*.tsbuildinfo
+
+# Vercel & local caches
+.vercel/
+.env
+.env.*
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db

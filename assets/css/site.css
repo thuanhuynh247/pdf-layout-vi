@@ -491,7 +491,7 @@ fieldset[aria-invalid="true"] .chip span { border-color: var(--error); }
 .pages-row { display: flex; flex-wrap: wrap; gap: var(--sp-3); margin-top: var(--sp-3); }
 .pages-row .input { max-width: 320px; }
 .modes-pick { display: grid; gap: var(--sp-4); grid-template-columns: 1fr; margin-bottom: var(--sp-5); }
-@media (min-width: 860px) { .modes-pick { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 720px) { .modes-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .mode-card { position: relative; display: grid; gap: var(--sp-2); align-content: start; padding: var(--sp-5); background: var(--paper); border: 1.5px solid var(--rule); border-radius: var(--radius-m); cursor: pointer; }
 .mode-card:has(input:checked) { border-color: var(--teal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent); }
 .mode-card input { position: absolute; top: var(--sp-4); right: var(--sp-4); accent-color: var(--teal); width: 18px; height: 18px; }
@@ -525,3 +525,26 @@ fieldset[aria-invalid="true"] .chip span { border-color: var(--error); }
 .dir-pick .check { display: inline-grid; align-items: center; }
 .dir-pick .check input { margin: 0; }
 .dir-note { font-size: var(--fs-sm); color: var(--ink-2); }
+
+/* AI CLI Bridge (/dich + Desktop .exe) */
+.cli-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--sp-3); }
+.cli-banner { padding: var(--sp-4) var(--sp-5); border-radius: var(--radius-m); border: 1px solid color-mix(in srgb, var(--teal) 35%, var(--rule)); background: var(--teal-wash); display: grid; gap: var(--sp-3); font-size: var(--fs-sm); }
+.cli-banner.is-warn { border-color: color-mix(in srgb, #b7791f 40%, var(--rule)); background: color-mix(in srgb, #f6e05e 12%, var(--paper)); }
+.cli-grid { display: grid; gap: var(--sp-3); grid-template-columns: 1fr; }
+@media (min-width: 720px) { .cli-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1080px) { .cli-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.cli-card { position: relative; display: grid; gap: var(--sp-2); align-content: space-between; padding: var(--sp-4); background: var(--paper); border: 1.5px solid var(--rule); border-radius: var(--radius-m); cursor: pointer; transition: border-color var(--dur-1), box-shadow var(--dur-1); }
+.cli-card:hover { border-color: var(--ink-2); }
+.cli-card:has(input[type="radio"]:checked) { border-color: var(--teal); box-shadow: 0 0 0 3px color-mix(in srgb, var(--teal) 18%, transparent); }
+.cli-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--sp-2); }
+.cli-card input[type="radio"] { accent-color: var(--teal); width: 17px; height: 17px; margin: 2px 0 0; flex: none; }
+.cli-title { font-weight: 700; font-size: var(--fs-sm); color: var(--ink); }
+.cli-vendor { font-size: var(--fs-xs); color: var(--ink-2); }
+.cli-badge { display: inline-block; font: 600 11px/1.2 var(--font-mono); padding: 3px 7px; border-radius: 4px; width: fit-content; }
+.cli-badge.ok { color: var(--pass); background: color-mix(in srgb, var(--pass) 12%, transparent); }
+.cli-badge.warn { color: #975a16; background: color-mix(in srgb, #ecc94b 24%, transparent); }
+.cli-badge.off { color: var(--ink-2); background: color-mix(in srgb, var(--rule) 55%, transparent); }
+.cli-detail { font-size: var(--fs-xs); color: var(--ink-2); overflow-wrap: anywhere; }
+.cli-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: 4px; }
+.cli-more summary { cursor: pointer; font-size: var(--fs-sm); font-weight: 600; color: var(--teal-ink); padding: var(--sp-2) 0; }
+

@@ -1,0 +1,11 @@
+# Chỉ đưa phần website lên Vercel. Các thư mục và tệp phát triển ở lại trong repo.
+apps-script/
+desktop/
+docs/
+tools/
+release/
+release-website/
+.github/
+README.md
+HUONG_DAN_TRIEN_KHAI.md
+/*.py

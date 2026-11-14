@@ -31,9 +31,11 @@
     worker.onerror = function (e) {
       Object.keys(waiting).forEach(function (k) { waiting[k].reject(new Error(e.message || "Bộ máy gặp lỗi.")); delete waiting[k]; });
     };
-    // Nguồn tải bộ máy: "cdn" (jsDelivr + PyPI, tự chuyển về website khi lỗi) hoặc "self" (chỉ website)
+    // Nguồn tải bộ máy: trên Desktop (.exe / localhost) ưu tiên "self" để nạp tức thì không phụ thuộc CDN
     var CFG = window.SITE_CONFIG || {};
-    worker.postMessage({ id: 0, cmd: "configure", args: [{ source: CFG.ENGINE_SOURCE || "cdn", ver: CFG.VERSION || "" }] });
+    var isLocalApp = !!(window.PDF_DESKTOP && window.PDF_DESKTOP.isDesktop) ||
+      location.hostname === "127.0.0.1" || location.hostname === "localhost";
+    worker.postMessage({ id: 0, cmd: "configure", args: [{ source: isLocalApp ? "self" : (CFG.ENGINE_SOURCE || "cdn"), ver: CFG.VERSION || "" }] });
   }
   function call(cmd) {
     var args = Array.prototype.slice.call(arguments, 1), transfer = [];
@@ -166,10 +168,11 @@
 
   function start() {
     show("#b3", true);
-    ["paste", "api", "fast"].forEach(function (m) { show("#pane-" + m, m === mode()); });
+    ["paste", "cli", "api", "fast"].forEach(function (m) { show("#pane-" + m, m === mode()); });
     show("#warn-box", false); trStatus("");
     call("progress").then(setProgress);
     if (mode() === "paste") nextPrompt();
+    if (mode() === "cli") initCli();
     if (mode() === "api") initApi();
     if (mode() === "fast") initFast();
     $("#b3").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -337,6 +340,182 @@
       else if (msg) trStatus(msg, false);
     }
     step().catch(function (e) { S.running = false; show("#api-stop", false); $("#api-run").disabled = false; trStatus(e.message, true); });
+  }
+
+  /* ---------- AI CLI Bridge (Desktop .exe / 127.0.0.1:47123) ---------- */
+  var CLI = { base: null, connected: false, engines: [], selected: "" };
+  function resolveCliBase() {
+    if (CLI.base !== null) return CLI.base;
+    if ((window.PDF_DESKTOP && window.PDF_DESKTOP.isDesktop) || location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+      CLI.base = "";
+    } else {
+      CLI.base = "http://127.0.0.1:47123";
+    }
+    return CLI.base;
+  }
+  function cliReq(path, body) {
+    var opts = body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : { method: "GET" };
+    return fetch(resolveCliBase() + path, opts).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (d) {
+        if (!r.ok || d.ok === false) throw new Error(d.error || ("HTTP " + r.status));
+        return d;
+      });
+    });
+  }
+  function probeCliSilent() {
+    return cliReq("/api/health").then(function (h) {
+      if (h && h.ok) {
+        CLI.connected = true;
+        setText("#cli-mode-note", "Đã kết nối cầu nối AI CLI trên máy. Dùng trực tiếp Claude, Codex, Gemini, Muse, Ollama hoàn toàn tự động.");
+        if (window.PDF_DESKTOP && window.PDF_DESKTOP.isDesktop) {
+          var cliRadio = $('input[name="mode"][value="cli"]');
+          if (cliRadio) cliRadio.checked = true;
+        }
+      }
+      return h;
+    }).catch(function () { CLI.connected = false; return null; });
+  }
+  function syncCliModelHints() {
+    var eng = CLI.engines.filter(function (e) { return e.id === CLI.selected; })[0];
+    var dl = $("#cli-model-list"), inp = $("#cli-model");
+    if (!dl || !inp) return;
+    var models = (eng && eng.models) || [];
+    dl.innerHTML = models.map(function (m) { return "<option value='" + esc(m) + "'>"; }).join("");
+    inp.placeholder = (eng && eng.defaultModel) ? eng.defaultModel : "mặc định của CLI";
+  }
+  function renderCliCard(e) {
+    var checked = CLI.selected === e.id ? " checked" : "";
+    var badgeClass = (e.installed && e.loggedIn) ? "ok" : (e.installed ? "warn" : "off");
+    var badgeText = (e.installed && e.loggedIn) ? "Sẵn sàng" : (e.installed ? "Cần đăng nhập" : "Chưa cài");
+    var btns = "";
+    if (!e.installed) {
+      btns += "<button class='btn btn-ghost btn-sm' type='button' data-cli-install='" + esc(e.id) + "'>Cài CLI</button>";
+    } else if (!e.loggedIn) {
+      btns += "<button class='btn btn-primary btn-sm' type='button' data-cli-login='" + esc(e.id) + "'>Đăng nhập</button>";
+    } else {
+      btns += "<button class='btn btn-ghost btn-sm' type='button' data-cli-login='" + esc(e.id) + "'>Đổi tài khoản</button>";
+    }
+    return "<label class='cli-card'>" +
+      "<div class='cli-card-top'><div><div class='cli-title'>" + esc(e.name) + "</div><div class='cli-vendor'>" + esc(e.vendor) + "</div></div>" +
+      "<input type='radio' name='cli-engine' value='" + esc(e.id) + "'" + checked + "></div>" +
+      "<span class='cli-badge " + badgeClass + "'>" + badgeText + "</span>" +
+      "<div class='cli-detail'>" + esc(e.detail || "") + "</div>" +
+      "<div class='cli-actions'>" + btns + "</div>" +
+      "</label>";
+  }
+  function renderCliList() {
+    var prim = CLI.engines.filter(function (e) { return e.tier === "primary"; });
+    var extra = CLI.engines.filter(function (e) { return e.tier !== "primary"; });
+    $("#cli-grid-primary").innerHTML = prim.map(renderCliCard).join("");
+    $("#cli-grid-extra").innerHTML = extra.map(renderCliCard).join("");
+    $$('input[name="cli-engine"]').forEach(function (r) {
+      r.addEventListener("change", function () { if (r.checked) { CLI.selected = r.value; syncCliModelHints(); } });
+    });
+    $$("[data-cli-login]").forEach(function (b) {
+      b.addEventListener("click", function (ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        var id = b.getAttribute("data-cli-login");
+        cliReq("/api/cli/login", { engine: id }).then(function () {
+          trStatus("Đã mở cửa sổ đăng nhập cho " + id + ". Hoàn tất trên trình duyệt/terminal rồi bấm Làm mới trạng thái.");
+        }).catch(function (e) { trStatus("Không mở được đăng nhập: " + e.message, true); });
+      });
+    });
+    $$("[data-cli-install]").forEach(function (b) {
+      b.addEventListener("click", function (ev) {
+        ev.preventDefault(); ev.stopPropagation();
+        var id = b.getAttribute("data-cli-install");
+        cliReq("/api/cli/install", { engine: id }).then(function () {
+          trStatus("Đã mở cửa sổ cài đặt cho " + id + ". Cài xong hãy bấm Làm mới trạng thái.");
+        }).catch(function (e) { trStatus("Không mở được bộ cài: " + e.message, true); });
+      });
+    });
+    syncCliModelHints();
+  }
+  function initCli() {
+    setText("#cli-bridge-status", "Đang dò các công cụ AI CLI trên máy…");
+    $("#cli-run").disabled = true;
+    cliReq("/api/cli/engines").then(function (d) {
+      CLI.connected = true;
+      CLI.engines = d.engines || [];
+      var ready = CLI.engines.filter(function (e) { return e.installed && e.loggedIn; });
+      if (!CLI.selected || !CLI.engines.some(function (e) { return e.id === CLI.selected; })) {
+        CLI.selected = (ready[0] && ready[0].id) || (CLI.engines[0] && CLI.engines[0].id) || "codex";
+      }
+      setText("#cli-bridge-status", "Đã kết nối cầu nối trên máy · " + ready.length + "/" + CLI.engines.length + " công cụ sẵn sàng.");
+      var ban = $("#cli-banner");
+      if (!ready.length) {
+        ban.className = "cli-banner is-warn";
+        ban.innerHTML = "<strong>Chưa thấy AI CLI nào đăng nhập xong.</strong><span>Bấm <em>Đăng nhập</em> ngay trên thẻ Codex, Claude Code, Gemini CLI hoặc Muse, hoàn tất OAuth rồi bấm <em>Làm mới trạng thái</em>.</span>";
+        show("#cli-banner", true);
+      } else {
+        show("#cli-banner", false);
+      }
+      renderCliList();
+      $("#cli-run").disabled = !ready.length;
+    }).catch(function () {
+      CLI.connected = false;
+      setText("#cli-bridge-status", "Chưa phát hiện ứng dụng Desktop PDF Layout VI đang chạy trên máy.");
+      var CFG = window.SITE_CONFIG || {};
+      var dlUrl = CFG.DESKTOP_URL || "https://github.com/thuanhuynh247/pdf-layout-vi/releases/latest";
+      var ban = $("#cli-banner");
+      ban.className = "cli-banner is-warn";
+      ban.innerHTML = "<strong>Cần mở app Windows (.exe) để trình duyệt gọi thẳng AI CLI trên máy bạn.</strong>" +
+        "<span>Trên trang web công khai không thể tự chạy lệnh terminal do bảo mật trình duyệt. Hãy tải và mở bản Windows (.exe) — app chạy cùng giao diện này nhưng kết nối trực tiếp Claude Code, Codex, Gemini, Muse, Ollama.</span>" +
+        "<div class='cta-row'><a class='btn btn-primary btn-sm' href='" + esc(dlUrl) + "' target='_blank' rel='noopener'>Tải bản Windows (.exe)</a>" +
+        "<button class='btn btn-ghost btn-sm' type='button' id='cli-retry-btn'>Thử kết nối lại</button></div>";
+      show("#cli-banner", true);
+      var retry = $("#cli-retry-btn");
+      if (retry) retry.addEventListener("click", initCli);
+    });
+  }
+  function stripCodeFences(s) {
+    var t = String(s || "").trim();
+    var m = /^```(?:json)?\s*([\s\S]*?)\s*```$/i.exec(t);
+    if (m) return m[1].trim();
+    var i = t.indexOf("{"), j = t.lastIndexOf("}");
+    if (i >= 0 && j > i) return t.slice(i, j + 1);
+    return t;
+  }
+  function runCli() {
+    if (!CLI.connected) { trStatus("Chưa kết nối cầu nối Desktop.", true); return; }
+    var eng = CLI.engines.filter(function (e) { return e.id === CLI.selected; })[0];
+    if (!eng) { trStatus("Hãy chọn một AI CLI.", true); return; }
+    if (!eng.installed || !eng.loggedIn) { trStatus(eng.name + " chưa sẵn sàng. Hãy cài đặt hoặc đăng nhập trước.", true); return; }
+    var model = $("#cli-model").value.trim();
+    var chunkChars = Math.max(2000, Math.min(16000, Number($("#cli-chars").value) || 7000));
+    S.stop = false; S.running = true; show("#cli-stop", true); $("#cli-run").disabled = true;
+    var stuck = 0, lastDone = -1, batches = 0;
+    function step() {
+      if (S.stop) return finish("Đã dừng. Bấm Chạy tự động qua AI CLI để làm tiếp.");
+      return call("nextItems", chunkChars).then(function (r) {
+        setProgress(r);
+        if (!r.items.length) return finish(null, true);
+        if (r.done === lastDone) stuck++; else stuck = 0;
+        lastDone = r.done;
+        if (stuck >= 3) throw new Error(eng.name + " nhiều lần không trả đủ JSON hợp lệ. Hãy thử đổi mô hình hoặc chuyển CLI khác.");
+        S.ids = r.items.map(function (i) { return i.id; });
+        var prompt = rules().replace("trong cuộc trò chuyện này", "trong toàn bộ tài liệu") + "\n" +
+          rulesEnd(r.items.length) + "\n\n" +
+          r.items.map(function (it) { return JSON.stringify(it); }).join("\n");
+        batches++;
+        trStatus("Lô #" + batches + ": đang dịch " + r.items.length + " đoạn bằng " + eng.name + (model ? " (" + model + ")" : "") + "…");
+        return cliReq("/api/cli/translate", { engine: eng.id, model: model, prompt: prompt }).then(function (ans) {
+          return loadText(stripCodeFences(ans.text));
+        }).then(function (lr) {
+          showWarnings(lr.warnings);
+          return step();
+        });
+      });
+    }
+    function finish(msg, done) {
+      S.running = false; show("#cli-stop", false); $("#cli-run").disabled = false;
+      if (done) { trStatus("Đã dịch xong toàn bộ bằng " + eng.name + ".", false); goBuild(); }
+      else if (msg) trStatus(msg, false);
+    }
+    step().catch(function (e) {
+      S.running = false; show("#cli-stop", false); $("#cli-run").disabled = false;
+      trStatus("Lỗi " + eng.name + ": " + e.message, true);
+    });
   }
 
   /* ---------- Dịch nhanh: Translator API của Chrome ---------- */
@@ -517,6 +696,9 @@
     $("#api-run").addEventListener("click", runApi);
     $("#api-stop").addEventListener("click", function () { S.stop = true; });
     $("#api-key").addEventListener("change", loadModels);
+    $("#cli-refresh").addEventListener("click", initCli);
+    $("#cli-run").addEventListener("click", runCli);
+    $("#cli-stop").addEventListener("click", function () { S.stop = true; });
     $("#fast-run").addEventListener("click", runFast);
     $("#fast-stop").addEventListener("click", function () { S.stop = true; });
     $("#build").addEventListener("click", build);
@@ -524,6 +706,7 @@
     $("#cham-run").addEventListener("click", runScore);
     $$('input[name="mode"]').forEach(function (r) { r.addEventListener("change", function () { if (!$("#b3").hidden) start(); }); });
     if (!hasTranslator()) setText("#fast-note", "Cần Chrome 138 trở lên trên máy tính; trình duyệt này chưa có bộ dịch tích hợp. Bộ dịch chạy trên máy, không gửi chữ đi đâu.");
+    probeCliSilent();
     window.__ptlTest = { call: call, state: S };   // cho kiểm thử tự động
   });
 })();

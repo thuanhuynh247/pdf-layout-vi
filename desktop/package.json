@@ -1,0 +1,24 @@
+{
+  "name": "pdf-layout-vi-desktop",
+  "productName": "PDF Layout VI",
+  "version": "3.3.0",
+  "description": "Dịch PDF Anh–Việt giữ nguyên bố cục vector, tích hợp trực tiếp Claude Code, Codex, Gemini, Muse và AI CLI trên Windows.",
+  "main": "electron/main.mjs",
+  "author": "Huynh Anh Thuan",
+  "license": "MIT",
+  "homepage": "https://github.com/thuanhuynh247/pdf-layout-vi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thuanhuynh247/pdf-layout-vi.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "server": "node server/index.mjs",
+    "pack:dir": "electron-builder --config electron-builder.yml --dir",
+    "build:win": "electron-builder --config electron-builder.yml --win"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^25.1.8"
+  }
+}

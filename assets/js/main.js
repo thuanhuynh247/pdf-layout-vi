@@ -21,6 +21,7 @@
   $$("[data-gpt-off]").forEach(function (el) { el.hidden = !!CFG.GPT_URL; });
   $$("[data-github]").forEach(function (el) { if (CFG.GITHUB_URL) { el.href = CFG.GITHUB_URL; el.hidden = false; } });
   $$("[data-github-off]").forEach(function (el) { el.hidden = !!CFG.GITHUB_URL; });
+  $$("[data-desktop-exe]").forEach(function (el) { if (CFG.DESKTOP_URL) { el.href = CFG.DESKTOP_URL; el.hidden = false; } });
   $$("[data-direct]").forEach(function (el) { el.hidden = CFG.CLAUDE_DIRECT_DOWNLOAD === false; });
   $$("[data-via-email]").forEach(function (el) { el.hidden = CFG.CLAUDE_DIRECT_DOWNLOAD !== false; });
 

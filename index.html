@@ -58,9 +58,10 @@
         <p class="lead">Kéo PDF vào trang web, hoặc gửi PDF cho Claude. Tiếng Anh sang tiếng Việt, hoặc tiếng Việt sang tiếng Anh. Chính AI bạn chọn là người dịch; công cụ dàn bản dịch lại bằng chữ thật, vẫn bôi đen, tìm kiếm và in sắc nét, kèm phiếu kiểm định lỗi dấu và tràn khung. Tài liệu không rời máy bạn.</p>
         <div class="cta-row">
           <a class="btn btn-primary" href="dich">Dịch ngay trên web</a>
+          <a class="btn btn-ghost" data-desktop-exe href="https://github.com/thuanhuynh247/pdf-layout-vi/releases/latest" target="_blank" rel="noopener">Tải app Windows (.exe)</a>
           <a class="btn btn-ghost" href="dung-voi-claude">Dùng với Claude</a>
         </div>
-        <p class="meta-row"><span>Trình duyệt</span><span>Claude.ai</span><span>ChatGPT</span><span>Antigravity</span><span>Claude Code</span><span class="num">không cần Python</span></p>
+        <p class="meta-row"><span>Windows .exe (AI CLI)</span><span>Trình duyệt</span><span>Claude Code</span><span>Codex</span><span>Gemini CLI</span><span class="num">không cần Python</span></p>
       </div>
 
       <figure class="proof" aria-labelledby="proof-cap">
@@ -247,15 +248,15 @@ data/translations.json</code></li>
       </div>
       <div class="matrix-wrap">
         <table class="matrix">
-          <thead><tr><th scope="col"><span class="visually-hidden">Tính năng</span></th><th scope="col">Trang web<span>pdf.huynhanhthuan.com/dich</span></th><th scope="col">Claude.ai<span>Web, Desktop · tự động nhất</span></th><th scope="col">ChatGPT<span>GPT dựng sẵn</span></th><th scope="col">Antigravity<span>Plugin · máy của bạn</span></th><th scope="col">Claude Code<span>Skill · máy của bạn</span></th></tr></thead>
+          <thead><tr><th scope="col"><span class="visually-hidden">Tính năng</span></th><th scope="col">Trang web<span>pdf.huynhanhthuan.com/dich</span></th><th scope="col">App Windows (.exe)<span>AI CLI · không cần Python</span></th><th scope="col">Claude.ai<span>Web, Desktop · tự động nhất</span></th><th scope="col">ChatGPT<span>GPT dựng sẵn</span></th><th scope="col">Antigravity / Code<span>Plugin &amp; Skill · máy của bạn</span></th></tr></thead>
           <tbody>
-            <tr><th scope="row">Cách bắt đầu</th><td>Kéo PDF vào trang</td><td>Tải 1 file zip lên mục Skills</td><td>Mở link GPT, gửi PDF</td><td>Cài plugin vài cú bấm</td><td>Chép thư mục vào skills</td></tr>
-            <tr><th scope="row">Cần cài Python</th><td class="yes">Không</td><td class="yes">Không</td><td class="yes">Không</td><td>Có, trợ lý tự cài thư viện</td><td>Có, trợ lý tự cài thư viện</td></tr>
-            <tr><th scope="row">Dịch giữ bố cục, 4 kiểu xuất</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td><td class="yes">Có</td><td class="yes">Có</td></tr>
-            <tr><th scope="row">Phiếu kiểm định lỗi dấu, tràn khung</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td><td class="yes">Có</td><td class="yes">Có</td></tr>
-            <tr><th scope="row">Tài liệu dài</th><td>Dán từng lô, hoặc tự động bằng khóa API</td><td>Theo lô, bạn nhắn “tiếp”</td><td>Theo lô, bạn nhắn “tiếp”</td><td>Theo lô</td><td>Theo lô</td></tr>
-            <tr><th scope="row">Giọng đọc, video đọc sách</th><td class="no">Không</td><td class="no">Không</td><td class="no">Không</td><td>Gói nâng cao</td><td>Gói nâng cao</td></tr>
-            <tr><th scope="row">Tài liệu của bạn đi đâu</th><td>Ở lại trong trình duyệt; chỉ phần chữ tới AI bạn chọn</td><td>Chỉ vào tài khoản Claude của bạn</td><td>Chỉ vào tài khoản ChatGPT của bạn</td><td>Trang dựng trên máy; chỉ phần chữ tới AI</td><td>Trang dựng trên máy; chỉ phần chữ tới AI</td></tr>
+            <tr><th scope="row">Cách bắt đầu</th><td>Kéo PDF vào trang</td><td>Mở file .exe, chọn AI CLI</td><td>Tải 1 file zip lên mục Skills</td><td>Mở link GPT, gửi PDF</td><td>Cài plugin / chép skill</td></tr>
+            <tr><th scope="row">Cần cài Python</th><td class="yes">Không</td><td class="yes">Không</td><td class="yes">Không</td><td class="yes">Không</td><td>Có, trợ lý tự cài thư viện</td></tr>
+            <tr><th scope="row">Dịch giữ bố cục, 4 kiểu xuất</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td><td class="yes">Có</td></tr>
+            <tr><th scope="row">Phiếu kiểm định lỗi dấu, tràn khung</th><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có</td><td class="yes">Có*</td><td class="yes">Có</td></tr>
+            <tr><th scope="row">Tài liệu dài</th><td>Dán từng lô, hoặc tự động bằng khóa API</td><td class="yes">Tự động qua Claude, Codex, Gemini, Muse, Ollama</td><td>Theo lô, bạn nhắn “tiếp”</td><td>Theo lô, bạn nhắn “tiếp”</td><td>Theo lô / tự động</td></tr>
+            <tr><th scope="row">Giọng đọc, video đọc sách</th><td class="no">Không</td><td class="no">Không</td><td class="no">Không</td><td class="no">Không</td><td>Gói nâng cao</td></tr>
+            <tr><th scope="row">Tài liệu của bạn đi đâu</th><td>Ở lại trong trình duyệt; chỉ phần chữ tới AI bạn chọn</td><td>Xử lý hoàn toàn trên máy; chỉ phần chữ tới AI CLI đã đăng nhập</td><td>Chỉ vào tài khoản Claude của bạn</td><td>Chỉ vào tài khoản ChatGPT của bạn</td><td>Trang dựng trên máy; chỉ phần chữ tới AI</td></tr>
           </tbody>
         </table>
       </div>
