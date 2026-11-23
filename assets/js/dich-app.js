@@ -6,7 +6,8 @@
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
 
   var PASTE_CHARS = 6000, API_CHARS = 8000, FAST_CHARS = 4000, MAX_MB = 80;
-  var PREFERRED_MODELS = ["google/gemini-2.5-flash", "google/gemini-2.5-pro", "anthropic/claude-sonnet-4.5",
+  var GEMINI_MODELS = ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview", "gemini-3.1-pro-preview"];
+  var PREFERRED_MODELS = ["google/gemini-2.5-flash", "google/gemini-3-flash-preview", "anthropic/claude-sonnet-4.5",
     "openai/gpt-4.1-mini", "openai/gpt-4o-mini", "deepseek/deepseek-chat-v3.1", "deepseek/deepseek-chat"];
 
   // Quy tắc dịch lấy từ bộ máy (dich_pdf.QUY_TAC) theo chiều của tài liệu, để mọi kênh dùng chung một bản
@@ -79,7 +80,7 @@
       try { localStorage.setItem(storeKey(), v); }
       catch (e) {
         try {   // đầy bộ nhớ: xóa bản lưu cũ của file khác rồi thử lại
-          Object.keys(localStorage).forEach(function (k) { if (k.indexOf("ptl:") === 0 && k !== storeKey() && k !== "ptl:or-key") localStorage.removeItem(k); });
+          Object.keys(localStorage).forEach(function (k) { if (k.indexOf("ptl:") === 0 && k !== storeKey() && k !== "ptl:or-key" && k !== "ptl:gemini-key") localStorage.removeItem(k); });
           localStorage.setItem(storeKey(), v);
         } catch (e2) { /* không lưu được: bỏ qua */ }
       }
@@ -250,30 +251,65 @@
     else { ta.select(); document.execCommand("copy"); ok(); }
   }
 
-  /* ---------- Khóa API: OpenRouter ---------- */
+  /* ---------- Khóa API: Google Gemini API & OpenRouter ---------- */
   var modelsLoaded = false;
-  function getKey() {
-    try { return localStorage.getItem("ptl:or-key") || sessionStorage.getItem("ptl:or-key") || ""; } catch (e) { return ""; }
+  function apiProvider() {
+    var el = $("#api-provider");
+    return (el && el.value) || "gemini";
   }
-  function putKey(k, remember) {
+  function keyStorageName(prov) { return prov === "openrouter" ? "ptl:or-key" : "ptl:gemini-key"; }
+  function getKey(prov) {
+    var name = keyStorageName(prov || apiProvider());
+    try { return localStorage.getItem(name) || sessionStorage.getItem(name) || ""; } catch (e) { return ""; }
+  }
+  function putKey(k, remember, prov) {
+    var name = keyStorageName(prov || apiProvider());
     try {
-      sessionStorage.setItem("ptl:or-key", k);
-      if (remember) localStorage.setItem("ptl:or-key", k); else localStorage.removeItem("ptl:or-key");
+      sessionStorage.setItem(name, k);
+      if (remember) localStorage.setItem(name, k); else localStorage.removeItem(name);
     } catch (e) { /* bỏ qua */ }
   }
+  function syncApiProviderUI(keepKey) {
+    var prov = apiProvider();
+    var isGem = prov === "gemini";
+    setText("#api-key-label", isGem ? "Khóa Google Gemini API" : "Khóa OpenRouter");
+    $("#api-key").placeholder = isGem ? "AIzaSy…" : "sk-or-…";
+    setText("#api-key-hint", isGem
+      ? "Khóa chỉ nằm trong trình duyệt này và chỉ gửi tới generativelanguage.googleapis.com. Lấy khóa tại aistudio.google.com/apikey."
+      : "Khóa chỉ nằm trong trình duyệt này và chỉ gửi tới openrouter.ai. Tạo khóa tại openrouter.ai/keys.");
+    $("#api-model").placeholder = isGem ? "gemini-2.5-flash" : "google/gemini-2.5-flash";
+    if (!keepKey) {
+      var k = getKey(prov);
+      $("#api-key").value = k;
+      try { $("#remember-key").checked = !!localStorage.getItem(keyStorageName(prov)); } catch (e) { /* */ }
+    }
+    if (isGem) {
+      $("#model-list").innerHTML = GEMINI_MODELS.map(function (i) { return "<option value='" + esc(i) + "'>"; }).join("");
+      var cur = $("#api-model").value.trim();
+      if (!cur || cur.indexOf("/") >= 0) $("#api-model").value = GEMINI_MODELS[0];
+      setText("#model-hint", "Gợi ý: gemini-2.5-flash (ổn định), gemini-3-flash-preview (mới & nhanh), gemini-3.1-pro-preview (gói trả phí).");
+    } else {
+      var curOr = $("#api-model").value.trim();
+      if (!curOr || curOr.indexOf("/") < 0) $("#api-model").value = PREFERRED_MODELS[0];
+      $("#model-list").innerHTML = PREFERRED_MODELS.map(function (i) { return "<option value='" + esc(i) + "'>"; }).join("");
+      setText("#model-hint", "Nhập mã mô hình trên OpenRouter. Có khóa rồi, danh sách sẽ tự hiện.");
+      loadModels();
+    }
+  }
   function initApi() {
-    var k = getKey();
-    if (k && !$("#api-key").value) { $("#api-key").value = k; try { $("#remember-key").checked = !!localStorage.getItem("ptl:or-key"); } catch (e) { /* */ } }
-    loadModels();
+    var el = $("#api-provider");
+    if (el && !getKey("gemini") && getKey("openrouter")) el.value = "openrouter";
+    syncApiProviderUI(false);
   }
   function loadModels() {
-    if (modelsLoaded) return;
+    if (apiProvider() !== "openrouter" || modelsLoaded) return;
     fetch("https://openrouter.ai/api/v1/models").then(function (r) { return r.json(); }).then(function (d) {
       var ids = (d.data || []).map(function (m) { return m.id; });
       if (!ids.length) return;
       modelsLoaded = true;
+      if (apiProvider() !== "openrouter") return;
       $("#model-list").innerHTML = ids.map(function (i) { return "<option value='" + esc(i) + "'>"; }).join("");
-      if (!$("#api-model").value) {
+      if (!$("#api-model").value || $("#api-model").value.indexOf("/") < 0) {
         var pick = PREFERRED_MODELS.filter(function (p) { return ids.indexOf(p) >= 0; })[0];
         if (pick) $("#api-model").value = pick;
       }
@@ -282,6 +318,51 @@
   }
 
   function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+  function geminiThinkingConfig(model) {
+    var m = String(model || "").toLowerCase();
+    if (m.indexOf("gemini-3") === 0) return m.indexOf("pro") >= 0 ? { thinkingLevel: "low" } : { thinkingLevel: "minimal" };
+    if (m.indexOf("gemini-2.5") === 0) return m.indexOf("pro") >= 0 ? { thinkingBudget: 128 } : { thinkingBudget: 0 };
+    return null;
+  }
+
+  function askGemini(key, model, items, tries) {
+    tries = tries || 0;
+    var mdl = String(model || "gemini-2.5-flash").replace(/^models\//, "");
+    var sysPrompt = rules().replace("trong cuộc trò chuyện này", "trong toàn bộ tài liệu") + "\n" + rulesEnd(items.length);
+    var userPrompt = items.map(function (it) { return JSON.stringify(it); }).join("\n");
+    var genCfg = { temperature: 0, maxOutputTokens: 16384, responseMimeType: "application/json" };
+    var tcfg = geminiThinkingConfig(mdl);
+    if (tcfg) genCfg.thinkingConfig = tcfg;
+    return fetch("https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(mdl) + ":generateContent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: sysPrompt }] },
+        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+        generationConfig: genCfg
+      })
+    }).then(function (res) {
+      if (res.status === 429 || res.status >= 500) {
+        if (tries < 4) return sleep(2000 * Math.pow(2, tries)).then(function () { return askGemini(key, mdl, items, tries + 1); });
+      }
+      return res.json().catch(function () { return {}; }).then(function (d) {
+        if (!res.ok) {
+          var m = (d.error && d.error.message) || ("HTTP " + res.status);
+          if (res.status === 400 && /API key/i.test(m)) m = "Khóa Google Gemini API không đúng hoặc chưa kích hoạt.";
+          if (res.status === 401 || res.status === 403) m = "Khóa Google Gemini API không có quyền truy cập mô hình này.";
+          if (res.status === 404) m = "Mô hình " + mdl + " không còn khả dụng. Hãy chọn gemini-2.5-flash hoặc gemini-3-flash-preview.";
+          if (res.status === 429) m = "Hết hạn mức (429) cho " + mdl + ". Hãy thử gemini-2.5-flash hoặc gemini-3-flash-preview, hoặc nâng gói trả phí.";
+          throw new Error(m);
+        }
+        var parts = d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts;
+        var text = parts ? parts.map(function (p) { return p.text || ""; }).join("").trim() : "";
+        if (!text) throw new Error("Gemini không trả về nội dung.");
+        var u = d.usageMetadata || {};
+        return { text: text, usage: { total_tokens: u.totalTokenCount || 0 } };
+      });
+    });
+  }
 
   function askOpenRouter(key, model, items, tries) {
     tries = tries || 0;
@@ -312,10 +393,10 @@
   }
 
   function runApi() {
-    var key = $("#api-key").value.trim(), model = $("#api-model").value.trim();
-    if (!key) { trStatus("Hãy nhập khóa OpenRouter.", true); $("#api-key").focus(); return; }
+    var prov = apiProvider(), key = $("#api-key").value.trim(), model = $("#api-model").value.trim();
+    if (!key) { trStatus("Hãy nhập khóa " + (prov === "gemini" ? "Google Gemini API." : "OpenRouter."), true); $("#api-key").focus(); return; }
     if (!model) { trStatus("Hãy nhập mã mô hình.", true); $("#api-model").focus(); return; }
-    putKey(key, $("#remember-key").checked);
+    putKey(key, $("#remember-key").checked, prov);
     S.stop = false; S.running = true; show("#api-stop", true); $("#api-run").disabled = true;
     var tokens = 0, stuck = 0, lastDone = -1;
     function step() {
@@ -327,10 +408,11 @@
         lastDone = r.done;
         if (stuck >= 3) throw new Error("Mô hình nhiều lần không trả đủ bản dịch. Thử mô hình khác, hoặc dùng cách Dán.");
         S.ids = r.items.map(function (i) { return i.id; });
-        trStatus("Đang dịch " + r.items.length + " đoạn…" + (tokens ? " Đã dùng " + plural(tokens) + " token." : ""));
-        return askOpenRouter(key, model, r.items).then(function (ans) {
+        trStatus("Đang dịch " + r.items.length + " đoạn bằng " + (prov === "gemini" ? "Google Gemini" : "OpenRouter") + " (" + model + ")…" + (tokens ? " Đã dùng " + plural(tokens) + " token." : ""));
+        var ask = prov === "gemini" ? askGemini(key, model, r.items) : askOpenRouter(key, model, r.items);
+        return ask.then(function (ans) {
           tokens += (ans.usage.total_tokens || 0);
-          return loadText(ans.text);
+          return loadText(stripCodeFences(ans.text));
         }).then(function (lr) { showWarnings(lr.warnings); return step(); });
       });
     }
@@ -695,6 +777,13 @@
     $("#redo-warn").addEventListener("click", redoWarnings);
     $("#api-run").addEventListener("click", runApi);
     $("#api-stop").addEventListener("click", function () { S.stop = true; });
+    if ($("#api-provider")) $("#api-provider").addEventListener("change", function () { syncApiProviderUI(false); });
+    $("#api-key").addEventListener("input", function () {
+      var v = $("#api-key").value.trim(), p = $("#api-provider");
+      if (!p) return;
+      if (/^AIza[0-9A-Za-z_-]{10,}/.test(v) && p.value !== "gemini") { p.value = "gemini"; syncApiProviderUI(true); }
+      else if (/^sk-or-/i.test(v) && p.value !== "openrouter") { p.value = "openrouter"; syncApiProviderUI(true); }
+    });
     $("#api-key").addEventListener("change", loadModels);
     $("#cli-refresh").addEventListener("click", initCli);
     $("#cli-run").addEventListener("click", runCli);

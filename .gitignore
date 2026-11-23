@@ -7,6 +7,7 @@ npm-debug.log*
 
 # Vercel & local caches
 .vercel/
+_Archive/
 .env
 .env.*
 __pycache__/

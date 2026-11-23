@@ -35,16 +35,20 @@ test("env-path: strips nested Claude env vars and deduplicates PATH", () => {
   assert.equal(parts.filter((x) => x.toLowerCase() === "c:\\testa").length, 1);
 });
 
-test("drivers: listEngines returns 10 normalized platform connectors", async () => {
+test("drivers: listEngines returns 11 normalized platform connectors including Google Gemini API & CLI", async () => {
   const engines = await listEngines();
-  assert.ok(engines.length >= 10);
-  for (const id of ["codex", "claude", "gemini", "antigravity", "muse", "ollama", "openrouter"]) {
+  assert.ok(engines.length >= 11);
+  for (const id of ["codex", "claude", "gemini", "gemini-api", "antigravity", "muse", "ollama", "openrouter"]) {
     const found = engines.find((e) => e.id === id);
     assert.ok(found, `Missing connector: ${id}`);
     assert.equal(typeof found.installed, "boolean");
     assert.equal(typeof found.loggedIn, "boolean");
     assert.ok(Array.isArray(found.models));
   }
+  const gemCli = engines.find((e) => e.id === "gemini");
+  const gemApi = engines.find((e) => e.id === "gemini-api");
+  assert.ok(!gemCli.models.includes("gemini-2.5-pro"), "Deprecated gemini-2.5-pro must not be listed");
+  assert.ok(gemApi.models.includes("gemini-2.5-flash") && gemApi.models.includes("gemini-3-flash-preview"));
 });
 
 test("server HTTP seams: health v4.0.0, loopback CORS security, static isolation & path traversal defense", async () => {
@@ -59,11 +63,35 @@ test("server HTTP seams: health v4.0.0, loopback CORS security, static isolation
     assert.equal(h.version, "4.0.0");
     assert.ok(Array.isArray(h.features) && h.features.includes("visual-preview") && h.features.includes("tm-cache"));
 
-    // Cross-origin request from external site MUST be rejected (403)
+    // Cross-origin request from untrusted external site MUST be rejected (403)
     const crossRes = await fetch(`${baseUrl}/api/health`, {
       headers: { Origin: "https://evil.example" },
     });
     assert.equal(crossRes.status, 403);
+
+    // Trusted official website origin allowed ONLY on CLI bridge routes (/api/health, /api/cli/*)
+    const webHealth = await fetch(`${baseUrl}/api/health`, {
+      headers: { Origin: "https://pdf.huynhanhthuan.com" },
+    });
+    assert.equal(webHealth.status, 200);
+    assert.equal(webHealth.headers.get("access-control-allow-origin"), "https://pdf.huynhanhthuan.com");
+
+    const webPna = await fetch(`${baseUrl}/api/cli/engines`, {
+      method: "OPTIONS",
+      headers: {
+        Origin: "https://pdf.huynhanhthuan.com",
+        "Access-Control-Request-Private-Network": "true",
+      },
+    });
+    assert.equal(webPna.status, 204);
+    assert.equal(webPna.headers.get("access-control-allow-origin"), "https://pdf.huynhanhthuan.com");
+    assert.equal(webPna.headers.get("access-control-allow-private-network"), "true");
+
+    // Trusted web origin MUST still be rejected on local file/config endpoints (least privilege)
+    const webConfigBlocked = await fetch(`${baseUrl}/api/config`, {
+      headers: { Origin: "https://pdf.huynhanhthuan.com" },
+    });
+    assert.equal(webConfigBlocked.status, 403);
 
     // Loopback origin MUST be echoed safely
     const localRes = await fetch(`${baseUrl}/api/health`, {

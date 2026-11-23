@@ -21,6 +21,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const LOOPBACK_ORIGIN_RE = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i;
+const TRUSTED_WEB_ORIGINS = new Set([
+  "https://pdf.huynhanhthuan.com",
+  "https://pdf-layout-vi.vercel.app",
+]);
+
+function isBridgePathname(pathname) {
+  return pathname === "/api/health" || pathname.startsWith("/api/cli/");
+}
+
+function isAllowedOrigin(origin, pathname) {
+  if (!origin) return true;
+  if (LOOPBACK_ORIGIN_RE.test(origin)) return true;
+  if (TRUSTED_WEB_ORIGINS.has(origin) && isBridgePathname(pathname)) return true;
+  return false;
+}
 
 function resolvePaths() {
   const envDesktop = process.env.PDF_LAYOUT_DESKTOP_UI_DIR;
@@ -66,26 +81,30 @@ const MIME = {
   ".txt": "text/plain; charset=utf-8",
 };
 
-function corsHeaders(req) {
+function corsHeaders(req, pathname) {
   const origin = req && req.headers && req.headers.origin ? String(req.headers.origin) : "";
+  const routePath = pathname || new URL((req && req.url) || "/", "http://127.0.0.1").pathname;
   const headers = {
     "Vary": "Origin",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
-  if (origin && LOOPBACK_ORIGIN_RE.test(origin)) {
+  if (origin && isAllowedOrigin(origin, routePath)) {
     headers["Access-Control-Allow-Origin"] = origin;
+    if (req.headers["access-control-request-private-network"] === "true") {
+      headers["Access-Control-Allow-Private-Network"] = "true";
+    }
   }
   return headers;
 }
 
-function sendJson(req, res, status, data) {
+function sendJson(req, res, status, data, pathname) {
   const body = JSON.stringify(data);
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
     "X-Content-Type-Options": "nosniff",
-    ...corsHeaders(req),
+    ...corsHeaders(req, pathname),
   });
   res.end(body);
 }
@@ -141,14 +160,14 @@ export function createAppServer() {
     const url = new URL(req.url || "/", "http://127.0.0.1");
     const pathname = url.pathname;
 
-    // Reject cross-origin API calls from non-loopback sites
+    // Reject cross-origin API calls from untrusted sites (allow loopback + trusted web origins on CLI bridge routes only)
     const origin = req.headers && req.headers.origin ? String(req.headers.origin) : "";
-    if (origin && pathname.startsWith("/api/") && !LOOPBACK_ORIGIN_RE.test(origin)) {
-      return sendJson(req, res, 403, { ok: false, error: "Forbidden cross-origin request" });
+    if (origin && pathname.startsWith("/api/") && !isAllowedOrigin(origin, pathname)) {
+      return sendJson(req, res, 403, { ok: false, error: "Forbidden cross-origin request" }, pathname);
     }
 
     if (req.method === "OPTIONS") {
-      res.writeHead(204, corsHeaders(req));
+      res.writeHead(204, corsHeaders(req, pathname));
       return res.end();
     }
 

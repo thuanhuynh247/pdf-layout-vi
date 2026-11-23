@@ -136,6 +136,80 @@ function runOllamaGenerate(model, prompt, timeoutMs = 180000) {
   });
 }
 
+function geminiThinkingConfig(model) {
+  const m = String(model || "").toLowerCase();
+  if (m.startsWith("gemini-3")) {
+    return /pro/.test(m) ? { thinkingLevel: "low" } : { thinkingLevel: "minimal" };
+  }
+  if (m.startsWith("gemini-2.5")) {
+    return /pro/.test(m) ? { thinkingBudget: 128 } : { thinkingBudget: 0 };
+  }
+  return null;
+}
+
+async function runGeminiApi(prompt, model, tries = 0) {
+  const key = getKeyValue("GEMINI_API_KEY") || process.env.GOOGLE_API_KEY || "";
+  if (!key) throw new Error("Chưa nhập khóa Google Gemini API (GEMINI_API_KEY).");
+  const mdl = String(model || "gemini-2.5-flash").replace(/^models\//, "");
+  const generationConfig = {
+    temperature: 0,
+    maxOutputTokens: 16384,
+    responseMimeType: "application/json",
+  };
+  const tcfg = geminiThinkingConfig(mdl);
+  if (tcfg) generationConfig.thinkingConfig = tcfg;
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(mdl)}:generateContent`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": key,
+      },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig,
+      }),
+      signal: typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(90000) : undefined,
+    }
+  );
+  if ((res.status === 429 || res.status >= 500) && tries < 3) {
+    await new Promise((r) => setTimeout(r, 1500 * Math.pow(2, tries)));
+    return runGeminiApi(prompt, mdl, tries + 1);
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const rawMsg = (data.error && data.error.message) || `Gemini API HTTP ${res.status}`;
+    if (res.status === 404) {
+      throw new Error(`Mô hình ${mdl} không còn khả dụng (404). Hãy dùng gemini-2.5-flash hoặc gemini-3-flash-preview.`);
+    }
+    if (res.status === 429) {
+      throw new Error(`Vượt hạn mức Gemini API (429) với ${mdl}. Thử gemini-2.5-flash / gemini-3-flash-preview hoặc kiểm tra gói Google AI.`);
+    }
+    throw new Error(rawMsg.slice(0, 320));
+  }
+  const parts = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts;
+  const text = parts ? parts.map((p) => p.text || "").join("").trim() : "";
+  if (!text) throw new Error("Google Gemini API không trả nội dung.");
+  return text;
+}
+
+function extractGeminiCliError(stderr) {
+  const txt = String(stderr || "").trim();
+  const m = /Full report available at:\s*([^\r\n]+)/i.exec(txt);
+  if (m && m[1]) {
+    const p = m[1].trim();
+    try {
+      if (fs.existsSync(p)) {
+        const rep = JSON.parse(fs.readFileSync(p, "utf8"));
+        const msg = rep?.error?.message || rep?.message || "";
+        if (msg) return String(msg).slice(0, 320);
+      }
+    } catch { /* ignore */ }
+  }
+  return (txt || "Gemini CLI thất bại").slice(0, 400);
+}
+
 async function runOpenRouter(prompt, model) {
   const key = getKeyValue("OPENROUTER_API_KEY");
   if (!key) throw new Error("Chưa nhập khóa OpenRouter API.");
@@ -411,13 +485,13 @@ export const ENGINES = [
   {
     id: "gemini",
     name: "Google Gemini CLI",
-    vendor: "Google · OAuth hoặc Gemini API Key",
+    vendor: "Google · Google AI Pro (OAuth) hoặc API Key",
     category: "cli",
     tier: "primary",
     envKeyName: "GEMINI_API_KEY",
-    envKeyLabel: "GEMINI_API_KEY (tùy chọn nếu đăng nhập Google)",
+    envKeyLabel: "GEMINI_API_KEY (tùy chọn nếu đăng nhập Google AI Pro OAuth)",
     defaultModel: "",
-    models: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-flash-preview"],
+    models: ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-3.1-pro-preview", "gemini-3.1-flash-lite-preview"],
     installCmd: "npm install -g @google/gemini-cli",
     loginCmd: "gemini",
     loginArgs: [],
@@ -432,7 +506,7 @@ export const ENGINES = [
         installed: true,
         bin,
         loggedIn,
-        account: oauthOk ? "Google OAuth" : keyOk ? "GEMINI_API_KEY" : "",
+        account: oauthOk ? "Google OAuth (AI Pro)" : keyOk ? "GEMINI_API_KEY" : "",
         detail: oauthOk ? "Đã đăng nhập Google OAuth" : keyOk ? "Đã kết nối GEMINI_API_KEY" : "Mở terminal để chọn Login with Google",
       };
     },
@@ -440,9 +514,36 @@ export const ENGINES = [
       const args = ["--skip-trust", "-p", "Hãy dịch toàn bộ các đoạn được gửi qua stdin và CHỈ trả về JSON hợp lệ.", "-o", "text"];
       if (model) args.push("-m", model);
       const res = await runCmd("gemini", args, { input: prompt, timeoutMs: 180000 });
-      if (!res.ok && !res.stdout.trim()) throw new Error((res.stderr || "Gemini CLI thất bại").slice(0, 400));
+      if (!res.ok && !res.stdout.trim()) throw new Error(extractGeminiCliError(res.stderr));
       return res.stdout.trim();
     },
+  },
+  {
+    id: "gemini-api",
+    name: "Google Gemini API (Direct)",
+    vendor: "Google AI Studio · Google AI Pro API Key",
+    category: "api",
+    tier: "primary",
+    envKeyName: "GEMINI_API_KEY",
+    envKeyLabel: "Khóa Google Gemini API (AIza...)",
+    defaultModel: "gemini-2.5-flash",
+    models: ["gemini-2.5-flash", "gemini-3-flash-preview", "gemini-3.1-flash-lite-preview", "gemini-3.1-pro-preview"],
+    installCmd: "",
+    loginCmd: "",
+    supportsStreamAuth: false,
+    detect: async () => {
+      const hasKey = Boolean(getKeyValue("GEMINI_API_KEY") || process.env.GOOGLE_API_KEY);
+      return {
+        installed: true,
+        bin: "https://generativelanguage.googleapis.com",
+        loggedIn: hasKey,
+        account: hasKey ? "GEMINI_API_KEY" : "",
+        detail: hasKey
+          ? "Sẵn sàng gọi trực tiếp Google Gemini REST API (nhanh, JSON chuẩn)"
+          : "Nhập khóa AIza... từ aistudio.google.com/apikey để kích hoạt",
+      };
+    },
+    translate: async (prompt, model) => runGeminiApi(prompt, model),
   },
   {
     id: "antigravity",
@@ -452,7 +553,7 @@ export const ENGINES = [
     tier: "primary",
     envKeyName: "",
     defaultModel: "",
-    models: ["gemini-2.5-flash", "gemini-2.5-pro"],
+    models: ["gemini-3-flash-preview", "gemini-3.1-pro-preview", "gemini-2.5-flash"],
     installCmd: isWin
       ? "irm https://dl.google.com/agy-extensions/releases/windows/agy-acp-server-1.4.3-windows-x86_64.zip -OutFile $env:TEMP\\agy.zip; Expand-Archive $env:TEMP\\agy.zip \"$env:LOCALAPPDATA\\agy\\bin\" -Force"
       : "brew install antigravity",
@@ -648,7 +749,7 @@ export const ENGINES = [
     defaultModel: "google/gemini-2.5-flash",
     models: [
       "google/gemini-2.5-flash",
-      "google/gemini-2.5-pro",
+      "google/gemini-3-flash-preview",
       "anthropic/claude-sonnet-4.5",
       "openai/gpt-4.1-mini",
       "deepseek/deepseek-chat-v3.1",

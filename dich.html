@@ -32,7 +32,7 @@
   <div class="wrap">
     <a class="brand" href="./" aria-label="pdf-translation-layout, về trang chủ">
       <img src="assets/img/favicon.svg" alt="" width="26" height="26">
-      <span>pdf-translation-layout <span class="mono" data-version>v3.1.0</span></span>
+      <span>pdf-translation-layout <span class="mono" data-version>v4.0.0</span></span>
     </a>
     <nav class="nav" aria-label="Mục lục">
       <a href="./">Trang chủ</a>
@@ -101,8 +101,8 @@
           <span class="mc-h">Tự động bằng AI CLI trên máy <em>khuyên dùng trên .exe</em></span>
           <span class="mc-p" id="cli-mode-note">Dùng trực tiếp Claude Code, Codex, Gemini, Muse, Ollama đã đăng nhập trên Windows. Không tốn phí API riêng, tự chạy hết từng lô.</span></label>
         <label class="mode-card"><input type="radio" name="mode" value="api">
-          <span class="mc-h">Tự động bằng khóa API</span>
-          <span class="mc-p">Dùng khóa OpenRouter của bạn, trang tự gửi từng lô và nạp kết quả. Bạn trả phí theo lượng chữ cho OpenRouter.</span></label>
+          <span class="mc-h">Tự động bằng khóa API (Google Gemini / OpenRouter)</span>
+          <span class="mc-p">Dùng trực tiếp khóa Google Gemini API (AI Studio / Google AI Pro) hoặc OpenRouter. Trang tự gửi từng lô và nạp kết quả ngay trong trình duyệt.</span></label>
         <label class="mode-card"><input type="radio" name="mode" value="fast">
           <span class="mc-h">Dịch nhanh trên máy</span>
           <span class="mc-p" id="fast-note">Dùng bộ dịch có sẵn trong Chrome trên máy tính, không gửi chữ đi đâu. Chất lượng như máy dịch, hợp để đọc lướt.</span></label>
@@ -156,7 +156,7 @@
             <label for="cli-model">Mô hình (để trống = mặc định của CLI)</label>
             <input class="input mono" id="cli-model" list="cli-model-list" placeholder="mặc định">
             <datalist id="cli-model-list"></datalist>
-            <p class="hint">Ví dụ: <span class="mono">sonnet</span> (Claude), <span class="mono">gpt-5.4-mini</span> (Codex), <span class="mono">gemini-2.5-flash</span> (Gemini).</p>
+            <p class="hint">Ví dụ: <span class="mono">gemini-3-flash-preview</span> / <span class="mono">gemini-2.5-flash</span> (Gemini), <span class="mono">sonnet</span> (Claude), <span class="mono">gpt-5.4-mini</span> (Codex).</p>
           </div>
           <div class="field">
             <label for="cli-chars">Ký tự mỗi lô gửi CLI</label>
@@ -172,14 +172,21 @@
 
       <!-- API -->
       <div class="pane" id="pane-api" hidden>
+        <div class="field" style="margin-bottom:12px">
+          <label for="api-provider">Nhà cung cấp API</label>
+          <select class="select" id="api-provider">
+            <option value="gemini">Google Gemini API (AI Studio / Google AI Pro · AIza…)</option>
+            <option value="openrouter">OpenRouter API (nhiều hãng · sk-or-…)</option>
+          </select>
+        </div>
         <div class="form-row">
-          <div class="field"><label for="api-key">Khóa OpenRouter</label>
-            <input class="input mono" id="api-key" type="password" autocomplete="off" placeholder="sk-or-…">
-            <p class="hint">Khóa chỉ nằm trong trình duyệt này và chỉ gửi tới openrouter.ai. Tạo khóa tại openrouter.ai/keys.</p></div>
+          <div class="field"><label for="api-key" id="api-key-label">Khóa Google Gemini API</label>
+            <input class="input mono" id="api-key" type="password" autocomplete="off" placeholder="AIzaSy…">
+            <p class="hint" id="api-key-hint">Khóa chỉ nằm trong trình duyệt này và chỉ gửi tới generativelanguage.googleapis.com. Lấy khóa tại aistudio.google.com/apikey.</p></div>
           <div class="field"><label for="api-model">Mô hình</label>
-            <input class="input mono" id="api-model" list="model-list" placeholder="google/gemini-2.5-flash">
+            <input class="input mono" id="api-model" list="model-list" placeholder="gemini-2.5-flash">
             <datalist id="model-list"></datalist>
-            <p class="hint" id="model-hint">Nhập mã mô hình trên OpenRouter. Có khóa rồi, danh sách sẽ tự hiện.</p></div>
+            <p class="hint" id="model-hint">Gợi ý: gemini-2.5-flash (ổn định), gemini-3-flash-preview (mới &amp; nhanh), gemini-3.1-pro-preview (gói trả phí).</p></div>
         </div>
         <label class="check" for="remember-key"><input type="checkbox" id="remember-key"><span>Nhớ khóa trên máy này</span></label>
         <div class="cta-row"><button class="btn btn-primary" type="button" id="api-run">Chạy tự động</button><button class="btn btn-ghost" type="button" id="api-stop" hidden>Dừng</button></div>
@@ -245,7 +252,7 @@
       <div class="note-grid">
         <div>
           <h2 id="rieng-tu-h" class="h3">Tài liệu của bạn đi đâu</h2>
-          <p>File PDF được mở và dựng lại ngay trong trình duyệt; trang web không có máy chủ nhận tài liệu. Phần chữ cần dịch chỉ rời máy khi bạn chọn: bạn tự dán sang AI của mình, hoặc trang gửi tới OpenRouter bằng khóa của bạn. Chế độ dịch nhanh của Chrome chạy trên máy, không gửi chữ đi.</p>
+          <p>File PDF được mở và dựng lại ngay trong trình duyệt; trang web không có máy chủ nhận tài liệu. Phần chữ cần dịch chỉ rời máy khi bạn chọn: bạn tự dán sang AI của mình, nối cầu tới ứng dụng Desktop trên máy bạn, hoặc trang gửi trực tiếp tới Google Gemini API / OpenRouter bằng khóa của bạn. Chế độ dịch nhanh của Chrome chạy trên máy, không gửi chữ đi.</p>
           <p>Bộ máy (Pyodide và thư viện PDF, khoảng 30 MB) được tải từ jsDelivr và PyPI, hai kho phân phối mã nguồn mở công khai. Các dịch vụ này chỉ thấy trình duyệt của bạn tải thư viện, không thấy tài liệu. Mọi file tải về đều được kiểm mã SHA-256 trước khi chạy, nên trang chỉ chạy đúng bộ máy đã kiểm thử; file nào không tải được hoặc sai mã thì trang tự lấy bản dự phòng trên website.</p>
           <p>Bản dịch dở được lưu tạm trong trình duyệt này để bạn mở lại làm tiếp; xóa bằng nút “Dịch file khác”.</p>
         </div>

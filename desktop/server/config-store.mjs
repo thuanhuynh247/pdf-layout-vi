@@ -103,7 +103,7 @@ function sanitizeGlossary(arr) {
 function readRaw() {
   const defaults = {
     activeEngine: "codex",
-    failoverEngines: ["gemini", "claude", "openrouter", "ollama"],
+    failoverEngines: ["gemini-api", "gemini", "claude", "openrouter", "ollama"],
     chunkChars: 7000,
     outputDir: defaultOutputDir(),
     theme: "dark",
@@ -157,7 +157,7 @@ export function getPublicConfig() {
   }
   return {
     activeEngine: cfg.activeEngine || "codex",
-    failoverEngines: Array.isArray(cfg.failoverEngines) ? cfg.failoverEngines : ["gemini", "claude", "openrouter", "ollama"],
+    failoverEngines: Array.isArray(cfg.failoverEngines) ? cfg.failoverEngines : ["gemini-api", "gemini", "claude", "openrouter", "ollama"],
     chunkChars: Number(cfg.chunkChars) || 7000,
     outputDir: cfg.outputDir || defaultOutputDir(),
     theme: cfg.theme === "light" ? "light" : "dark",

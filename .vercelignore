@@ -6,6 +6,7 @@ tools/
 release/
 release-website/
 .github/
+_Archive/
 README.md
 HUONG_DAN_TRIEN_KHAI.md
 /*.py
