@@ -90,6 +90,8 @@ var handlers = {
   build: async function (mode, footer) { return J(api.build(mode, footer !== false)); },
   qa: async function () { return J(api.qa()); },
   zipAll: async function () { return J(api.zip_all()); },
+  availableOutputs: async function () { return J(api.available_outputs()); },
+  renderPage: async function (which, pageNo, zoom) { return J(api.render_page(which || "src", pageNo || 1, zoom || 1.35)); },
   readFile: async function (p) { return py.FS.readFile(p); },
   score: async function (goc, dich, nameGoc, nameDich) {
     await init();

@@ -1,61 +1,82 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PDF Layout VI Studio</title>
-  <link rel="icon" type="image/png" href="icon.png">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>PDF Layout VI Studio v4.0</title>
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
-  <div class="app-shell">
-    <!-- Windows 11 Integrated Titlebar -->
+  <div class="shell">
+    <!-- Native Frameless Windows Titlebar -->
     <header class="titlebar">
-      <div class="tb-brand">
-        <img src="icon.png" alt="" class="tb-icon" width="20" height="20">
-        <span class="tb-title">PDF Layout VI Studio</span>
-        <span class="tb-ver">v3.5.0</span>
+      <div class="titlebar-brand">
+        <img class="brand-icon" src="icon.png" alt="">
+        <span class="brand-name">PDF Layout VI Studio</span>
+        <span class="brand-badge">v4.0 PRO</span>
       </div>
-      <div class="tb-right">
-        <button class="pill pill-connector" id="top-connector-btn" type="button" title="Chuyển nhanh hoặc cấu hình nền tảng AI">
-          <span class="dot" id="top-connector-dot"></span>
-          <span id="top-connector-label">Đang dò nền tảng AI…</span>
+      <div class="titlebar-status">
+        <button class="pill pill-cmd" id="btn-cmd-palette" type="button" title="Mở bảng lệnh nhanh (Ctrl+K)">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <span>Lệnh nhanh</span>
+          <kbd>Ctrl K</kbd>
         </button>
-        <div class="pill pill-engine" id="top-engine-pill" title="Trạng thái bộ máy PDF cục bộ">
-          <span class="dot is-idle" id="top-engine-dot"></span>
-          <span id="top-engine-label">Bộ máy PDF: Chờ khởi động</span>
+        <button class="pill" id="top-connector-btn" type="button" title="Đổi nền tảng AI đang kết nối">
+          <span class="dot" id="top-connector-dot"></span>
+          <span id="top-connector-label">Đang quét nền tảng AI…</span>
+        </button>
+        <div class="pill pill-muted" id="top-engine-pill" title="Trạng thái bộ máy dựng PDF PyMuPDF WebAssembly">
+          <span class="dot is-busy" id="top-engine-dot"></span>
+          <span id="top-engine-label">Đang khởi động bộ máy PDF…</span>
         </div>
+        <button class="pill pill-icon" id="btn-theme-toggle" type="button" aria-label="Chuyển giao diện Sáng / Tối" title="Chuyển giao diện Sáng / Tối">
+          <svg class="ic" id="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"/></svg>
+          <svg class="ic" id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true" hidden><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
       </div>
+      <div class="titlebar-win-spacer"></div>
     </header>
 
-    <!-- Main Desktop Workspace Frame -->
-    <div class="app-body">
-      <!-- Left Navigation & Live Platform Switcher Rail -->
+    <div class="workbench">
+      <!-- Left Activity Rail -->
       <aside class="rail">
         <nav class="rail-nav" aria-label="Điều hướng chính">
-          <button class="nav-btn is-active" data-view="connectors" type="button">
-            <span class="nav-ic">⚡</span>
+          <button class="nav-btn is-active" data-view="connectors" type="button" title="Alt+1">
+            <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 2v6m0 8v6M4.93 4.93l4.24 4.24m5.66 5.66 4.24 4.24M2 12h6m8 0h6M4.93 19.07l4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
             <span class="nav-txt">Kết nối AI</span>
-            <span class="nav-badge" id="badge-ready">0</span>
+            <span class="nav-badge" id="badge-ready">0/10</span>
           </button>
-          <button class="nav-btn" data-view="workspace" type="button">
-            <span class="nav-ic">📄</span>
-            <span class="nav-txt">Dịch PDF</span>
+          <button class="nav-btn" data-view="workspace" type="button" title="Alt+2">
+            <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+            <span class="nav-txt">Dịch PDF Studio</span>
+            <span class="nav-badge" id="badge-queue" hidden>0</span>
           </button>
-          <button class="nav-btn" data-view="qa" type="button">
-            <span class="nav-ic">✓</span>
+          <button class="nav-btn" data-view="glossary" type="button" title="Alt+3">
+            <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <span class="nav-txt">Từ điển thuật ngữ</span>
+            <span class="nav-badge" id="badge-glossary">0</span>
+          </button>
+          <button class="nav-btn" data-view="history" type="button" title="Alt+4">
+            <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+            <span class="nav-txt">Lịch sử dự án</span>
+            <span class="nav-badge" id="badge-history">0</span>
+          </button>
+          <button class="nav-btn" data-view="qa" type="button" title="Alt+5">
+            <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
             <span class="nav-txt">Kiểm định QA</span>
           </button>
-          <button class="nav-btn" data-view="logs" type="button">
-            <span class="nav-ic">&gt;_</span>
-            <span class="nav-txt">Nhật ký &amp; CLI</span>
+          <button class="nav-btn" data-view="logs" type="button" title="Alt+6">
+            <svg class="nav-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            <span class="nav-txt">Nhật ký &amp; TM</span>
           </button>
         </nav>
 
         <div class="rail-section">
           <div class="rail-sec-head">
-            <span>Nền tảng đã bật</span>
-            <button class="link-btn" id="rail-refresh-btn" type="button" title="Quét lại CLI trên máy">Làm mới</button>
+            <span>Nền tảng trên máy</span>
+            <button class="icon-btn" id="rail-refresh-btn" type="button" title="Quét lại CLI trên máy" aria-label="Quét lại CLI">
+              <svg class="ic-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </button>
           </div>
           <div class="rail-connectors" id="rail-connectors"></div>
         </div>
@@ -72,14 +93,14 @@
 
       <!-- Active View Stage -->
       <main class="stage">
-        <!-- VIEW 1: AI PLATFORM CONNECTORS (OpenMausBot Style) -->
+        <!-- VIEW 1: AI PLATFORM CONNECTORS (OpenMausBot Style + Failover + TM) -->
         <section class="view is-active" id="view-connectors">
           <div class="view-split connectors-split">
             <div class="pane-scroll">
               <div class="pane-head">
                 <div>
                   <h1>Kết nối nền tảng AI</h1>
-                  <p class="sub">Chọn CLI hoặc API bạn đang đăng nhập trên Windows. Chọn xong có thể bấm <strong>Vào dịch PDF ngay</strong>.</p>
+                  <p class="sub">Kết nối trực tiếp 10 CLI/API trên Windows kèm <strong>Auto-Failover</strong> và <strong>Bộ nhớ dịch TM 0 ms</strong>.</p>
                 </div>
                 <div class="head-actions">
                   <button class="btn btn-ghost" id="btn-ping-all" type="button">Ping các AI sẵn sàng</button>
@@ -87,6 +108,29 @@
                   <button class="btn btn-primary" id="btn-go-translate" type="button">Vào dịch PDF →</button>
                 </div>
               </div>
+
+              <!-- Smart Failover & TM Banner -->
+              <div class="pro-strip">
+                <div class="pro-strip-item">
+                  <div class="pro-strip-title">Chuỗi AI dự phòng (Auto-Failover)</div>
+                  <div class="pro-strip-sub" id="failover-summary">Tự chuyển sang AI sẵn sàng kế tiếp nếu nền tảng chính gặp lỗi hoặc giới hạn.</div>
+                </div>
+                <div class="pro-strip-controls">
+                  <label class="switch-inline" title="Bật Bộ nhớ dịch Translation Memory 0ms cho các đoạn trùng lặp">
+                    <input type="checkbox" id="cfg-tm-enabled" checked>
+                    <span>Bộ nhớ TM (<strong class="mono" id="tm-count-pill">0</strong> mục)</span>
+                  </label>
+                  <button class="btn btn-ghost btn-sm" id="btn-edit-failover" type="button">Cấu hình dự phòng</button>
+                </div>
+              </div>
+              <div class="failover-panel" id="failover-panel" hidden>
+                <div class="failover-head">
+                  <strong>Chọn &amp; sắp thứ tự nền tảng AI dự phòng khi nền tảng chính lỗi:</strong>
+                  <button class="btn btn-primary btn-sm" id="btn-save-failover" type="button">Lưu chuỗi dự phòng</button>
+                </div>
+                <div class="failover-chips" id="failover-chips"></div>
+              </div>
+
               <div class="connectors-grid" id="connectors-grid"></div>
             </div>
 
@@ -157,14 +201,17 @@
             <!-- Left Control Dock -->
             <div class="ws-controls">
               <div class="ws-card">
-                <div class="ws-card-h">1. Tài liệu nguồn</div>
+                <div class="ws-card-h">
+                  <span>1. Tài liệu &amp; Hàng đợi PDF</span>
+                  <button class="link-btn" id="ws-add-multi-btn" type="button">+ Thêm nhiều PDF</button>
+                </div>
                 <div class="dropzone" id="ws-drop">
                   <div class="drop-main">
-                    <strong id="ws-file-name">Kéo thả file PDF vào đây</strong>
-                    <span id="ws-file-sub">Hoặc bấm chọn file từ máy tính</span>
+                    <strong id="ws-file-name">Kéo thả 1 hoặc nhiều PDF vào đây</strong>
+                    <span id="ws-file-sub">Hỗ trợ xử lý đơn lẻ hoặc hàng loạt tự động</span>
                   </div>
                   <button class="btn btn-primary btn-sm" id="ws-pick-btn" type="button">Chọn PDF…</button>
-                  <input type="file" id="ws-file-input" accept="application/pdf,.pdf" hidden>
+                  <input type="file" id="ws-file-input" accept="application/pdf,.pdf" multiple hidden>
                 </div>
                 <dl class="kv-grid" id="ws-doc-meta" hidden>
                   <div><dt>Số trang</dt><dd id="meta-pages">—</dd></div>
@@ -207,12 +254,16 @@
 
               <div class="ws-card">
                 <div class="ws-card-h">
-                  <span>3. Nền tảng dịch đang chọn</span>
+                  <span>3. AI, Bộ nhớ TM &amp; Từ điển</span>
                   <button class="link-btn" id="ws-change-ai" type="button">Đổi cấu hình</button>
                 </div>
                 <div class="active-ai-box">
-                  <select class="select" id="ws-engine-select"></select>
+                  <select class="select" id="ws-engine-select" aria-label="Chọn nền tảng AI"></select>
                   <input class="input mono mt-1" id="ws-model-input" placeholder="Mô hình (trống = mặc định CLI)">
+                  <div class="ws-active-meta">
+                    <span class="meta-pill" id="ws-tm-pill">TM: Bật</span>
+                    <span class="meta-pill" id="ws-gloss-pill">Từ điển: 0 mục</span>
+                  </div>
                 </div>
               </div>
 
@@ -220,12 +271,12 @@
                 <button class="btn btn-primary btn-lg" id="ws-run-btn" type="button" disabled>Bắt đầu dịch &amp; dựng PDF</button>
                 <div class="ws-actions-sub">
                   <button class="btn btn-ghost" id="ws-stop-btn" type="button" hidden>Dừng dịch</button>
-                  <button class="btn btn-ghost" id="ws-build-only-btn" type="button" disabled>Dựng PDF từ phần đã dịch</button>
+                  <button class="btn btn-ghost" id="ws-build-only-btn" type="button" disabled>Dựng lại PDF tức thì</button>
                 </div>
               </div>
             </div>
 
-            <!-- Right Live Translation Monitor & Output Stage -->
+            <!-- Right Live Translation Monitor, Visual Preview & Output Stage -->
             <div class="ws-monitor">
               <div class="mon-header">
                 <div class="bento-kpis">
@@ -235,19 +286,19 @@
                     <span class="bento-sub" id="kpi-seg-sub">0% hoàn tất</span>
                   </div>
                   <div class="bento-card">
-                    <span class="bento-lbl">Tốc độ xử lý</span>
-                    <strong class="bento-val mono" id="kpi-speed">—</strong>
-                    <span class="bento-sub" id="kpi-speed-sub">ký tự / giây</span>
+                    <span class="bento-lbl">Bộ nhớ TM (0ms)</span>
+                    <strong class="bento-val mono" id="kpi-tm">0%</strong>
+                    <span class="bento-sub" id="kpi-tm-sub">0 đoạn tái sử dụng</span>
                   </div>
                   <div class="bento-card">
-                    <span class="bento-lbl">Độ trễ TB / lô</span>
-                    <strong class="bento-val mono" id="kpi-latency">—</strong>
+                    <span class="bento-lbl">Tốc độ / Độ trễ</span>
+                    <strong class="bento-val mono" id="kpi-speed">—</strong>
                     <span class="bento-sub" id="kpi-latency-sub">chưa chạy lô nào</span>
                   </div>
                   <div class="bento-card">
                     <span class="bento-lbl">Cảnh báo QA</span>
                     <strong class="bento-val mono" id="kpi-warn">0</strong>
-                    <span class="bento-sub" id="kpi-warn-sub">đoạn cần kiểm tra</span>
+                    <span class="bento-sub" id="kpi-warn-sub">sạch cảnh báo</span>
                   </div>
                 </div>
                 <div class="mon-progress-wrap">
@@ -259,13 +310,30 @@
                 </div>
                 <div class="lieflat-card" id="ws-latency-chart" hidden></div>
                 <div class="mon-tabs">
-                  <button class="tab-btn is-active" data-mon-tab="segments" type="button">Xem bản dịch trực tiếp</button>
+                  <button class="tab-btn is-active" data-mon-tab="segments" type="button">Biên tập trực tiếp</button>
+                  <button class="tab-btn" data-mon-tab="preview" type="button">So sánh trang PDF</button>
                   <button class="tab-btn" data-mon-tab="results" type="button">Kết quả &amp; Phiếu QA</button>
+                  <button class="tab-btn" data-mon-tab="queue" type="button">Hàng đợi (<span id="tab-queue-count">0</span>)</button>
                 </div>
               </div>
 
-              <!-- Live Segments Table -->
+              <!-- TAB 1: Live Interactive Segment Editor -->
               <div class="mon-panel is-active" id="mon-tab-segments">
+                <div class="seg-toolbar">
+                  <input class="input seg-search" id="seg-search" placeholder="Tìm nhanh theo ID, văn bản gốc hoặc bản dịch…">
+                  <div class="filter-pills" id="seg-filter-group">
+                    <button class="fpill is-active" data-seg-filter="all" type="button">Tất cả</button>
+                    <button class="fpill" data-seg-filter="warn" type="button">Cảnh báo</button>
+                    <button class="fpill" data-seg-filter="tm" type="button">Khớp TM</button>
+                    <button class="fpill" data-seg-filter="manual" type="button">Sửa tay</button>
+                  </div>
+                  <div class="export-group">
+                    <button class="btn-xs" id="btn-export-csv" type="button" title="Xuất Excel CSV UTF-8">CSV</button>
+                    <button class="btn-xs" id="btn-export-md" type="button" title="Xuất Markdown song ngữ">MD</button>
+                    <button class="btn-xs" id="btn-export-tmx" type="button" title="Xuất chuẩn CAT TMX 1.4">TMX</button>
+                    <button class="btn-xs" id="btn-export-json" type="button" title="Xuất JSON bản dịch">JSON</button>
+                  </div>
+                </div>
                 <div class="mon-warn-bar" id="ws-warn-bar" hidden>
                   <span id="ws-warn-summary"></span>
                   <button class="btn-xs" id="ws-retry-warn" type="button">Dịch lại các đoạn cảnh báo</button>
@@ -274,20 +342,76 @@
                   <table class="seg-table">
                     <thead>
                       <tr>
-                        <th style="width:84px">ID</th>
+                        <th style="width:82px">ID</th>
                         <th>Văn bản gốc</th>
-                        <th>Bản dịch AI</th>
-                        <th style="width:120px">Trạng thái</th>
+                        <th>Bản dịch (bấm để sửa trực tiếp)</th>
+                        <th style="width:118px">Trạng thái</th>
                       </tr>
                     </thead>
                     <tbody id="seg-tbody">
-                      <tr><td colspan="4" class="empty-cell">Kéo thả hoặc chọn file PDF ở cột trái để bắt đầu.</td></tr>
+                      <tr><td colspan="4" class="empty-cell">Kéo thả hoặc chọn 1 hoặc nhiều file PDF ở cột trái để bắt đầu.</td></tr>
                     </tbody>
                   </table>
                 </div>
               </div>
 
-              <!-- Build Results & QA Scorecard -->
+              <!-- TAB 2: Live Offline Visual PDF Comparator (Side-by-Side & Split Curtain Slider) -->
+              <div class="mon-panel" id="mon-tab-preview">
+                <div class="preview-toolbar">
+                  <div class="preview-ctrl-group">
+                    <button class="btn-xs" id="pv-prev" type="button">← Trước</button>
+                    <span class="mono pv-page-label" id="pv-page-label">Trang 1 / 1</span>
+                    <button class="btn-xs" id="pv-next" type="button">Sau →</button>
+                  </div>
+                  <div class="preview-ctrl-group">
+                    <select class="select select-sm" id="pv-mode" aria-label="Chế độ xem PDF">
+                      <option value="side">Song song (Gốc | Dịch)</option>
+                      <option value="slider">Kéo rèm so sánh (Curtain)</option>
+                    </select>
+                    <select class="select select-sm" id="pv-target" aria-label="Chọn bản xuất PDF">
+                      <option value="dst">Bản dịch đơn ngữ</option>
+                      <option value="doi-trang">Song ngữ Đối trang</option>
+                      <option value="hai-cot">Song ngữ Hai cột</option>
+                      <option value="xen-doan">Song ngữ Xen đoạn</option>
+                    </select>
+                    <select class="select select-sm mono" id="pv-zoom" aria-label="Thu phóng">
+                      <option value="0.9">90%</option>
+                      <option value="1.25" selected>125%</option>
+                      <option value="1.65">165%</option>
+                    </select>
+                    <button class="btn btn-primary btn-sm" id="pv-render-btn" type="button">Tải trang</button>
+                  </div>
+                </div>
+                <div class="preview-stage" id="pv-stage">
+                  <div class="empty-panel" id="pv-empty">Nạp tài liệu PDF (và dựng bản dịch) rồi bấm <strong>Tải trang</strong> để so sánh trực quan từng trang gốc ↔ bản dịch ngay trong ứng dụng.</div>
+                  <div class="pv-side-grid" id="pv-side-grid" hidden>
+                    <figure class="pv-pane">
+                      <figcaption>Bản gốc (PDF nguồn)</figcaption>
+                      <div class="pv-img-wrap"><img id="pv-img-src" alt="Trang gốc PDF"></div>
+                    </figure>
+                    <figure class="pv-pane">
+                      <figcaption id="pv-dst-caption">Bản đã dịch (Vector PDF)</figcaption>
+                      <div class="pv-img-wrap"><img id="pv-img-dst" alt="Trang dịch PDF"></div>
+                    </figure>
+                  </div>
+                  <div class="pv-curtain-wrap" id="pv-curtain-wrap" hidden>
+                    <div class="pv-curtain-box" id="pv-curtain-box">
+                      <img class="pv-curtain-base" id="pv-curtain-dst" alt="Bản dịch">
+                      <div class="pv-curtain-overlay" id="pv-curtain-overlay">
+                        <img id="pv-curtain-src" alt="Bản gốc">
+                      </div>
+                      <div class="pv-curtain-divider" id="pv-curtain-divider"></div>
+                    </div>
+                    <div class="pv-slider-bar">
+                      <span>← Bản gốc</span>
+                      <input type="range" id="pv-slider-range" min="0" max="100" value="50" aria-label="Thanh kéo so sánh Gốc và Dịch">
+                      <span>Bản dịch →</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 3: Build Results & QA Scorecard -->
               <div class="mon-panel" id="mon-tab-results">
                 <div class="empty-panel" id="res-empty">Sau khi dịch xong, hệ thống tự dựng PDF vector, kiểm định 8 tiêu chí QA và lưu thẳng vào thư mục Windows của bạn.</div>
                 <div class="res-content" id="res-content" hidden>
@@ -308,11 +432,111 @@
                   </table>
                 </div>
               </div>
+
+              <!-- TAB 4: Multi-PDF Batch Queue Manager -->
+              <div class="mon-panel" id="mon-tab-queue">
+                <div class="queue-toolbar">
+                  <div>
+                    <strong>Hàng đợi dịch hàng loạt (Batch Queue)</strong>
+                    <p class="hint">Tự động dịch lần lượt từng tài liệu, lưu checkpoint riêng và xuất mỗi tài liệu vào một thư mục độc lập.</p>
+                  </div>
+                  <div class="head-actions">
+                    <button class="btn btn-ghost btn-sm" id="q-clear-done" type="button">Dọn mục đã xong</button>
+                    <button class="btn btn-primary btn-sm" id="q-run-all" type="button" disabled>Chạy cả hàng đợi</button>
+                  </div>
+                </div>
+                <div class="table-wrap">
+                  <table class="seg-table">
+                    <thead>
+                      <tr>
+                        <th>Tài liệu PDF</th>
+                        <th style="width:90px">Dung lượng</th>
+                        <th style="width:150px">Trạng thái</th>
+                        <th style="width:170px">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody id="queue-tbody">
+                      <tr><td colspan="4" class="empty-cell">Chưa có tệp nào trong hàng đợi. Bấm "+ Thêm nhiều PDF" ở cột trái.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        <!-- VIEW 3: STANDALONE QA INSPECTOR -->
+        <!-- VIEW 3: DOMAIN GLOSSARY / TERMBASE MANAGER -->
+        <section class="view" id="view-glossary">
+          <div class="qa-view">
+            <div class="pane-head">
+              <div>
+                <h1>Từ điển thuật ngữ chuyên ngành (Glossary)</h1>
+                <p class="sub">Khóa chuẩn bản dịch cho tên riêng và thuật ngữ học thuật/kỹ thuật — tự động nạp vào mọi lô dịch AI.</p>
+              </div>
+              <div class="head-actions">
+                <button class="btn btn-ghost" id="gloss-import-btn" type="button">Nhập CSV / JSON</button>
+                <button class="btn btn-ghost" id="gloss-export-btn" type="button">Xuất CSV</button>
+              </div>
+            </div>
+
+            <div class="ws-card">
+              <div class="ws-card-h">Bộ thuật ngữ mẫu theo lĩnh vực (1 chạm áp dụng)</div>
+              <div class="preset-chips" id="gloss-presets"></div>
+            </div>
+
+            <div class="ws-card">
+              <div class="ws-card-h">Thêm cặp thuật ngữ tùy chỉnh</div>
+              <div class="gloss-form">
+                <input class="input" id="gloss-src-in" placeholder="Thuật ngữ gốc (vd: qualitative content analysis)">
+                <input class="input" id="gloss-dst-in" placeholder="Bản dịch bắt buộc (vd: phân tích nội dung định tính)">
+                <input class="input" id="gloss-note-in" placeholder="Ghi chú (tùy chọn)">
+                <button class="btn btn-primary" id="gloss-add-btn" type="button">Thêm thuật ngữ</button>
+              </div>
+              <div class="gloss-import-box" id="gloss-import-box" hidden>
+                <textarea class="input mono" id="gloss-import-text" rows="4" placeholder="Dán JSON [{src, dst}] hoặc từng dòng dạng: source => đích hoặc source,đích"></textarea>
+                <div class="head-actions mt-1">
+                  <button class="btn btn-primary btn-sm" id="gloss-import-apply" type="button">Nạp vào từ điển</button>
+                  <button class="btn btn-ghost btn-sm" id="gloss-import-cancel" type="button">Hủy</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ws-card">
+              <div class="ws-card-h">
+                <span>Danh sách thuật ngữ đang kích hoạt (<span id="gloss-active-count">0</span>)</span>
+                <button class="link-btn" id="gloss-clear-custom" type="button">Xóa toàn bộ tùy chỉnh</button>
+              </div>
+              <table class="qa-table">
+                <thead><tr><th>Thuật ngữ gốc</th><th>Bản dịch bắt buộc</th><th>Nguồn</th><th style="width:90px">Xóa</th></tr></thead>
+                <tbody id="gloss-tbody">
+                  <tr><td colspan="4" class="empty-cell">Chưa có thuật ngữ nào. Chọn bộ mẫu phía trên hoặc thêm cặp thuật ngữ mới.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 4: PROJECT HISTORY LIBRARY -->
+        <section class="view" id="view-history">
+          <div class="qa-view">
+            <div class="pane-head">
+              <div>
+                <h1>Thư viện lịch sử dự án</h1>
+                <p class="sub">Quản lý toàn bộ PDF đã dịch, tỷ lệ khớp bộ nhớ TM, điểm QA và mở nhanh thư mục trên Windows.</p>
+              </div>
+              <div class="head-actions">
+                <input class="input" id="hist-search" placeholder="Tìm theo tên tài liệu hoặc AI…" style="width:240px">
+                <button class="btn btn-ghost" id="hist-refresh-btn" type="button">Làm mới</button>
+                <button class="btn btn-ghost" id="hist-clear-btn" type="button">Xóa lịch sử</button>
+              </div>
+            </div>
+            <div class="history-grid" id="history-list">
+              <div class="empty-panel">Chưa có dự án nào được lưu. Khi hoàn tất dựng PDF, kết quả sẽ tự động hiển thị tại đây.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- VIEW 5: STANDALONE QA INSPECTOR -->
         <section class="view" id="view-qa">
           <div class="qa-view">
             <div class="pane-head">
@@ -334,11 +558,10 @@
                 <span class="mono qa-picked-name" id="qa-dst-name">Chưa chọn</span>
                 <input type="file" id="qa-dst-file" accept=".pdf" hidden>
               </div>
-              <div class="qa-run-col">
-                <button class="btn btn-primary btn-lg" id="qa-run-btn" type="button">Chấm QA ngay</button>
-              </div>
+              <button class="btn btn-primary btn-lg" id="qa-run-btn" type="button">Chấm điểm QA ngay</button>
             </div>
-            <div class="qa-score-out" id="qa-score-out" hidden>
+            <div class="ws-card" id="qa-score-out" hidden>
+              <div class="ws-card-h">Bảng kết quả kiểm định</div>
               <div class="lieflat-card" id="qa-lieflat-chart" hidden></div>
               <table class="qa-table">
                 <thead><tr><th>Chỉ số</th><th>Giá trị</th><th>Đánh giá</th></tr></thead>
@@ -348,15 +571,36 @@
           </div>
         </section>
 
-        <!-- VIEW 4: ACTIVITY & CLI LOGS -->
+        <!-- VIEW 6: DIAGNOSTICS, TM VAULT & LOGS -->
         <section class="view" id="view-logs">
           <div class="logs-view">
             <div class="pane-head">
               <div>
-                <h1>Nhật ký hoạt động &amp; CLI</h1>
-                <p class="sub">Theo dõi thời gian thực từng lệnh gọi CLI, tải Pyodide và trạng thái dựng PDF.</p>
+                <h1>Nhật ký hệ thống &amp; Bộ nhớ dịch (TM Vault)</h1>
+                <p class="sub">Theo dõi thời gian thực các cuộc gọi CLI, Auto-Failover và quản lý kho Translation Memory cục bộ (đã tự che khóa bí mật).</p>
               </div>
-              <button class="btn btn-ghost" id="logs-clear-btn" type="button">Xóa nhật ký</button>
+              <div class="head-actions">
+                <button class="btn btn-ghost" id="tm-export-btn" type="button">Xuất TM (.json)</button>
+                <button class="btn btn-ghost" id="tm-clear-btn" type="button">Xóa kho TM</button>
+                <button class="btn btn-ghost" id="logs-clear-btn" type="button">Xóa nhật ký</button>
+              </div>
+            </div>
+            <div class="bento-kpis" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+              <div class="bento-card">
+                <span class="bento-lbl">Tổng mục TM đã lưu</span>
+                <strong class="bento-val mono" id="vault-tm-count">0</strong>
+                <span class="bento-sub" id="vault-tm-size">0 KB trên đĩa</span>
+              </div>
+              <div class="bento-card">
+                <span class="bento-lbl">Chuỗi AI dự phòng</span>
+                <strong class="bento-val mono" id="vault-failover-count">0</strong>
+                <span class="bento-sub" id="vault-failover-list">—</span>
+              </div>
+              <div class="bento-card">
+                <span class="bento-lbl">Phiên bản Studio</span>
+                <strong class="bento-val mono">v4.0.0 PRO</strong>
+                <span class="bento-sub">Loopback-only Security · PyMuPDF WASM</span>
+              </div>
             </div>
             <pre class="logs-pre" id="logs-pre"></pre>
           </div>
@@ -364,6 +608,19 @@
       </main>
     </div>
   </div>
+
+  <!-- Command Palette Overlay (Ctrl+K) -->
+  <div class="cmd-backdrop" id="cmd-backdrop" hidden>
+    <div class="cmd-dialog" role="dialog" aria-modal="true" aria-label="Bảng lệnh nhanh">
+      <div class="cmd-input-row">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input class="cmd-input" id="cmd-input" placeholder="Gõ lệnh, chuyển màn hình, đổi AI hoặc tìm hành động…">
+        <kbd>Esc</kbd>
+      </div>
+      <div class="cmd-list" id="cmd-list"></div>
+    </div>
+  </div>
+
   <script src="helpers.js"></script>
   <script src="app.js"></script>
 </body>

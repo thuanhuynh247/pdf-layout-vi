@@ -31,8 +31,8 @@ docs/ADR-003-…md             Trang /dich tải bộ máy từ jsDelivr và PyP
 docs/DESIGN_SYSTEM.md        Design system "Proof Sheet"
 release/                     Gói nâng cao v3.0.1 đã làm sạch (zip để tải lên Drive, không đưa lên web)
 HUONG_DAN_TRIEN_KHAI.md      Hướng dẫn từng bước cho người không lập trình
-desktop/                     PDF Layout VI Studio v3.5.0 (.exe trên Windows, tách biệt hoàn toàn layout website): desktop/app/ + Electron + ELECTRON_RUN_AS_NODE=1 kết nối 10 nền tảng AI, Bento KPI & LieFlat QA Charts, Checkpoint auto-resume, kiểm thử npm test & Alibaba ocr_guard
-docs/ADR-004-…md             Kiến trúc Desktop Studio v3.5.0, schema web_api & đường biên bảo mật
+desktop/                     PDF Layout VI Studio v4.0.0 PRO (.exe trên Windows, tách biệt hoàn toàn layout website): Kết nối 10 nền tảng AI + Auto-Failover, Bộ nhớ dịch TM 0ms, Xem trực quan so sánh PDF Gốc↔Dịch (Side-by-Side & Split Curtain Slider), Hàng đợi đa tệp (Batch Queue), Từ điển thuật ngữ (5 bộ mẫu), Biên tập trực tiếp & dựng lại PDF tức thì, Lịch sử dự án, Command Palette (Ctrl+K), Dark/Light Theme & Loopback-only CORS
+docs/ADR-004-…md, ADR-005…   Kiến trúc Desktop Studio v3.5 → v4.0 PRO, schema web_api & đường biên bảo mật
 CONTEXT.md                   Ngôn ngữ Miền Thống nhất (Ubiquitous Language) cho dự án
 .github/workflows/package-win.yml  CI tự động test & đóng gói PDF-Layout-VI-*-setup.exe & portable.exe trên GitHub Releases
 ```

@@ -8,7 +8,7 @@ window.SITE_CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxOZPeGValKjmm_12FGldg6DmmjPApAyJlDd6k1S4G21mwjtumo2HnSEmSy8V2e7xmk/exec",
 
   // Phiên bản hiển thị trên trang
-  VERSION: "3.5.0",
+  VERSION: "4.0.0",
 
   // Trang "Dùng với Claude": true = hiện nút tải thẳng file zip (không cần email);
   // false = nút dẫn tới form đăng ký, file gửi qua email.

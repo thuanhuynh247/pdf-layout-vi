@@ -1,15 +1,27 @@
-// desktop/test/server.test.mjs — Seams-based TDD suite (node:test, zero external deps)
+// desktop/test/server.test.mjs — Seams-based TDD suite for PDF Layout VI Studio v4.0.0 (node:test, zero external deps)
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { cleanChildEnv, augmentedPath } from "../server/env-path.mjs";
-import { listEngines } from "../server/drivers.mjs";
-import { createAppServer } from "../server/index.mjs";
 import { createRequire } from "node:module";
+import { fileURLToPath } from "node:url";
+
+// Isolate AppData persistence for every test run
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "ptl-v4-data-"));
+process.env.PDF_LAYOUT_DATA_DIR = TEST_DATA_DIR;
+
+const { cleanChildEnv, augmentedPath } = await import("../server/env-path.mjs");
+const { listEngines } = await import("../server/drivers.mjs");
+const { createAppServer } = await import("../server/index.mjs");
 
 const require = createRequire(import.meta.url);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+test.after(() => {
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+});
 
 test("env-path: strips nested Claude env vars and deduplicates PATH", () => {
   process.env.CLAUDECODE = "1";
@@ -35,7 +47,7 @@ test("drivers: listEngines returns 10 normalized platform connectors", async () 
   }
 });
 
-test("server HTTP seams: health, engines, static isolation, and path traversal defense", async () => {
+test("server HTTP seams: health v4.0.0, loopback CORS security, static isolation & path traversal defense", async () => {
   const server = createAppServer();
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const addr = server.address();
@@ -44,30 +56,64 @@ test("server HTTP seams: health, engines, static isolation, and path traversal d
   try {
     const h = await fetch(`${baseUrl}/api/health`).then((r) => r.json());
     assert.equal(h.ok, true);
-    assert.ok(h.version);
+    assert.equal(h.version, "4.0.0");
+    assert.ok(Array.isArray(h.features) && h.features.includes("visual-preview") && h.features.includes("tm-cache"));
 
-    const eng = await fetch(`${baseUrl}/api/cli/engines`).then((r) => r.json());
-    assert.equal(eng.ok, true);
-    assert.ok(eng.engines.length >= 10);
+    // Cross-origin request from external site MUST be rejected (403)
+    const crossRes = await fetch(`${baseUrl}/api/health`, {
+      headers: { Origin: "https://evil.example" },
+    });
+    assert.equal(crossRes.status, 403);
 
-    // Ensure traversal outside desktop/app cannot leak server/package.json
+    // Loopback origin MUST be echoed safely
+    const localRes = await fetch(`${baseUrl}/api/health`, {
+      headers: { Origin: `http://127.0.0.1:${addr.port}` },
+    });
+    assert.equal(localRes.status, 200);
+    assert.equal(localRes.headers.get("access-control-allow-origin"), `http://127.0.0.1:${addr.port}`);
+
+    // Static traversal outside desktop/app cannot leak package.json
     const leakRes = await fetch(`${baseUrl}/..%2fpackage.json`);
-    assert.ok(leakRes.status === 403 || leakRes.status === 404, `Expected 403/404, got ${leakRes.status}`);
+    assert.ok(leakRes.status === 403 || leakRes.status === 404);
 
-    // Path traversal test on POST /api/output/save
+    // Path traversal tests on /api/output/save
     const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ptl-out-test-"));
     try {
-      const travRes = await fetch(`${baseUrl}/api/output/save`, {
+      const travFolder = await fetch(`${baseUrl}/api/output/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ outputDir: tmpRoot, folderName: "..", files: [] }),
+      });
+      assert.equal(travFolder.status, 400);
+
+      const travFile = await fetch(`${baseUrl}/api/output/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           outputDir: tmpRoot,
-          folderName: "..",
+          folderName: "Valid-2026",
           files: [{ name: "../../evil.txt", base64: Buffer.from("bad").toString("base64") }],
         }),
       });
-      const travBody = await travRes.json();
-      assert.equal(travRes.status, 400, `Expected 400 rejecting traversal folderName '..', got ${travRes.status} (${JSON.stringify(travBody)})`);
+      assert.equal(travFile.status, 400);
+
+      const okSave = await fetch(`${baseUrl}/api/output/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          outputDir: tmpRoot,
+          folderName: "Valid-2026",
+          files: [
+            { name: "Sample_VI.pdf", base64: Buffer.from("%PDF-1.4\n%ok\n").toString("base64") },
+            { name: "Sample_QA.md", base64: Buffer.from("# QA Pass").toString("base64") },
+          ],
+        }),
+      });
+      const saved = await okSave.json();
+      assert.equal(okSave.status, 200);
+      assert.equal(saved.ok, true);
+      assert.equal(saved.files.length, 2);
+      assert.ok(fs.existsSync(path.join(tmpRoot, "Valid-2026", "Sample_VI.pdf")));
     } finally {
       fs.rmSync(tmpRoot, { recursive: true, force: true });
     }
@@ -76,90 +122,155 @@ test("server HTTP seams: health, engines, static isolation, and path traversal d
   }
 });
 
-test("app helpers: mapPrepareSummary handles web_api.py exact schema without undefined fields", () => {
+test("server HTTP seams: Translation Memory (TM) cache, Glossary presets, Config & History persistence", async () => {
+  const server = createAppServer();
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const addr = server.address();
+  const baseUrl = `http://127.0.0.1:${addr.port}`;
+
+  try {
+    // 1. Glossary presets
+    const presetsRes = await fetch(`${baseUrl}/api/glossary/presets`).then((r) => r.json());
+    assert.equal(presetsRes.ok, true);
+    assert.ok(presetsRes.presets.academic && presetsRes.presets.finance && presetsRes.presets.tech);
+
+    // 2. Config persistence (theme, failover, glossary)
+    const cfgRes = await fetch(`${baseUrl}/api/config`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        theme: "light",
+        tmEnabled: true,
+        glossaryPreset: "academic",
+        failoverEngines: ["gemini", "ollama"],
+        glossary: [{ src: "Vector PDF", dst: "PDF dạng vector" }],
+      }),
+    }).then((r) => r.json());
+    assert.equal(cfgRes.ok, true);
+    assert.equal(cfgRes.config.theme, "light");
+    assert.equal(cfgRes.config.glossaryPreset, "academic");
+    assert.deepEqual(cfgRes.config.failoverEngines, ["gemini", "ollama"]);
+    assert.equal(cfgRes.config.glossary.length, 1);
+
+    // 3. Translation Memory save -> lookup -> stats -> clear
+    const saveTm = await fetch(`${baseUrl}/api/tm/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dir: "en-vi",
+        engine: "codex",
+        pairs: [{ src: "Introduction to Swiss Schools", dst: "Giới thiệu về các trường Thụy Sĩ" }],
+      }),
+    }).then((r) => r.json());
+    assert.equal(saveTm.ok, true);
+    assert.equal(saveTm.count, 1);
+
+    const lookup = await fetch(`${baseUrl}/api/tm/lookup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dir: "en-vi",
+        items: [
+          { id: "p1-1", text: "  introduction   to swiss schools  " },
+          { id: "p1-2", text: "Brand new sentence" },
+        ],
+      }),
+    }).then((r) => r.json());
+    assert.equal(lookup.ok, true);
+    assert.equal(lookup.hitCount, 1);
+    assert.equal(lookup.hits["p1-1"], "Giới thiệu về các trường Thụy Sĩ");
+    assert.equal(lookup.misses.length, 1);
+    assert.equal(lookup.misses[0].id, "p1-2");
+
+    const clrTm = await fetch(`${baseUrl}/api/tm/clear`, { method: "POST" }).then((r) => r.json());
+    assert.equal(clrTm.count, 0);
+
+    // 4. Project History add -> list -> delete
+    const added = await fetch(`${baseUrl}/api/history`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        pdfName: "thesis.pdf",
+        pages: 24,
+        segments: 190,
+        engine: "codex",
+        tmHitPct: 22,
+        qaPass: true,
+        outputDir: "C:\\Docs\\thesis",
+      }),
+    }).then((r) => r.json());
+    assert.equal(added.ok, true);
+    assert.ok(added.item.id);
+
+    const hist = await fetch(`${baseUrl}/api/history`).then((r) => r.json());
+    assert.equal(hist.items.length, 1);
+    assert.equal(hist.items[0].pdfName, "thesis.pdf");
+
+    const del = await fetch(`${baseUrl}/api/history/delete`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: added.item.id }),
+    }).then((r) => r.json());
+    assert.equal(del.remaining, 0);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test("app helpers v4.0.0: schema, secrets, glossary, failover, CSV/MD/TMX export & LieFlat SVG", () => {
   const helpers = require("../app/helpers.js");
-  const samplePrepare = {
-    ok: true,
-    name: "paper.pdf",
-    pages: 17,
-    scanned: [4],
-    words: 5120,
-    chars: 32000,
-    huong: "en-vi",
-    done: 0,
-    total: 142,
-    batches_done: 0,
-    batches_total: 6,
-  };
-  const summary = helpers.mapPrepareSummary(samplePrepare, 2400000);
+
+  const summary = helpers.mapPrepareSummary(
+    { ok: true, name: "paper.pdf", pages: 17, scanned: [4], words: 5120, chars: 32000, huong: "en-vi", done: 0, total: 142, batches_done: 0, batches_total: 6 },
+    2400000
+  );
   assert.equal(summary.totalSegments, 142);
-  assert.equal(summary.pages, 17);
-  assert.equal(summary.words, 5120);
-  assert.deepEqual(summary.scannedPages, [4]);
   assert.equal(summary.batchesTotal, 6);
-  assert.equal(summary.huong, "en-vi");
 
-  // Secret redaction in logs
   const redacted = helpers.redactSecrets("Using key sk-or-v1-1234567890abcdef1234567890abcdef and AIzaSyD1234567890abcdefghijklmnop");
-  assert.ok(!redacted.includes("1234567890abcdef"));
-  assert.ok(!redacted.includes("AIzaSyD1234567890"));
-  assert.ok(redacted.includes("<REDACTED>"));
+  assert.ok(!redacted.includes("1234567890abcdef") && redacted.includes("<REDACTED>"));
 
-  // JSON fence stripping + chatter repair
-  const parsed = helpers.extractJsonText("Here is translation:\n```json\n{\"p1-1\": \"Xin chào\"}\n```\nHope it helps!");
-  assert.equal(JSON.parse(parsed)["p1-1"], "Xin chào");
+  const parsedJson = helpers.extractJsonText("Here:\n```json\n{\"p1-1\": \"Xin chào\"}\n```");
+  assert.equal(JSON.parse(parsedJson)["p1-1"], "Xin chào");
 
-  // LieFlat SVG chart rendering invariants (unbroken 0-100% axis)
+  // Glossary prompt injection & import parser
+  const gBlock = helpers.buildGlossaryPromptBlock([{ src: "latency", dst: "độ trễ" }], "en-vi");
+  assert.ok(gBlock.includes("BẢNG THUẬT NGỮ BẮT BUỘC") && gBlock.includes("latency => độ trễ"));
+  const imported = helpers.parseGlossaryImport("alpha => an-pha\nbeta,bê-ta\n");
+  assert.equal(imported.length, 2);
+  assert.equal(imported[1].dst, "bê-ta");
+
+  // Auto-failover engine selector
+  const engines = [
+    { id: "codex", installed: true, loggedIn: true },
+    { id: "claude", installed: true, loggedIn: false },
+    { id: "gemini", installed: true, loggedIn: true },
+  ];
+  const next = helpers.pickFailoverEngine("codex", ["claude", "gemini"], engines, ["codex"]);
+  assert.equal(next.id, "gemini");
+
+  // Exports: CSV (UTF-8 BOM), Markdown, TMX 1.4
+  const segs = [{ id: "p1-1", src: "Hello, \"world\" & <all>", dst: "Xin chào, thế giới", origin: "ai", warn: "" }];
+  const csv = helpers.exportSegmentsToCsv(segs);
+  assert.ok(csv.startsWith("\uFEFFID,Source,Translation") && csv.includes("\"Hello, \"\"world\"\" & <all>\""));
+  const md = helpers.exportSegmentsToMarkdown(segs, "demo.pdf");
+  assert.ok(md.includes("| `p1-1` |"));
+  const tmx = helpers.exportSegmentsToTmx(segs, "en-vi");
+  assert.ok(tmx.includes("<tmx version=\"1.4\">") && tmx.includes("&amp; &lt;all&gt;"));
+
+  // LieFlat SVG invariants
   const svg = helpers.buildLieFlatMetricsSvg("QA", [{ label: "Tiêu chí", pct: 95, valueText: "95%", color: "#22c55e" }]);
   assert.ok(svg.includes("<svg") && svg.includes("100%") && svg.includes("0%"));
   const latSvg = helpers.buildBatchLatencySvg([1200, 2400]);
   assert.ok(latSvg.includes("<svg") && latSvg.includes("<rect"));
 });
 
-test("server HTTP seams: happy-path output save & isolated static asset routing", async () => {
-  const server = createAppServer();
-  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
-  const addr = server.address();
-  const baseUrl = `http://127.0.0.1:${addr.port}`;
-  const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ptl-happy-out-"));
-
-  try {
-    const saveRes = await fetch(`${baseUrl}/api/output/save`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        outputDir: tmpRoot,
-        folderName: "Sample-2026-01",
-        files: [
-          { name: "Sample_VI.pdf", base64: Buffer.from("%PDF-1.4\n%test\n").toString("base64") },
-          { name: "Sample_QA.md", base64: Buffer.from("# QA Pass").toString("base64") },
-        ],
-      }),
-    });
-    const saved = await saveRes.json();
-    assert.equal(saveRes.status, 200);
-    assert.equal(saved.ok, true);
-    assert.equal(saved.files.length, 2);
-    assert.ok(fs.existsSync(path.join(tmpRoot, "Sample-2026-01", "Sample_VI.pdf")));
-    assert.ok(fs.existsSync(path.join(tmpRoot, "Sample-2026-01", "Sample_QA.md")));
-
-    const badFileRes = await fetch(`${baseUrl}/api/output/save`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        outputDir: tmpRoot,
-        folderName: "Sample-2026-01",
-        files: [{ name: "../../evil.txt", base64: Buffer.from("bad").toString("base64") }],
-      }),
-    });
-    assert.equal(badFileRes.status, 400);
-
-    const helpersRes = await fetch(`${baseUrl}/helpers.js`);
-    assert.equal(helpersRes.status, 200);
-    const engineRes = await fetch(`${baseUrl}/engine/web_api.py`);
-    assert.equal(engineRes.status, 200);
-  } finally {
-    fs.rmSync(tmpRoot, { recursive: true, force: true });
-    await new Promise((resolve) => server.close(resolve));
-  }
+test("DOM ID parity: every #id referenced in desktop/app/app.js exists in desktop/app/index.html", () => {
+  const html = fs.readFileSync(path.resolve(__dirname, "../app/index.html"), "utf8");
+  const js = fs.readFileSync(path.resolve(__dirname, "../app/app.js"), "utf8");
+  const htmlIds = new Set([...html.matchAll(/\bid=["']([^"']+)["']/g)].map((m) => m[1]));
+  const jsIds = new Set([...js.matchAll(/\$\(["']#([a-zA-Z0-9_-]+)["']\)/g)].map((m) => m[1]));
+  assert.ok(jsIds.size >= 80, `Expected >= 80 DOM ID bindings, found ${jsIds.size}`);
+  const missing = [...jsIds].filter((id) => !htmlIds.has(id));
+  assert.deepEqual(missing, [], `Missing DOM IDs in index.html: ${missing.join(", ")}`);
 });

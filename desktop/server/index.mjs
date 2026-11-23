@@ -1,4 +1,4 @@
-// server/index.mjs — Dedicated Windows Desktop backend (AI Connectors, Vault, File I/O, Local Engine Host)
+// server/index.mjs — Dedicated Windows Desktop backend v4.0.0 (AI Connectors, Vault, TM, Glossary, History, Loopback-Safe File I/O)
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
@@ -13,13 +13,16 @@ import {
   stopJob,
   pingEngine,
 } from "./drivers.mjs";
-import { getPublicConfig, updateConfig, defaultOutputDir } from "./config-store.mjs";
+import { getPublicConfig, updateConfig, defaultOutputDir, GLOSSARY_PRESETS } from "./config-store.mjs";
+import { lookupTm, saveTmEntries, getTmStats, exportTmEntries, clearTm } from "./tm-store.mjs";
+import { listHistory, addHistoryEntry, deleteHistoryEntry, clearHistory } from "./history-store.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const LOOPBACK_ORIGIN_RE = /^https?:\/\/(127\.0\.0\.1|localhost)(:\d+)?$/i;
+
 function resolvePaths() {
-  // Desktop app HTML/JS/CSS
   const envDesktop = process.env.PDF_LAYOUT_DESKTOP_UI_DIR;
   const packagedDesktop = path.resolve(__dirname, "..", "app");
   const devDesktop = path.resolve(__dirname, "..", "app");
@@ -29,7 +32,6 @@ function resolvePaths() {
       ? packagedDesktop
       : devDesktop;
 
-  // Shared Pyodide + PyMuPDF + dich_pdf.py engine assets
   const envEngine = process.env.PDF_LAYOUT_ENGINE_DIR;
   const packagedEngine = path.resolve(__dirname, "..", "engine");
   const devEngine = path.resolve(__dirname, "..", "..", "engine");
@@ -64,14 +66,26 @@ const MIME = {
   ".txt": "text/plain; charset=utf-8",
 };
 
-function sendJson(res, status, data) {
+function corsHeaders(req) {
+  const origin = req && req.headers && req.headers.origin ? String(req.headers.origin) : "";
+  const headers = {
+    "Vary": "Origin",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+  };
+  if (origin && LOOPBACK_ORIGIN_RE.test(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+  return headers;
+}
+
+function sendJson(req, res, status, data) {
   const body = JSON.stringify(data);
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "X-Content-Type-Options": "nosniff",
+    ...corsHeaders(req),
   });
   res.end(body);
 }
@@ -127,83 +141,132 @@ export function createAppServer() {
     const url = new URL(req.url || "/", "http://127.0.0.1");
     const pathname = url.pathname;
 
+    // Reject cross-origin API calls from non-loopback sites
+    const origin = req.headers && req.headers.origin ? String(req.headers.origin) : "";
+    if (origin && pathname.startsWith("/api/") && !LOOPBACK_ORIGIN_RE.test(origin)) {
+      return sendJson(req, res, 403, { ok: false, error: "Forbidden cross-origin request" });
+    }
+
     if (req.method === "OPTIONS") {
-      res.writeHead(204, {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-      });
+      res.writeHead(204, corsHeaders(req));
       return res.end();
     }
 
     try {
       if (pathname === "/api/health" && req.method === "GET") {
-        return sendJson(res, 200, {
+        return sendJson(req, res, 200, {
           ok: true,
           app: "pdf-layout-vi-desktop",
-          version: "3.5.0",
+          version: "4.0.0",
           platform: process.platform,
           desktopDir: DESKTOP_DIR,
           engineDir: ENGINE_DIR,
+          features: ["visual-preview", "batch-queue", "glossary", "tm-cache", "auto-failover", "history", "command-palette"],
         });
       }
 
       if (pathname === "/api/config" && req.method === "GET") {
-        return sendJson(res, 200, { ok: true, config: getPublicConfig() });
+        return sendJson(req, res, 200, { ok: true, config: getPublicConfig() });
       }
 
       if (pathname === "/api/config" && req.method === "POST") {
         const body = await readJsonBody(req);
-        return sendJson(res, 200, { ok: true, config: updateConfig(body) });
+        return sendJson(req, res, 200, { ok: true, config: updateConfig(body) });
+      }
+
+      if (pathname === "/api/glossary/presets" && req.method === "GET") {
+        return sendJson(req, res, 200, { ok: true, presets: GLOSSARY_PRESETS });
+      }
+
+      // Translation Memory endpoints
+      if (pathname === "/api/tm/stats" && req.method === "GET") {
+        return sendJson(req, res, 200, { ok: true, stats: getTmStats() });
+      }
+
+      if (pathname === "/api/tm/export" && req.method === "GET") {
+        return sendJson(req, res, 200, { ok: true, entries: exportTmEntries() });
+      }
+
+      if (pathname === "/api/tm/lookup" && req.method === "POST") {
+        const body = await readJsonBody(req);
+        const result = lookupTm(Array.isArray(body.items) ? body.items : [], body.dir || "en-vi");
+        return sendJson(req, res, 200, { ok: true, ...result });
+      }
+
+      if (pathname === "/api/tm/save" && req.method === "POST") {
+        const body = await readJsonBody(req);
+        const result = saveTmEntries(Array.isArray(body.pairs) ? body.pairs : [], body.dir || "en-vi", body.engine || "");
+        return sendJson(req, res, 200, { ok: true, ...result });
+      }
+
+      if (pathname === "/api/tm/clear" && req.method === "POST") {
+        return sendJson(req, res, 200, clearTm());
+      }
+
+      // Project History endpoints
+      if (pathname === "/api/history" && req.method === "GET") {
+        return sendJson(req, res, 200, { ok: true, items: listHistory() });
+      }
+
+      if (pathname === "/api/history" && req.method === "POST") {
+        const body = await readJsonBody(req);
+        const item = addHistoryEntry(body);
+        return sendJson(req, res, 200, { ok: true, item });
+      }
+
+      if (pathname === "/api/history/delete" && req.method === "POST") {
+        const body = await readJsonBody(req);
+        if (body.clearAll) return sendJson(req, res, 200, clearHistory());
+        return sendJson(req, res, 200, deleteHistoryEntry(String(body.id || "")));
       }
 
       if (pathname === "/api/cli/engines" && req.method === "GET") {
         const engines = await listEngines();
-        return sendJson(res, 200, { ok: true, engines, config: getPublicConfig() });
+        return sendJson(req, res, 200, { ok: true, engines, config: getPublicConfig(), tm: getTmStats() });
       }
 
       if (pathname === "/api/cli/login" && req.method === "POST") {
         const body = await readJsonBody(req);
         const resJob = startLogin(body.engine, { mode: body.mode || "stream" });
-        return sendJson(res, 200, { ok: true, ...resJob });
+        return sendJson(req, res, 200, { ok: true, ...resJob });
       }
 
       if (pathname === "/api/cli/install" && req.method === "POST") {
         const body = await readJsonBody(req);
         const resJob = startInstall(body.engine, { mode: body.mode || "stream" });
-        return sendJson(res, 200, { ok: true, ...resJob });
+        return sendJson(req, res, 200, { ok: true, ...resJob });
       }
 
       if (pathname === "/api/cli/job" && req.method === "GET") {
         const id = url.searchParams.get("id") || "";
         const j = getJob(id);
-        if (!j) return sendJson(res, 404, { ok: false, error: "Không tìm thấy tiến trình." });
-        return sendJson(res, 200, { ok: true, job: j });
+        if (!j) return sendJson(req, res, 404, { ok: false, error: "Không tìm thấy tiến trình." });
+        return sendJson(req, res, 200, { ok: true, job: j });
       }
 
       if (pathname === "/api/cli/job/input" && req.method === "POST") {
         const body = await readJsonBody(req);
-        return sendJson(res, 200, sendJobInput(body.id, body.text));
+        return sendJson(req, res, 200, sendJobInput(body.id, body.text));
       }
 
       if (pathname === "/api/cli/job/stop" && req.method === "POST") {
         const body = await readJsonBody(req);
-        return sendJson(res, 200, stopJob(body.id));
+        return sendJson(req, res, 200, stopJob(body.id));
       }
 
       if (pathname === "/api/cli/ping" && req.method === "POST") {
         const body = await readJsonBody(req);
         const out = await pingEngine(body.engine, body.model || "");
-        return sendJson(res, 200, out);
+        return sendJson(req, res, 200, out);
       }
 
       if (pathname === "/api/cli/translate" && req.method === "POST") {
         const body = await readJsonBody(req);
         const eng = getEngine(body.engine);
-        if (!eng) return sendJson(res, 400, { ok: false, error: `Nền tảng không hợp lệ: ${body.engine}` });
-        if (!body.prompt) return sendJson(res, 400, { ok: false, error: "Thiếu prompt" });
+        if (!eng) return sendJson(req, res, 400, { ok: false, error: `Nền tảng không hợp lệ: ${body.engine}` });
+        if (!body.prompt) return sendJson(req, res, 400, { ok: false, error: "Thiếu prompt" });
         const text = await eng.translate(body.prompt, body.model || "");
-        return sendJson(res, 200, { ok: true, engine: eng.id, text });
+        return sendJson(req, res, 200, { ok: true, engine: eng.id, text });
       }
 
       // Save built PDF/QA files directly into a clean Windows output folder (strict path traversal defense)
@@ -212,33 +275,33 @@ export function createAppServer() {
         const rawFolder = String(body.folderName || `PDF-${Date.now()}`).trim();
         const baseName = rawFolder.replace(/[<>:"/\\|?*\x00-\x1F]+/g, "_");
         if (!baseName || baseName === "." || baseName === ".." || /^\.+$/.test(baseName)) {
-          return sendJson(res, 400, { ok: false, error: "Tên thư mục xuất không hợp lệ." });
+          return sendJson(req, res, 400, { ok: false, error: "Tên thư mục xuất không hợp lệ." });
         }
         const cfg = getPublicConfig();
         const rootOut = path.resolve(body.outputDir || cfg.outputDir || defaultOutputDir());
         const targetDir = path.resolve(rootOut, baseName);
         if (!targetDir.startsWith(rootOut + path.sep)) {
-          return sendJson(res, 400, { ok: false, error: "Đường dẫn thư mục vượt phạm vi cho phép." });
+          return sendJson(req, res, 400, { ok: false, error: "Đường dẫn thư mục vượt phạm vi cho phép." });
         }
         fs.mkdirSync(targetDir, { recursive: true });
         const saved = [];
         for (const f of body.files || []) {
           const rawFile = String(f.name || "output.pdf");
           if (rawFile.includes("..") || rawFile.includes("/") || rawFile.includes("\\")) {
-            return sendJson(res, 400, { ok: false, error: `Tên file không hợp lệ: ${rawFile}` });
+            return sendJson(req, res, 400, { ok: false, error: `Tên file không hợp lệ: ${rawFile}` });
           }
           const safeFile = path.basename(rawFile).replace(/[<>:"/\\|?*\x00-\x1F]+/g, "_");
           if (!safeFile || safeFile === "." || safeFile === "..") {
-            return sendJson(res, 400, { ok: false, error: "Tên file rỗng hoặc không hợp lệ." });
+            return sendJson(req, res, 400, { ok: false, error: "Tên file rỗng hoặc không hợp lệ." });
           }
           const dest = path.resolve(targetDir, safeFile);
           if (!dest.startsWith(targetDir + path.sep)) {
-            return sendJson(res, 400, { ok: false, error: "Đường dẫn file không hợp lệ." });
+            return sendJson(req, res, 400, { ok: false, error: "Đường dẫn file không hợp lệ." });
           }
           fs.writeFileSync(dest, Buffer.from(String(f.base64 || ""), "base64"));
           saved.push({ name: safeFile, path: dest, size: fs.statSync(dest).size });
         }
-        return sendJson(res, 200, { ok: true, dir: targetDir, files: saved });
+        return sendJson(req, res, 200, { ok: true, dir: targetDir, files: saved });
       }
 
       if (req.method === "GET" || req.method === "HEAD") {
@@ -251,9 +314,9 @@ export function createAppServer() {
         return serveFileFromRoot(res, DESKTOP_DIR, pathname.slice(1));
       }
 
-      sendJson(res, 404, { ok: false, error: "Route not found" });
+      sendJson(req, res, 404, { ok: false, error: "Route not found" });
     } catch (err) {
-      sendJson(res, 500, { ok: false, error: err && err.message ? err.message : String(err) });
+      sendJson(req, res, 500, { ok: false, error: err && err.message ? err.message : String(err) });
     }
   });
 }

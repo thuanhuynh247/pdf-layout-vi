@@ -1,4 +1,4 @@
-/* desktop/app/app.js — PDF Layout VI Studio (Windows Desktop Application) */
+/* desktop/app/app.js — PDF Layout VI Studio v4.0 PRO (Windows Desktop Application) */
 (function () {
   "use strict";
   var $ = function (s) { return document.querySelector(s); };
@@ -6,39 +6,66 @@
 
   var STATE = {
     engines: [],
-    config: { activeEngine: "codex", chunkChars: 7000, outputDir: "", models: {}, apiKeys: {} },
+    config: {
+      activeEngine: "codex",
+      failoverEngines: ["gemini", "claude", "openrouter", "ollama"],
+      chunkChars: 7000,
+      outputDir: "",
+      theme: "dark",
+      tmEnabled: true,
+      glossaryPreset: "none",
+      glossary: [],
+      models: {},
+      apiKeys: {},
+    },
+    glossaryPresets: {},
+    tmStats: { count: 0, bytes: 0 },
+    history: [],
+    queue: [],          // [{ id, name, size, buffer, status: 'pending'|'running'|'done'|'error', detail, outputDir }]
+    activeQueueId: null,
+    queueRunning: false,
     inspectedId: "codex",
     activeJobId: null,
     jobTimer: null,
     pdfBytes: null,
     pdfName: "",
     docInfo: null,
-    segments: [],      // [{ id, src, dst, warn }]
-    segMap: {},        // id -> index
+    segments: [],       // [{ id, src, dst, warn, origin: 'ai'|'tm'|'manual' }]
+    segMap: {},
+    segFilter: "all",
+    segSearch: "",
     warnIds: [],
     running: false,
     stop: false,
     qaSrcFile: null,
     qaDstFile: null,
-    pingResults: {},   // id -> { status: "ok"|"fail"|"busy", label: "..." }
+    pingResults: {},
     batchLatencies: [],
     charsDone: 0,
     startedAt: 0,
+    tmSessionHits: 0,
+    tmSessionChecked: 0,
     checkpointKey: "",
+    previewPage: 1,
+    previewTotal: 1,
+    hasBuiltOutput: false,
   };
 
+  function H() { return window.PTLHelpers || {}; }
+
   function redact(s) {
-    return (window.PTLHelpers && window.PTLHelpers.redactSecrets) ? window.PTLHelpers.redactSecrets(s) : String(s || "");
+    return H().redactSecrets ? H().redactSecrets(s) : String(s || "");
   }
 
   function esc(s) {
-    return String(s || "").replace(/[&<>"']/g, function (c) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
       return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[c];
     });
   }
 
   function fmtSize(n) {
-    return n < 1e6 ? Math.max(1, Math.round(n / 1e3)) + " KB" : (n / 1e6).toFixed(1) + " MB";
+    var v = Number(n || 0);
+    return v < 1e6 ? Math.max(1, Math.round(v / 1e3)) + " KB" : (v / 1e6).toFixed(1) + " MB";
   }
 
   function logLine(msg) {
@@ -47,6 +74,26 @@
     var ts = new Date().toLocaleTimeString("vi-VN", { hour12: false });
     pre.textContent += "[" + ts + "] " + redact(msg) + "\n";
     pre.scrollTop = pre.scrollHeight;
+  }
+
+  function notifyDesktop(title, body) {
+    if (window.PDF_DESKTOP && window.PDF_DESKTOP.notify) {
+      window.PDF_DESKTOP.notify(title, body).catch(function () { /* ignore */ });
+    }
+  }
+
+  function downloadTextFile(filename, content, mime) {
+    var blob = new Blob([content], { type: mime || "text/plain;charset=utf-8" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
   }
 
   function api(path, body) {
@@ -59,6 +106,17 @@
         return d;
       });
     });
+  }
+
+  /* ---------------- Theme Management ---------------- */
+  function applyTheme(theme) {
+    var mode = theme === "light" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", mode);
+    if ($("#theme-icon-sun")) $("#theme-icon-sun").hidden = mode === "light";
+    if ($("#theme-icon-moon")) $("#theme-icon-moon").hidden = mode !== "light";
+    if (window.PDF_DESKTOP && window.PDF_DESKTOP.setTheme) {
+      window.PDF_DESKTOP.setTheme(mode).catch(function () { /* ignore */ });
+    }
   }
 
   /* ---------------- Pyodide Worker ---------------- */
@@ -98,15 +156,31 @@
   function switchView(name) {
     $$(".nav-btn").forEach(function (b) { b.classList.toggle("is-active", b.getAttribute("data-view") === name); });
     $$(".view").forEach(function (v) { v.classList.toggle("is-active", v.id === "view-" + name); });
+    if (name === "history") loadHistory();
+    if (name === "logs") refreshTmStats();
   }
+
   function switchMonTab(tab) {
     $$(".tab-btn").forEach(function (b) { b.classList.toggle("is-active", b.getAttribute("data-mon-tab") === tab); });
     $$(".mon-panel").forEach(function (p) { p.classList.toggle("is-active", p.id === "mon-tab-" + tab); });
+    if (tab === "preview" && STATE.pdfBytes) renderPreviewPage();
   }
 
-  /* ---------------- Connectors & Inspector ---------------- */
+  /* ---------------- Connectors, Failover & Inspector ---------------- */
   function findEngine(id) {
     return STATE.engines.filter(function (e) { return e.id === id; })[0] || null;
+  }
+
+  function getActiveGlossaryTerms() {
+    var list = [];
+    var preset = STATE.glossaryPresets && STATE.glossaryPresets[STATE.config.glossaryPreset];
+    if (preset && Array.isArray(preset.terms)) {
+      preset.terms.forEach(function (t) { list.push({ src: t.src, dst: t.dst, source: preset.name }); });
+    }
+    (STATE.config.glossary || []).forEach(function (t) {
+      list.push({ src: t.src, dst: t.dst, note: t.note || "", source: "Tùy chỉnh" });
+    });
+    return list;
   }
 
   function updateHeaderAndConfigUI() {
@@ -121,6 +195,40 @@
     $("#rail-output-dir").textContent = outDir;
     $("#rail-output-dir").title = outDir;
     if (STATE.config.chunkChars) $("#ws-chunk").value = String(STATE.config.chunkChars);
+    if ($("#cfg-tm-enabled")) $("#cfg-tm-enabled").checked = STATE.config.tmEnabled !== false;
+    if ($("#ws-tm-pill")) $("#ws-tm-pill").textContent = "TM: " + (STATE.config.tmEnabled !== false ? "Bật (" + (STATE.tmStats.count || 0) + ")" : "Tắt");
+
+    var gTerms = getActiveGlossaryTerms();
+    if ($("#badge-glossary")) $("#badge-glossary").textContent = String(gTerms.length);
+    if ($("#ws-gloss-pill")) $("#ws-gloss-pill").textContent = "Từ điển: " + gTerms.length + " mục";
+
+    var fo = (STATE.config.failoverEngines || []).filter(function (id) { return id !== STATE.config.activeEngine; });
+    var foNames = fo.map(function (id) { var e = findEngine(id); return e ? e.name : id; });
+    if ($("#failover-summary")) {
+      $("#failover-summary").textContent = foNames.length
+        ? "Chuỗi dự phòng: " + foNames.join(" → ")
+        : "Chưa chọn nền tảng dự phòng (bấm Cấu hình dự phòng để bật Auto-Failover).";
+    }
+    if ($("#vault-failover-count")) $("#vault-failover-count").textContent = String(foNames.length);
+    if ($("#vault-failover-list")) $("#vault-failover-list").textContent = foNames.join(" → ") || "Chưa cấu hình";
+    applyTheme(STATE.config.theme);
+  }
+
+  function renderFailoverChips() {
+    var wrap = $("#failover-chips");
+    if (!wrap) return;
+    var selected = STATE.config.failoverEngines || [];
+    wrap.innerHTML = STATE.engines.map(function (e) {
+      var on = selected.indexOf(e.id) >= 0;
+      return "<label class='fo-chip" + (on ? " is-on" : "") + "'>" +
+        "<input type='checkbox' data-fo-id='" + esc(e.id) + "'" + (on ? " checked" : "") + ">" +
+        "<span>" + esc(e.name) + (e.installed && e.loggedIn ? " ✓" : "") + "</span></label>";
+    }).join("");
+    $$("[data-fo-id]").forEach(function (chk) {
+      chk.addEventListener("change", function () {
+        chk.parentElement.classList.toggle("is-on", chk.checked);
+      });
+    });
   }
 
   function renderRailConnectors() {
@@ -152,7 +260,6 @@
       });
     });
 
-    // Sync workspace engine dropdown
     var sel = $("#ws-engine-select");
     if (sel) {
       sel.innerHTML = STATE.engines.map(function (e) {
@@ -280,19 +387,33 @@
     }).catch(function (e) { logLine("Lỗi lưu config: " + e.message); });
   }
 
+  function refreshTmStats() {
+    return api("/api/tm/stats").then(function (d) {
+      STATE.tmStats = d.stats || { count: 0, bytes: 0 };
+      if ($("#tm-count-pill")) $("#tm-count-pill").textContent = String(STATE.tmStats.count || 0);
+      if ($("#vault-tm-count")) $("#vault-tm-count").textContent = Number(STATE.tmStats.count || 0).toLocaleString("vi-VN");
+      if ($("#vault-tm-size")) $("#vault-tm-size").textContent = fmtSize(STATE.tmStats.bytes || 0) + " trên đĩa";
+      updateHeaderAndConfigUI();
+    }).catch(function () { /* ignore */ });
+  }
+
   function loadEngines() {
     return api("/api/cli/engines").then(function (d) {
       STATE.engines = d.engines || [];
       if (d.config) STATE.config = d.config;
+      if (d.tm) STATE.tmStats = d.tm;
       if (!findEngine(STATE.config.activeEngine)) {
         var firstReady = STATE.engines.filter(function (e) { return e.installed && e.loggedIn; })[0];
         STATE.config.activeEngine = (firstReady && firstReady.id) || (STATE.engines[0] && STATE.engines[0].id) || "codex";
       }
       if (!findEngine(STATE.inspectedId)) STATE.inspectedId = STATE.config.activeEngine;
+      if ($("#tm-count-pill")) $("#tm-count-pill").textContent = String(STATE.tmStats.count || 0);
       updateHeaderAndConfigUI();
       renderRailConnectors();
       renderConnectorsGrid();
       renderInspector();
+      renderFailoverChips();
+      renderGlossaryView();
     }).catch(function (e) {
       logLine("Lỗi quét nền tảng AI: " + e.message);
     });
@@ -336,7 +457,149 @@
     }, 600);
   }
 
-  /* ---------------- PDF Workspace, Checkpoints & Telemetry ---------------- */
+  /* ---------------- Multi-PDF Batch Queue ---------------- */
+  function renderQueueTable() {
+    var count = STATE.queue.length;
+    if ($("#tab-queue-count")) $("#tab-queue-count").textContent = String(count);
+    var badge = $("#badge-queue");
+    if (badge) {
+      badge.hidden = count === 0;
+      badge.textContent = String(count);
+    }
+    var pendingCount = STATE.queue.filter(function (q) { return q.status === "pending" || q.status === "error"; }).length;
+    if ($("#q-run-all")) $("#q-run-all").disabled = pendingCount === 0 || STATE.running || STATE.queueRunning;
+
+    var tbody = $("#queue-tbody");
+    if (!tbody) return;
+    if (!count) {
+      tbody.innerHTML = "<tr><td colspan='4' class='empty-cell'>Chưa có tệp nào trong hàng đợi. Bấm \"+ Thêm nhiều PDF\" ở cột trái.</td></tr>";
+      return;
+    }
+    tbody.innerHTML = STATE.queue.map(function (q, idx) {
+      var cls = q.status === "done" ? "ok" : q.status === "running" ? "tm" : q.status === "error" ? "warn" : "off";
+      var label = q.status === "done" ? "✔ Hoàn tất" : q.status === "running" ? "Đang xử lý…" : q.status === "error" ? "✘ Lỗi" : "Đang chờ";
+      var isCur = STATE.activeQueueId === q.id;
+      return "<tr><td><strong>" + (isCur ? "▶ " : "") + esc(q.name) + "</strong>" + (q.detail ? "<div class='hint'>" + esc(q.detail) + "</div>" : "") + "</td>" +
+        "<td class='mono'>" + fmtSize(q.size) + "</td>" +
+        "<td><span class='status-chip " + cls + "'>" + label + "</span></td>" +
+        "<td><div style='display:flex;gap:4px'>" +
+        "<button class='btn-xs' data-q-load='" + esc(q.id) + "' type='button'>Nạp</button>" +
+        (idx > 0 ? "<button class='btn-xs' data-q-up='" + esc(q.id) + "' type='button' title='Đưa lên'>↑</button>" : "") +
+        (q.outputDir ? "<button class='btn-xs' data-q-open='" + esc(q.outputDir) + "' type='button'>Mở</button>" : "") +
+        "<button class='btn-xs' data-q-del='" + esc(q.id) + "' type='button'>Xóa</button>" +
+        "</div></td></tr>";
+    }).join("");
+
+    $$("[data-q-load]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (STATE.running) return;
+        var item = STATE.queue.filter(function (x) { return x.id === b.getAttribute("data-q-load"); })[0];
+        if (item) {
+          STATE.activeQueueId = item.id;
+          loadPdfBuffer(item.buffer, item.name);
+          renderQueueTable();
+        }
+      });
+    });
+    $$("[data-q-up]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var id = b.getAttribute("data-q-up");
+        var i = STATE.queue.findIndex(function (x) { return x.id === id; });
+        if (i > 0) {
+          var tmp = STATE.queue[i - 1];
+          STATE.queue[i - 1] = STATE.queue[i];
+          STATE.queue[i] = tmp;
+          renderQueueTable();
+        }
+      });
+    });
+    $$("[data-q-open]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (window.PDF_DESKTOP && window.PDF_DESKTOP.openPath) window.PDF_DESKTOP.openPath(b.getAttribute("data-q-open"));
+      });
+    });
+    $$("[data-q-del]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var id = b.getAttribute("data-q-del");
+        STATE.queue = STATE.queue.filter(function (x) { return x.id !== id; });
+        renderQueueTable();
+      });
+    });
+  }
+
+  function enqueueFiles(fileEntries) {
+    if (!fileEntries || !fileEntries.length) return;
+    var firstNew = null;
+    fileEntries.forEach(function (f) {
+      var item = {
+        id: "q-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6),
+        name: f.name,
+        size: f.buffer.byteLength,
+        buffer: f.buffer,
+        status: "pending",
+        detail: "",
+        outputDir: "",
+      };
+      if (!firstNew) firstNew = item;
+      STATE.queue.push(item);
+    });
+    renderQueueTable();
+    if (fileEntries.length > 1) {
+      logLine("Đã thêm " + fileEntries.length + " tệp PDF vào hàng đợi hàng loạt.");
+      if (!STATE.pdfBytes && firstNew) {
+        STATE.activeQueueId = firstNew.id;
+        loadPdfBuffer(firstNew.buffer, firstNew.name);
+      }
+      switchMonTab("queue");
+    } else if (firstNew) {
+      STATE.activeQueueId = firstNew.id;
+      loadPdfBuffer(firstNew.buffer, firstNew.name);
+      renderQueueTable();
+    }
+  }
+
+  function runBatchQueue() {
+    if (STATE.running || STATE.queueRunning) return;
+    var pending = STATE.queue.filter(function (q) { return q.status === "pending" || q.status === "error"; });
+    if (!pending.length) return;
+    STATE.queueRunning = true;
+    STATE.stop = false;
+    renderQueueTable();
+
+    var doneCount = 0;
+    function nextJob(idx) {
+      if (STATE.stop || idx >= pending.length) {
+        STATE.queueRunning = false;
+        renderQueueTable();
+        logLine("Hàng đợi hoàn tất: đã xử lý " + doneCount + "/" + pending.length + " tệp PDF.");
+        notifyDesktop("PDF Layout VI Studio", "Đã hoàn tất hàng đợi " + doneCount + "/" + pending.length + " tài liệu PDF!");
+        return Promise.resolve();
+      }
+      var item = pending[idx];
+      item.status = "running";
+      item.detail = "Đang phân tích & dịch…";
+      STATE.activeQueueId = item.id;
+      renderQueueTable();
+      return loadPdfBuffer(item.buffer, item.name).then(function () {
+        return runTranslationAndBuild(true);
+      }).then(function (saved) {
+        item.status = "done";
+        item.outputDir = saved && saved.dir ? saved.dir : "";
+        item.detail = saved ? ("Đã xuất " + (saved.files || []).length + " tệp") : "Hoàn tất";
+        doneCount++;
+        renderQueueTable();
+        return nextJob(idx + 1);
+      }).catch(function (err) {
+        item.status = "error";
+        item.detail = err && err.message ? err.message : String(err);
+        renderQueueTable();
+        return nextJob(idx + 1);
+      });
+    }
+    nextJob(0);
+  }
+
+  /* ---------------- Checkpoints, Telemetry & PDF Workspace ---------------- */
   function checkpointStorageKey(name, bytesLen, pages, huong) {
     return "ptl_ckpt_v1:" + [name || "", bytesLen || 0, pages || "", huong || "tu-dong"].join("|");
   }
@@ -347,9 +610,7 @@
       if (!raw) return null;
       var parsed = JSON.parse(raw);
       return parsed && typeof parsed === "object" ? parsed : null;
-    } catch {
-      return null;
-    }
+    } catch { return null; }
   }
 
   function saveStudioCheckpoint(translatedObj) {
@@ -360,13 +621,7 @@
         if (translatedObj[k]) cur[k] = translatedObj[k];
       });
       localStorage.setItem(STATE.checkpointKey, JSON.stringify(cur));
-    } catch {
-      /* localStorage quota exceeded or unavailable */
-    }
-  }
-
-  function clearStudioCheckpoint(key) {
-    try { if (key) localStorage.removeItem(key); } catch { /* ignore */ }
+    } catch { /* ignore quota */ }
   }
 
   function updateBentoKpis(done, total, warnCount) {
@@ -375,33 +630,31 @@
     if ($("#kpi-seg")) $("#kpi-seg").textContent = d.toLocaleString("vi-VN") + " / " + t.toLocaleString("vi-VN");
     if ($("#kpi-seg-sub")) $("#kpi-seg-sub").textContent = pct + "% hoàn tất";
 
+    var tmPct = STATE.tmSessionChecked > 0 ? Math.round((100 * STATE.tmSessionHits) / STATE.tmSessionChecked) : 0;
+    if ($("#kpi-tm")) $("#kpi-tm").textContent = tmPct + "%";
+    if ($("#kpi-tm-sub")) $("#kpi-tm-sub").textContent = STATE.tmSessionHits + " đoạn khớp 0ms";
+
+    var lats = STATE.batchLatencies || [];
     if (STATE.startedAt && STATE.charsDone > 0 && $("#kpi-speed")) {
       var elapsedSec = Math.max(0.5, (Date.now() - STATE.startedAt) / 1000);
       var cps = Math.round(STATE.charsDone / elapsedSec);
-      $("#kpi-speed").textContent = cps.toLocaleString("vi-VN");
-      $("#kpi-speed-sub").textContent = STATE.charsDone.toLocaleString("vi-VN") + " ký tự · " + Math.round(elapsedSec) + "s";
+      var avgStr = lats.length ? (" · TB " + ((lats.reduce(function (a, b) { return a + b; }, 0) / lats.length) / 1000).toFixed(1) + "s/lô") : "";
+      $("#kpi-speed").textContent = cps.toLocaleString("vi-VN") + " c/s";
+      $("#kpi-latency-sub").textContent = STATE.charsDone.toLocaleString("vi-VN") + " ký tự" + avgStr;
     } else if ($("#kpi-speed")) {
       $("#kpi-speed").textContent = "—";
-      $("#kpi-speed-sub").textContent = "ký tự / giây";
+      $("#kpi-latency-sub").textContent = "chưa chạy lô nào";
     }
 
-    var lats = STATE.batchLatencies || [];
-    if (lats.length && $("#kpi-latency")) {
-      var avgMs = Math.round(lats.reduce(function (a, b) { return a + b; }, 0) / lats.length);
-      $("#kpi-latency").textContent = (avgMs / 1000).toFixed(1) + "s";
-      $("#kpi-latency-sub").textContent = "TB qua " + lats.length + " lô gần nhất";
+    if (lats.length) {
       var chartEl = $("#ws-latency-chart");
-      if (chartEl && window.PTLHelpers && window.PTLHelpers.buildBatchLatencySvg) {
-        var svg = window.PTLHelpers.buildBatchLatencySvg(lats);
-        if (svg) {
-          chartEl.innerHTML = svg;
-          chartEl.hidden = false;
-        }
+      if (chartEl && H().buildBatchLatencySvg) {
+        var svg = H().buildBatchLatencySvg(lats);
+        if (svg) { chartEl.innerHTML = svg; chartEl.hidden = false; }
       }
-    } else if ($("#kpi-latency")) {
-      $("#kpi-latency").textContent = "—";
-      $("#kpi-latency-sub").textContent = "chưa chạy lô nào";
-      if ($("#ws-latency-chart")) { $("#ws-latency-chart").hidden = true; $("#ws-latency-chart").innerHTML = ""; }
+    } else if ($("#ws-latency-chart")) {
+      $("#ws-latency-chart").hidden = true;
+      $("#ws-latency-chart").innerHTML = "";
     }
 
     var wc = typeof warnCount === "number" ? warnCount : STATE.warnIds.length;
@@ -418,6 +671,11 @@
     STATE.batchLatencies = [];
     STATE.charsDone = 0;
     STATE.startedAt = 0;
+    STATE.tmSessionHits = 0;
+    STATE.tmSessionChecked = 0;
+    STATE.previewPage = 1;
+    STATE.previewTotal = 1;
+    STATE.hasBuiltOutput = false;
     $("#ws-file-name").textContent = fileName;
     $("#ws-file-sub").textContent = fmtSize(arrayBuffer.byteLength) + " · Đang phân tích cấu trúc…";
     $("#mon-status-title").textContent = "Đang khởi động bộ máy PDF & phân tích trang…";
@@ -425,32 +683,32 @@
     $("#res-empty").hidden = false;
     $("#res-content").hidden = true;
     $("#ws-warn-bar").hidden = true;
+    $("#pv-empty").hidden = false;
+    $("#pv-side-grid").hidden = true;
+    $("#pv-curtain-wrap").hidden = true;
     updateBentoKpis(0, 0, 0);
     switchMonTab("segments");
-    preparePdf();
+    return preparePdf();
   }
 
   function preparePdf() {
-    if (!STATE.pdfBytes) return;
+    if (!STATE.pdfBytes) return Promise.resolve();
     var huongEl = $('input[name="ws-dir"]:checked');
     var huong = huongEl ? huongEl.value : "tu-dong";
     var pages = $("#ws-pages").value.trim();
     var copy = STATE.pdfBytes.slice(0);
     logLine("Phân tích PDF: " + STATE.pdfName + (pages ? " (trang " + pages + ")" : ""));
-    callWorker("prepare", copy, STATE.pdfName, 15, pages, huong).then(function (r) {
+    return callWorker("prepare", copy, STATE.pdfName, 15, pages, huong).then(function (r) {
       if (!r.ok) throw new Error(r.error || r.message || "Không đọc được file PDF.");
       STATE.docInfo = r;
-      var summary = (window.PTLHelpers && window.PTLHelpers.mapPrepareSummary)
-        ? window.PTLHelpers.mapPrepareSummary(r, STATE.pdfBytes.byteLength)
-        : {
-          pages: r.pages || 0,
-          totalSegments: r.total || 0,
-          words: r.words || 0,
-          batchesTotal: r.batches_total || 0,
-          scannedPages: r.scanned || [],
-          huong: r.huong || "en-vi",
-        };
+      var summary = H().mapPrepareSummary ? H().mapPrepareSummary(r, STATE.pdfBytes.byteLength) : {
+        pages: r.pages || 0, totalSegments: r.total || 0, words: r.words || 0,
+        batchesTotal: r.batches_total || 0, scannedPages: r.scanned || [], huong: r.huong || "en-vi",
+      };
       STATE.docInfo.summary = summary;
+      STATE.previewTotal = Math.max(1, summary.pages || 1);
+      STATE.previewPage = 1;
+      $("#pv-page-label").textContent = "Trang 1 / " + STATE.previewTotal;
       STATE.checkpointKey = checkpointStorageKey(STATE.pdfName, STATE.pdfBytes.byteLength, pages, summary.huong);
 
       $("#ws-file-sub").textContent = fmtSize(STATE.pdfBytes.byteLength) + " · Sẵn sàng dịch";
@@ -482,10 +740,8 @@
             updateProgressUI(lr);
             STATE.warnIds = Object.keys(lr.warnings || {});
             updateBentoKpis(lr.done || 0, lr.total || summary.totalSegments, STATE.warnIds.length);
-            var previewRows = ckptKeys.slice(0, 150).map(function (id) {
-              return { id: id, text: "(đã nạp từ checkpoint phiên trước)" };
-            });
-            appendSegmentRows(previewRows, savedCkpt, lr.warnings);
+            var previewRows = ckptKeys.slice(0, 200).map(function (id) { return { id: id, text: "(đã nạp từ checkpoint phiên trước)" }; });
+            appendSegmentRows(previewRows, savedCkpt, lr.warnings, "tm");
             $("#mon-status-title").textContent = "Đã khôi phục " + (lr.done || 0) + "/" + summary.totalSegments + " đoạn từ checkpoint · bấm Bắt đầu để dịch tiếp";
             logLine("Khôi phục checkpoint: " + (lr.done || 0) + "/" + summary.totalSegments + " đoạn.");
           }
@@ -500,6 +756,7 @@
     }).catch(function (e) {
       $("#mon-status-title").textContent = "Lỗi phân tích PDF: " + e.message;
       logLine("Lỗi prepare PDF: " + e.message);
+      throw e;
     });
   }
 
@@ -510,51 +767,181 @@
     $("#mon-progress-nums").textContent = p.done.toLocaleString("vi-VN") + "/" + p.total.toLocaleString("vi-VN") + " đoạn · " + pct + "% (lô " + (p.batches_done || 0) + "/" + (p.batches_total || 0) + ")";
   }
 
-  function appendSegmentRows(items, translatedObj, warnings) {
+  /* ---------------- Inline Segment Editor & Filter ---------------- */
+  function renderSegmentsTable() {
     var tbody = $("#seg-tbody");
-    if (!STATE.segments.length) tbody.innerHTML = "";
+    if (!tbody) return;
+    if (!STATE.segments.length) {
+      tbody.innerHTML = "<tr><td colspan='4' class='empty-cell'>Chưa có đoạn văn bản nào được nạp.</td></tr>";
+      return;
+    }
+    var q = (STATE.segSearch || "").trim().toLowerCase();
+    var filter = STATE.segFilter || "all";
+    var filtered = STATE.segments.filter(function (s) {
+      if (filter === "warn" && !s.warn) return false;
+      if (filter === "tm" && s.origin !== "tm") return false;
+      if (filter === "manual" && s.origin !== "manual") return false;
+      if (q) {
+        var hay = (s.id + " " + s.src + " " + s.dst).toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+    if (!filtered.length) {
+      tbody.innerHTML = "<tr><td colspan='4' class='empty-cell'>Không có đoạn nào khớp bộ lọc hiện tại.</td></tr>";
+      return;
+    }
+    var slice = filtered.slice(-220);
+    tbody.innerHTML = slice.map(function (s) {
+      var st = s.warn
+        ? "<span class='status-chip warn'>" + esc(s.warn) + "</span>"
+        : s.origin === "tm"
+          ? "<span class='status-chip tm'>TM 0ms</span>"
+          : s.origin === "manual"
+            ? "<span class='status-chip ok'>Sửa tay</span>"
+            : "<span class='status-chip ok'>OK</span>";
+      return "<tr>" +
+        "<td class='mono'>" + esc(s.id) + "</td>" +
+        "<td>" + esc(s.src.slice(0, 220)) + "</td>" +
+        "<td><div class='seg-edit-cell' contenteditable='true' data-edit-seg-id='" + esc(s.id) + "' title='Bấm để chỉnh sửa trực tiếp rồi nhấn ra ngoài để lưu'>" + esc(s.dst || "") + "</div></td>" +
+        "<td>" + st + "</td></tr>";
+    }).join("");
+
+    $$("[data-edit-seg-id]").forEach(function (cell) {
+      cell.addEventListener("blur", function () {
+        var id = cell.getAttribute("data-edit-seg-id");
+        var idx = STATE.segMap[id];
+        if (idx === undefined) return;
+        var seg = STATE.segments[idx];
+        var nextText = cell.textContent.trim();
+        if (!nextText || nextText === seg.dst) return;
+        seg.dst = nextText;
+        seg.origin = "manual";
+        seg.warn = "";
+        STATE.warnIds = STATE.warnIds.filter(function (w) { return w !== id; });
+        var patch = {};
+        patch[id] = nextText;
+        saveStudioCheckpoint(patch);
+        callWorker("load", JSON.stringify(patch)).then(function (lr) {
+          if (STATE.config.tmEnabled && seg.src && seg.src.indexOf("(đã nạp") !== 0) {
+            var dir = (STATE.docInfo && STATE.docInfo.huong) || "en-vi";
+            api("/api/tm/save", { pairs: [{ src: seg.src, dst: nextText }], dir: dir, engine: "manual" }).catch(function () { /* ignore */ });
+          }
+          updateBentoKpis(lr.done, lr.total, STATE.warnIds.length);
+          renderSegmentsTable();
+          logLine("Đã lưu chỉnh sửa tay cho đoạn " + id + " (bấm \"Dựng lại PDF tức thì\" để xuất bản mới).");
+        }).catch(function (e) { logLine("Lỗi cập nhật đoạn " + id + ": " + e.message); });
+      });
+    });
+  }
+
+  function appendSegmentRows(items, translatedObj, warnings, origin) {
     items.forEach(function (it) {
       var dst = translatedObj[it.id] || "";
       var w = warnings && warnings[it.id] ? warnings[it.id].warning : "";
       if (STATE.segMap[it.id] !== undefined) {
         var idx = STATE.segMap[it.id];
-        STATE.segments[idx] = { id: it.id, src: it.text, dst: dst, warn: w };
+        STATE.segments[idx] = { id: it.id, src: it.text, dst: dst, warn: w, origin: origin || "ai" };
       } else {
         STATE.segMap[it.id] = STATE.segments.length;
-        STATE.segments.push({ id: it.id, src: it.text, dst: dst, warn: w });
+        STATE.segments.push({ id: it.id, src: it.text, dst: dst, warn: w, origin: origin || "ai" });
       }
     });
-    tbody.innerHTML = STATE.segments.slice(-150).map(function (s) {
-      var st = s.warn ? "<span class='status-chip warn'>" + esc(s.warn) + "</span>" : "<span class='status-chip ok'>OK</span>";
-      return "<tr><td class='mono'>" + esc(s.id) + "</td><td>" + esc(s.src.slice(0, 180)) + "</td><td>" + esc((s.dst || "").slice(0, 200)) + "</td><td>" + st + "</td></tr>";
-    }).join("");
-    tbody.parentElement.parentElement.scrollTop = tbody.parentElement.parentElement.scrollHeight;
+    renderSegmentsTable();
+    var wrap = $("#mon-tab-segments .table-wrap");
+    if (wrap) wrap.scrollTop = wrap.scrollHeight;
   }
 
+  /* ---------------- Visual Offline PDF Page Comparator ---------------- */
+  function updateCurtainSlider(pct) {
+    var v = Math.max(0, Math.min(100, Number(pct) || 50));
+    if ($("#pv-curtain-overlay")) $("#pv-curtain-overlay").style.clipPath = "inset(0 " + (100 - v) + "% 0 0)";
+    if ($("#pv-curtain-divider")) $("#pv-curtain-divider").style.left = v + "%";
+  }
+
+  function renderPreviewPage() {
+    if (!STATE.pdfBytes) return;
+    var page = Math.max(1, Math.min(STATE.previewTotal, STATE.previewPage));
+    var zoom = Number($("#pv-zoom").value) || 1.25;
+    var mode = $("#pv-mode").value || "side";
+    var target = $("#pv-target").value || "dst";
+    $("#pv-page-label").textContent = "Đang tải trang " + page + "…";
+
+    Promise.all([
+      callWorker("renderPage", "src", page, zoom),
+      callWorker("renderPage", target, page, zoom).catch(function () { return { ok: false }; }),
+    ]).then(function (pair) {
+      var src = pair[0], dst = pair[1];
+      if (!src || !src.ok) throw new Error((src && src.error) || "Không render được trang gốc.");
+      STATE.previewTotal = src.pages || STATE.previewTotal;
+      STATE.previewPage = src.page || page;
+      $("#pv-page-label").textContent = "Trang " + STATE.previewPage + " / " + STATE.previewTotal;
+      var srcUrl = "data:image/png;base64," + src.png_base64;
+      var dstUrl = (dst && dst.ok) ? ("data:image/png;base64," + dst.png_base64) : srcUrl;
+
+      $("#pv-empty").hidden = true;
+      if (mode === "slider" && dst && dst.ok) {
+        $("#pv-side-grid").hidden = true;
+        $("#pv-curtain-wrap").hidden = false;
+        $("#pv-curtain-src").src = srcUrl;
+        $("#pv-curtain-dst").src = dstUrl;
+        updateCurtainSlider($("#pv-slider-range").value);
+      } else {
+        $("#pv-curtain-wrap").hidden = true;
+        $("#pv-side-grid").hidden = false;
+        $("#pv-img-src").src = srcUrl;
+        $("#pv-img-dst").src = dstUrl;
+        $("#pv-dst-caption").textContent = (dst && dst.ok)
+          ? ("Bản đã dịch: " + dst.file)
+          : "Chưa dựng bản dịch (đang hiển thị tạm trang gốc)";
+      }
+    }).catch(function (e) {
+      $("#pv-page-label").textContent = "Trang " + STATE.previewPage + " / " + STATE.previewTotal;
+      logLine("Lỗi render xem trước PDF: " + e.message);
+    });
+  }
+
+  /* ---------------- Translation Engine (TM + Glossary + Auto-Failover) ---------------- */
   function stripCodeFences(s) {
-    if (window.PTLHelpers && window.PTLHelpers.extractJsonText) {
-      return window.PTLHelpers.extractJsonText(s);
-    }
-    return String(s || "").trim();
+    return H().extractJsonText ? H().extractJsonText(s) : String(s || "").trim();
   }
 
-  function translateBatchWithRetry(engineId, model, prompt, maxRetries) {
+  function translateSingleEngineWithRetry(engineId, model, prompt, maxRetries) {
     var attempt = 0;
     var limit = typeof maxRetries === "number" ? maxRetries : 2;
     function runOnce() {
       var t0 = Date.now();
       return api("/api/cli/translate", { engine: engineId, model: model, prompt: prompt }).then(function (ans) {
         if (!ans || !String(ans.text || "").trim()) throw new Error("CLI trả về phản hồi rỗng.");
-        return { text: ans.text, latencyMs: Date.now() - t0 };
+        return { text: ans.text, latencyMs: Date.now() - t0, engineId: engineId };
       }).catch(function (err) {
         if (STATE.stop || attempt >= limit) throw err;
         attempt++;
         var waitMs = attempt === 1 ? 800 : 1800;
-        logLine("Thử lại lần " + attempt + "/" + limit + " sau " + waitMs + "ms (" + err.message + ")");
+        logLine("Thử lại " + engineId + " lần " + attempt + "/" + limit + " sau " + waitMs + "ms (" + err.message + ")");
         return new Promise(function (resolve) { setTimeout(resolve, waitMs); }).then(runOnce);
       });
     }
     return runOnce();
+  }
+
+  function translateWithFailover(primaryId, primaryModel, prompt) {
+    var tried = [];
+    function attemptEngine(engId, mdl) {
+      tried.push(engId);
+      return translateSingleEngineWithRetry(engId, mdl, prompt, 1).catch(function (err) {
+        if (STATE.stop) throw err;
+        var nextEng = H().pickFailoverEngine
+          ? H().pickFailoverEngine(engId, STATE.config.failoverEngines, STATE.engines, tried)
+          : null;
+        if (!nextEng) throw err;
+        var nextModel = (STATE.config.models && STATE.config.models[nextEng.id]) || "";
+        logLine("⚡ Auto-Failover: " + engId + " gặp lỗi (" + err.message + ") → tự chuyển sang " + nextEng.name);
+        $("#mon-status-title").textContent = "Auto-Failover → đang dịch tiếp bằng " + nextEng.name + "…";
+        return attemptEngine(nextEng.id, nextModel);
+      });
+    }
+    return attemptEngine(primaryId, primaryModel);
   }
 
   function u8ToBase64(u8) {
@@ -599,10 +986,37 @@
         var stamp = new Date().toISOString().slice(0, 16).replace(/[:T]/g, "-");
         var folderName = STATE.pdfName.replace(/\.pdf$/i, "") + "-" + stamp;
         return api("/api/output/save", { folderName: folderName, files: payloadFiles }).then(function (saved) {
+          STATE.hasBuiltOutput = true;
           renderBuildResult(qa, saved);
+          recordHistory(qa, saved);
+          return saved;
         });
       });
     });
+  }
+
+  function recordHistory(qa, saved) {
+    var checks = qa.checks || [];
+    var passed = checks.filter(function (c) { return !!c.dat; }).length;
+    var summary = (STATE.docInfo && STATE.docInfo.summary) || {};
+    var tmPct = STATE.tmSessionChecked > 0 ? Math.round((100 * STATE.tmSessionHits) / STATE.tmSessionChecked) : 0;
+    api("/api/history", {
+      pdfName: STATE.pdfName,
+      huong: summary.huong || "en-vi",
+      pages: summary.pages || 0,
+      segments: summary.totalSegments || STATE.segments.length,
+      words: summary.words || 0,
+      engine: $("#ws-engine-select").value || STATE.config.activeEngine,
+      model: $("#ws-model-input").value.trim(),
+      tmHitPct: tmPct,
+      qaPass: Boolean(qa.pass),
+      qaPassedCount: passed,
+      qaTotalCount: checks.length,
+      outputDir: saved.dir || "",
+      files: saved.files || [],
+    }).then(function () {
+      loadHistory();
+    }).catch(function () { /* ignore */ });
   }
 
   function renderBuildResult(qa, saved) {
@@ -636,7 +1050,7 @@
     }).join("");
 
     var qaChartEl = $("#res-lieflat-chart");
-    if (qaChartEl && window.PTLHelpers && window.PTLHelpers.buildLieFlatMetricsSvg && qa.checks && qa.checks.length) {
+    if (qaChartEl && H().buildLieFlatMetricsSvg && qa.checks && qa.checks.length) {
       var totalChecks = qa.checks.length;
       var passedChecks = qa.checks.filter(function (c) { return !!c.dat; }).length;
       var hardChecks = qa.checks.filter(function (c, idx) { return !(c.canh_bao !== undefined ? c.canh_bao : idx >= 6); });
@@ -646,7 +1060,7 @@
       var segDone = STATE.segments.length;
       var warnSegs = STATE.warnIds.length;
       var segCleanPct = segDone > 0 ? Math.max(0, Math.round((100 * (segDone - warnSegs)) / segDone)) : 100;
-      qaChartEl.innerHTML = window.PTLHelpers.buildLieFlatMetricsSvg("Tỷ lệ Đạt kiểm định PDF (LieFlat 0–100%)", [
+      qaChartEl.innerHTML = H().buildLieFlatMetricsSvg("Tỷ lệ Đạt kiểm định PDF (LieFlat 0–100%)", [
         { label: "Cấu trúc bắt buộc", pct: hardPct, valueText: hardPassed + "/" + hardChecks.length + " đạt", color: hardPct === 100 ? "#22c55e" : "#f43f5e" },
         { label: "Tổng 8 tiêu chí QA", pct: warnCleanPct, valueText: passedChecks + "/" + totalChecks + " mục", color: "#14b8a6" },
         { label: "Đoạn văn sạch cảnh báo", pct: segCleanPct, valueText: segCleanPct + "%", color: "#38bdf8" },
@@ -657,22 +1071,35 @@
     switchMonTab("results");
     $("#mon-status-title").textContent = "Hoàn tất · đã lưu " + (saved.files || []).length + " file PDF & QA!";
     logLine("Hoàn tất xuất PDF tại: " + saved.dir);
+    if (!STATE.queueRunning) {
+      notifyDesktop("Đã dịch xong: " + STATE.pdfName, "Xuất thành công " + (saved.files || []).length + " tệp PDF & phiếu QA.");
+    }
   }
 
-  function runTranslationAndBuild() {
+  function runTranslationAndBuild(fromQueue) {
     var engId = $("#ws-engine-select").value;
     var eng = findEngine(engId);
     if (!eng || !eng.installed || !eng.loggedIn) {
-      STATE.inspectedId = engId;
-      switchView("connectors");
-      renderConnectorsGrid();
-      renderInspector();
-      logLine("Cần kết nối/đăng nhập nền tảng " + (eng ? eng.name : engId) + " trước khi dịch.");
-      return;
+      var fallback = H().pickFailoverEngine ? H().pickFailoverEngine("", STATE.config.failoverEngines, STATE.engines, []) : null;
+      if (fallback) {
+        eng = fallback;
+        engId = fallback.id;
+        logLine("Nền tảng chính chưa sẵn sàng → tự dùng dự phòng " + eng.name);
+      } else {
+        STATE.inspectedId = engId;
+        switchView("connectors");
+        renderConnectorsGrid();
+        renderInspector();
+        logLine("Cần kết nối/đăng nhập nền tảng " + (eng ? eng.name : engId) + " trước khi dịch.");
+        return Promise.reject(new Error("Chưa có nền tảng AI sẵn sàng."));
+      }
     }
 
     var model = $("#ws-model-input").value.trim();
     var chunkChars = Math.max(2000, Math.min(16000, Number($("#ws-chunk").value) || 7000));
+    var dir = (STATE.docInfo && STATE.docInfo.huong) || "en-vi";
+    var glossaryBlock = H().buildGlossaryPromptBlock ? H().buildGlossaryPromptBlock(getActiveGlossaryTerms(), dir) : "";
+
     STATE.stop = false;
     STATE.running = true;
     if (!STATE.startedAt) STATE.startedAt = Date.now();
@@ -683,11 +1110,8 @@
     var stuck = 0, lastDone = -1, batchNo = 0;
     function step() {
       if (STATE.stop) {
-        STATE.running = false;
-        $("#ws-run-btn").disabled = false;
-        $("#ws-stop-btn").hidden = true;
         $("#mon-status-title").textContent = "Đã tạm dừng (đã lưu checkpoint). Bấm Bắt đầu để chạy tiếp.";
-        return Promise.resolve();
+        return Promise.resolve(null);
       }
       return callWorker("nextItems", chunkChars).then(function (r) {
         updateProgressUI(r);
@@ -697,50 +1121,251 @@
         lastDone = r.done;
         if (stuck >= 3) throw new Error(eng.name + " nhiều lần không trả JSON đúng định dạng.");
 
-        batchNo++;
-        var rules = ((STATE.docInfo && STATE.docInfo.rules) || "").replace("trong cuộc trò chuyện này", "trong toàn bộ tài liệu");
-        var rulesEnd = ((STATE.docInfo && STATE.docInfo.rules_end) || "").replace("{n}", r.items.length).replace(/\{\{/g, "{").replace(/\}\}/g, "}");
-        var batchPayload = r.items.map(function (it) { return JSON.stringify(it); }).join("\n");
-        var prompt = rules + "\n" + rulesEnd + "\n\n" + batchPayload;
+        // Step A: Local Translation Memory (0ms lookup)
+        var tmPromise = (STATE.config.tmEnabled !== false)
+          ? api("/api/tm/lookup", { items: r.items, dir: dir }).catch(function () { return { hits: {}, misses: r.items, hitCount: 0 }; })
+          : Promise.resolve({ hits: {}, misses: r.items, hitCount: 0 });
 
-        $("#mon-status-title").textContent = "Lô #" + batchNo + ": đang dịch " + r.items.length + " đoạn qua " + eng.name + (model ? " (" + model + ")" : "") + "…";
-        logLine("Gửi lô #" + batchNo + " (" + r.items.length + " đoạn) -> " + eng.name);
+        return tmPromise.then(function (tmRes) {
+          STATE.tmSessionChecked += r.items.length;
+          var hitsObj = tmRes.hits || {};
+          var hitIds = Object.keys(hitsObj);
+          var misses = Array.isArray(tmRes.misses) ? tmRes.misses : r.items;
+          var applyHits = Promise.resolve();
 
-        return translateBatchWithRetry(eng.id, model, prompt, 2).then(function (ans) {
-          STATE.batchLatencies.push(ans.latencyMs);
-          STATE.charsDone += batchPayload.length;
-          var cleaned = stripCodeFences(ans.text);
-          var parsed = {};
-          try { parsed = JSON.parse(cleaned); } catch { /* web_api.load handles repairs */ }
-          saveStudioCheckpoint(parsed);
-          return callWorker("load", cleaned).then(function (lr) {
-            if (!lr.ok) throw new Error(lr.error || "JSON trả về chưa đọc được");
-            updateProgressUI(lr);
-            appendSegmentRows(r.items, parsed, lr.warnings);
-            var wKeys = Object.keys(lr.warnings || {});
-            wKeys.forEach(function (k) { if (STATE.warnIds.indexOf(k) < 0) STATE.warnIds.push(k); });
-            updateBentoKpis(lr.done, lr.total, STATE.warnIds.length);
-            if (STATE.warnIds.length) {
-              $("#ws-warn-bar").hidden = false;
-              $("#ws-warn-summary").textContent = STATE.warnIds.length + " đoạn có cảnh báo QA (đã nạp tạm).";
-            }
-            return step();
+          if (hitIds.length > 0) {
+            STATE.tmSessionHits += hitIds.length;
+            var hitItems = r.items.filter(function (it) { return Boolean(hitsObj[it.id]); });
+            saveStudioCheckpoint(hitsObj);
+            applyHits = callWorker("load", JSON.stringify(hitsObj)).then(function (lr) {
+              updateProgressUI(lr);
+              appendSegmentRows(hitItems, hitsObj, lr.warnings, "tm");
+              updateBentoKpis(lr.done, lr.total, STATE.warnIds.length);
+              logLine("TM 0ms khớp " + hitIds.length + "/" + r.items.length + " đoạn trong lô.");
+            });
+          }
+
+          return applyHits.then(function () {
+            if (!misses.length) return step();
+            batchNo++;
+            var rules = ((STATE.docInfo && STATE.docInfo.rules) || "").replace("trong cuộc trò chuyện này", "trong toàn bộ tài liệu");
+            var rulesEnd = ((STATE.docInfo && STATE.docInfo.rules_end) || "").replace("{n}", misses.length).replace(/\{\{/g, "{").replace(/\}\}/g, "}");
+            var batchPayload = misses.map(function (it) { return JSON.stringify(it); }).join("\n");
+            var prompt = rules + glossaryBlock + "\n" + rulesEnd + "\n\n" + batchPayload;
+
+            $("#mon-status-title").textContent = "Lô #" + batchNo + ": đang dịch " + misses.length + " đoạn qua " + eng.name + (model ? " (" + model + ")" : "") + "…";
+            logLine("Gửi lô #" + batchNo + " (" + misses.length + " đoạn) -> " + eng.name);
+
+            return translateWithFailover(eng.id, model, prompt).then(function (ans) {
+              STATE.batchLatencies.push(ans.latencyMs);
+              STATE.charsDone += batchPayload.length;
+              var cleaned = stripCodeFences(ans.text);
+              var parsed = {};
+              try { parsed = JSON.parse(cleaned); } catch { /* web_api.load handles repairs */ }
+              saveStudioCheckpoint(parsed);
+
+              // Persist new translations into local TM Vault
+              if (STATE.config.tmEnabled !== false) {
+                var pairs = misses
+                  .filter(function (it) { return parsed[it.id]; })
+                  .map(function (it) { return { src: it.text, dst: parsed[it.id] }; });
+                if (pairs.length) {
+                  api("/api/tm/save", { pairs: pairs, dir: dir, engine: ans.engineId || eng.id })
+                    .then(function (s) { if (s && typeof s.count === "number") { STATE.tmStats.count = s.count; if ($("#tm-count-pill")) $("#tm-count-pill").textContent = String(s.count); } })
+                    .catch(function () { /* ignore */ });
+                }
+              }
+
+              return callWorker("load", cleaned).then(function (lr) {
+                if (!lr.ok) throw new Error(lr.error || "JSON trả về chưa đọc được");
+                updateProgressUI(lr);
+                appendSegmentRows(misses, parsed, lr.warnings, "ai");
+                var wKeys = Object.keys(lr.warnings || {});
+                wKeys.forEach(function (k) { if (STATE.warnIds.indexOf(k) < 0) STATE.warnIds.push(k); });
+                updateBentoKpis(lr.done, lr.total, STATE.warnIds.length);
+                if (STATE.warnIds.length) {
+                  $("#ws-warn-bar").hidden = false;
+                  $("#ws-warn-summary").textContent = STATE.warnIds.length + " đoạn có cảnh báo QA (đã nạp tạm).";
+                }
+                return step();
+              });
+            });
           });
         });
       });
     }
 
-    step().catch(function (e) {
+    return step().catch(function (e) {
       $("#mon-status-title").textContent = "Lỗi: " + e.message;
       logLine("Lỗi dịch: " + e.message);
-    }).then(function () {
+      if (fromQueue) throw e;
+    }).finally(function () {
       STATE.running = false;
       $("#ws-run-btn").disabled = false;
       $("#ws-stop-btn").hidden = true;
+      renderQueueTable();
     });
   }
 
-  /* ---------------- QA Scorer ---------------- */
+  /* ---------------- Glossary View ---------------- */
+  function loadGlossaryPresets() {
+    return api("/api/glossary/presets").then(function (d) {
+      STATE.glossaryPresets = d.presets || {};
+      renderGlossaryView();
+    }).catch(function () { /* ignore */ });
+  }
+
+  function renderGlossaryView() {
+    var presetWrap = $("#gloss-presets");
+    if (presetWrap) {
+      var keys = ["none"].concat(Object.keys(STATE.glossaryPresets || {}));
+      presetWrap.innerHTML = keys.map(function (k) {
+        var label = k === "none" ? "Không dùng bộ mẫu" : (STATE.glossaryPresets[k].name + " (" + STATE.glossaryPresets[k].terms.length + ")");
+        var active = (STATE.config.glossaryPreset || "none") === k;
+        return "<button class='preset-btn" + (active ? " is-active" : "") + "' data-preset-id='" + esc(k) + "' type='button'>" + esc(label) + "</button>";
+      }).join("");
+      $$("[data-preset-id]").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var pid = btn.getAttribute("data-preset-id");
+          api("/api/config", { glossaryPreset: pid }).then(function (d) {
+            STATE.config = d.config;
+            renderGlossaryView();
+            updateHeaderAndConfigUI();
+            logLine("Chọn bộ từ điển mẫu: " + pid);
+          });
+        });
+      });
+    }
+
+    var terms = getActiveGlossaryTerms();
+    if ($("#gloss-active-count")) $("#gloss-active-count").textContent = String(terms.length);
+    var tbody = $("#gloss-tbody");
+    if (!tbody) return;
+    if (!terms.length) {
+      tbody.innerHTML = "<tr><td colspan='4' class='empty-cell'>Chưa có thuật ngữ nào. Chọn bộ mẫu phía trên hoặc thêm cặp thuật ngữ mới.</td></tr>";
+      return;
+    }
+    tbody.innerHTML = terms.map(function (t) {
+      var isCustom = t.source === "Tùy chỉnh";
+      return "<tr><td class='mono'>" + esc(t.src) + "</td><td><strong>" + esc(t.dst) + "</strong>" + (t.note ? "<div class='hint'>" + esc(t.note) + "</div>" : "") + "</td>" +
+        "<td><span class='status-chip " + (isCustom ? "ok" : "tm") + "'>" + esc(t.source) + "</span></td>" +
+        "<td>" + (isCustom ? "<button class='btn-xs' data-gloss-del='" + esc(t.src) + "' type='button'>Xóa</button>" : "—") + "</td></tr>";
+    }).join("");
+
+    $$("[data-gloss-del]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var src = btn.getAttribute("data-gloss-del");
+        var next = (STATE.config.glossary || []).filter(function (x) { return x.src !== src; });
+        api("/api/config", { glossary: next }).then(function (d) {
+          STATE.config = d.config;
+          renderGlossaryView();
+          updateHeaderAndConfigUI();
+        });
+      });
+    });
+  }
+
+  /* ---------------- History View ---------------- */
+  function loadHistory() {
+    return api("/api/history").then(function (d) {
+      STATE.history = d.items || [];
+      if ($("#badge-history")) $("#badge-history").textContent = String(STATE.history.length);
+      renderHistoryList();
+    }).catch(function () { /* ignore */ });
+  }
+
+  function renderHistoryList() {
+    var wrap = $("#history-list");
+    if (!wrap) return;
+    var q = ($("#hist-search") ? $("#hist-search").value : "").trim().toLowerCase();
+    var list = STATE.history.filter(function (h) {
+      if (!q) return true;
+      return (h.pdfName + " " + h.engine + " " + h.outputDir).toLowerCase().indexOf(q) >= 0;
+    });
+    if (!list.length) {
+      wrap.innerHTML = "<div class='empty-panel'>Chưa có dự án nào phù hợp trong lịch sử.</div>";
+      return;
+    }
+    wrap.innerHTML = list.map(function (h) {
+      var dt = h.createdAt ? new Date(h.createdAt).toLocaleString("vi-VN") : "";
+      var primaryFile = (h.files || []).filter(function (f) { return /\.pdf$/i.test(f.name); })[0];
+      return "<div class='hist-card'>" +
+        "<div class='hist-head'><div class='hist-title'>" + esc(h.pdfName) + "</div>" +
+        "<span class='status-chip " + (h.qaPass ? "ok" : "warn") + "'>" + (h.qaPass ? "QA ĐẠT" : "Cần xem") + "</span></div>" +
+        "<div class='hist-meta'>" +
+        "<span>" + esc(dt) + "</span><span>·</span><span>" + h.pages + " trang</span><span>·</span>" +
+        "<span>" + esc(h.engine || "AI") + "</span><span>·</span><span>TM " + (h.tmHitPct || 0) + "%</span></div>" +
+        "<div class='hint mono' style='overflow:hidden;text-overflow:ellipsis'>" + esc(h.outputDir) + "</div>" +
+        "<div class='hist-actions'>" +
+        (h.outputDir ? "<button class='btn btn-primary btn-sm' data-h-open='" + esc(h.outputDir) + "' type='button'>Mở thư mục</button>" : "") +
+        (primaryFile ? "<button class='btn btn-ghost btn-sm' data-h-open='" + esc(primaryFile.path) + "' type='button'>Mở PDF</button>" : "") +
+        "<button class='btn btn-ghost btn-sm' data-h-del='" + esc(h.id) + "' type='button'>Xóa</button>" +
+        "</div></div>";
+    }).join("");
+
+    $$("[data-h-open]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (window.PDF_DESKTOP && window.PDF_DESKTOP.openPath) window.PDF_DESKTOP.openPath(b.getAttribute("data-h-open"));
+      });
+    });
+    $$("[data-h-del]").forEach(function (b) {
+      b.addEventListener("click", function () {
+        api("/api/history/delete", { id: b.getAttribute("data-h-del") }).then(loadHistory);
+      });
+    });
+  }
+
+  /* ---------------- Command Palette (Ctrl+K) ---------------- */
+  function getCommandItems() {
+    return [
+      { label: "Chuyển sang Kết nối nền tảng AI (10 CLI/API)", hint: "Alt+1", run: function () { switchView("connectors"); } },
+      { label: "Chuyển sang Dịch PDF Studio", hint: "Alt+2", run: function () { switchView("workspace"); } },
+      { label: "Chuyển sang Từ điển thuật ngữ (Glossary)", hint: "Alt+3", run: function () { switchView("glossary"); } },
+      { label: "Chuyển sang Thư viện lịch sử dự án", hint: "Alt+4", run: function () { switchView("history"); } },
+      { label: "Chuyển sang Kiểm định QA độc lập", hint: "Alt+5", run: function () { switchView("qa"); } },
+      { label: "Chuyển sang Nhật ký & Bộ nhớ TM", hint: "Alt+6", run: function () { switchView("logs"); } },
+      { label: "Mở tệp PDF để dịch ngay", hint: "Ctrl+O", run: function () { switchView("workspace"); $("#ws-pick-btn").click(); } },
+      { label: "Thêm nhiều PDF vào hàng đợi (Batch Queue)", hint: "Batch", run: function () { switchView("workspace"); $("#ws-add-multi-btn").click(); } },
+      { label: "So sánh trực quan trang PDF Gốc ↔ Dịch", hint: "Preview", run: function () { switchView("workspace"); switchMonTab("preview"); } },
+      { label: "Ping toàn bộ nền tảng AI sẵn sàng", hint: "Health", run: function () { switchView("connectors"); pingAllReady(); } },
+      { label: "Đổi giao diện Sáng / Tối (Editorial Light / Obsidian Dark)", hint: "Theme", run: function () { $("#btn-theme-toggle").click(); } },
+    ];
+  }
+
+  function openCmdPalette() {
+    var bd = $("#cmd-backdrop"), inp = $("#cmd-input");
+    if (!bd || !inp) return;
+    bd.hidden = false;
+    inp.value = "";
+    renderCmdList("");
+    setTimeout(function () { inp.focus(); }, 20);
+  }
+
+  function closeCmdPalette() {
+    if ($("#cmd-backdrop")) $("#cmd-backdrop").hidden = true;
+  }
+
+  function renderCmdList(query) {
+    var listEl = $("#cmd-list");
+    if (!listEl) return;
+    var q = String(query || "").trim().toLowerCase();
+    var items = getCommandItems().filter(function (it) {
+      return !q || it.label.toLowerCase().indexOf(q) >= 0 || it.hint.toLowerCase().indexOf(q) >= 0;
+    });
+    listEl.innerHTML = items.map(function (it, idx) {
+      return "<button class='cmd-item" + (idx === 0 ? " is-focus" : "") + "' data-cmd-idx='" + idx + "' type='button'>" +
+        "<span>" + esc(it.label) + "</span><span class='cmd-hint'>" + esc(it.hint) + "</span></button>";
+    }).join("");
+    $$("[data-cmd-idx]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var idx = Number(btn.getAttribute("data-cmd-idx"));
+        closeCmdPalette();
+        if (items[idx]) items[idx].run();
+      });
+    });
+  }
+
+  /* ---------------- Standalone QA Scorer ---------------- */
   function base64ToArrayBuffer(b64) {
     var bin = atob(b64), len = bin.length, u8 = new Uint8Array(len);
     for (var i = 0; i < len; i++) u8[i] = bin.charCodeAt(i);
@@ -768,13 +1393,13 @@
         return "<tr><td>" + esc(x[0]) + "</td><td class='mono'>" + esc(x[1]) + "</td><td class='" + (x[2] ? "qa-yes" : "qa-bad") + "'>" + (x[2] ? "✔ Đạt" : "✘ Cần xem") + "</td></tr>";
       }).join("");
       var qaSvgBox = $("#qa-lieflat-chart");
-      if (qaSvgBox && window.PTLHelpers && window.PTLHelpers.buildLieFlatMetricsSvg) {
+      if (qaSvgBox && H().buildLieFlatMetricsSvg) {
         var accentPct = Math.round(Number(r.ty_le_tu_co_dau || 0) * 100);
         var layoutPct = r.do_trung_bo_cuc === "" ? 100 : Math.round(Number(r.do_trung_bo_cuc || 0) * 100);
         var cleanTofuPct = r.ky_tu_loi_phong === 0 ? 100 : Math.max(0, 100 - Math.min(100, Number(r.ky_tu_loi_phong) * 5));
         var vectorPct = r.trang_mat_lop_chu === 0 ? 100 : 0;
         var noOverlapPct = r.cap_dong_chong_nhau === 0 ? 100 : Math.max(0, 100 - Math.min(100, Number(r.cap_dong_chong_nhau) * 10));
-        qaSvgBox.innerHTML = window.PTLHelpers.buildLieFlatMetricsSvg("Chỉ số Bảo toàn Bố cục & Tiếng Việt (0–100%)", [
+        qaSvgBox.innerHTML = H().buildLieFlatMetricsSvg("Chỉ số Bảo toàn Bố cục & Tiếng Việt (0–100%)", [
           { label: "Sạch lỗi phông (Tofu)", pct: cleanTofuPct, valueText: r.ky_tu_loi_phong + " lỗi", color: "#22c55e" },
           { label: "Lớp chữ Vector", pct: vectorPct, valueText: r.trang_mat_lop_chu + " trang mất", color: "#14b8a6" },
           { label: "Không chồng dòng", pct: noOverlapPct, valueText: r.cap_dong_chong_nhau + " cặp", color: "#38bdf8" },
@@ -797,15 +1422,69 @@
     $("#btn-go-translate").addEventListener("click", function () { switchView("workspace"); });
     $("#ws-change-ai").addEventListener("click", function () {
       STATE.inspectedId = $("#ws-engine-select").value;
-      renderConnectorsGrid();
-      renderInspector();
-      switchView("connectors");
+      renderConnectorsGrid(); renderInspector(); switchView("connectors");
     });
 
-    if ($("#btn-ping-all")) $("#btn-ping-all").addEventListener("click", pingAllReady);
+    // Theme Toggle
+    $("#btn-theme-toggle").addEventListener("click", function () {
+      var next = STATE.config.theme === "light" ? "dark" : "light";
+      STATE.config.theme = next;
+      applyTheme(next);
+      api("/api/config", { theme: next }).then(function (d) { STATE.config = d.config; }).catch(function () { /* ignore */ });
+    });
+
+    // Command Palette & Shortcuts
+    $("#btn-cmd-palette").addEventListener("click", openCmdPalette);
+    $("#cmd-backdrop").addEventListener("click", function (e) { if (e.target === $("#cmd-backdrop")) closeCmdPalette(); });
+    $("#cmd-input").addEventListener("input", function () { renderCmdList($("#cmd-input").value); });
+    $("#cmd-input").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        var first = $("#cmd-list .cmd-item");
+        if (first) first.click();
+      }
+    });
+    document.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if ($("#cmd-backdrop").hidden) openCmdPalette(); else closeCmdPalette();
+      } else if (e.key === "Escape") {
+        closeCmdPalette();
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "o") {
+        e.preventDefault();
+        switchView("workspace");
+        $("#ws-pick-btn").click();
+      } else if (e.altKey && !e.ctrlKey && e.key >= "1" && e.key <= "6") {
+        e.preventDefault();
+        var views = ["connectors", "workspace", "glossary", "history", "qa", "logs"];
+        switchView(views[Number(e.key) - 1]);
+      }
+    });
+
+    // Connectors & Failover & TM toggle
+    $("#btn-ping-all").addEventListener("click", pingAllReady);
     $("#btn-refresh-engines").addEventListener("click", loadEngines);
     $("#rail-refresh-btn").addEventListener("click", loadEngines);
+    $("#cfg-tm-enabled").addEventListener("change", function () {
+      api("/api/config", { tmEnabled: $("#cfg-tm-enabled").checked }).then(function (d) {
+        STATE.config = d.config;
+        updateHeaderAndConfigUI();
+      });
+    });
+    $("#btn-edit-failover").addEventListener("click", function () {
+      $("#failover-panel").hidden = !$("#failover-panel").hidden;
+      renderFailoverChips();
+    });
+    $("#btn-save-failover").addEventListener("click", function () {
+      var chosen = $$("[data-fo-id]:checked").map(function (c) { return c.getAttribute("data-fo-id"); });
+      api("/api/config", { failoverEngines: chosen }).then(function (d) {
+        STATE.config = d.config;
+        $("#failover-panel").hidden = true;
+        updateHeaderAndConfigUI();
+        logLine("Đã lưu chuỗi AI dự phòng (" + chosen.length + " nền tảng).");
+      });
+    });
 
+    // Output directory
     $("#pick-output-btn").addEventListener("click", function () {
       if (window.PDF_DESKTOP && window.PDF_DESKTOP.pickFolder) {
         window.PDF_DESKTOP.pickFolder().then(function (r) {
@@ -889,34 +1568,42 @@
       if (STATE.activeJobId) api("/api/cli/job/stop", { id: STATE.activeJobId });
     });
 
-    // Workspace file drop & native picker
-    var drop = $("#ws-drop");
-    $("#ws-pick-btn").addEventListener("click", function (ev) {
-      ev.stopPropagation();
+    // Multi-file & Single-file PDF pickers + dropzone
+    function pickPdfs(multiple) {
       if (window.PDF_DESKTOP && window.PDF_DESKTOP.pickPdf) {
-        window.PDF_DESKTOP.pickPdf(false).then(function (res) {
-          if (!res.canceled && res.files[0]) loadPdfBuffer(base64ToArrayBuffer(res.files[0].base64), res.files[0].name);
+        window.PDF_DESKTOP.pickPdf(multiple).then(function (res) {
+          if (!res.canceled && res.files && res.files.length) {
+            enqueueFiles(res.files.map(function (f) { return { name: f.name, buffer: base64ToArrayBuffer(f.base64) }; }));
+          }
         });
       } else {
         $("#ws-file-input").click();
       }
-    });
-    drop.addEventListener("click", function () { $("#ws-pick-btn").click(); });
+    }
+    var drop = $("#ws-drop");
+    $("#ws-pick-btn").addEventListener("click", function (ev) { ev.stopPropagation(); pickPdfs(true); });
+    $("#ws-add-multi-btn").addEventListener("click", function () { pickPdfs(true); });
+    drop.addEventListener("click", function () { pickPdfs(true); });
     $("#ws-file-input").addEventListener("change", function () {
-      var f = $("#ws-file-input").files[0];
-      if (f) f.arrayBuffer().then(function (b) { loadPdfBuffer(b, f.name); });
+      var files = Array.prototype.slice.call($("#ws-file-input").files || []);
+      Promise.all(files.map(readFileInput)).then(enqueueFiles);
     });
     ["dragenter", "dragover"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("is-over"); }); });
     ["dragleave", "drop"].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("is-over"); }); });
     drop.addEventListener("drop", function (e) {
-      var f = e.dataTransfer.files[0];
-      if (f) f.arrayBuffer().then(function (b) { loadPdfBuffer(b, f.name); });
+      var files = Array.prototype.slice.call(e.dataTransfer.files || []).filter(function (f) { return /\.pdf$/i.test(f.name); });
+      Promise.all(files.map(readFileInput)).then(enqueueFiles);
     });
 
-    $("#ws-engine-select").addEventListener("change", function () {
-      setActiveEngine($("#ws-engine-select").value);
-      syncWorkspaceModel();
+    // Queue actions
+    $("#q-run-all").addEventListener("click", runBatchQueue);
+    $("#q-clear-done").addEventListener("click", function () {
+      STATE.queue = STATE.queue.filter(function (q) { return q.status !== "done"; });
+      renderQueueTable();
     });
+
+    // Workspace controls
+    $("#ws-engine-select").addEventListener("change", function () { setActiveEngine($("#ws-engine-select").value); syncWorkspaceModel(); });
     $("#ws-model-input").addEventListener("change", function () {
       var id = $("#ws-engine-select").value;
       if (!id) return;
@@ -924,6 +1611,40 @@
       patch.models[id] = $("#ws-model-input").value.trim();
       api("/api/config", patch).then(function (d) { STATE.config = d.config; updateHeaderAndConfigUI(); renderConnectorsGrid(); });
     });
+    $("#ws-run-btn").addEventListener("click", function () { runTranslationAndBuild(false); });
+    $("#ws-stop-btn").addEventListener("click", function () { STATE.stop = true; });
+    $("#ws-build-only-btn").addEventListener("click", function () { buildAndSavePdfs().catch(function (e) { logLine("Lỗi dựng: " + e.message); }); });
+    $$('input[name="ws-dir"]').forEach(function (r) { r.addEventListener("change", function () { if (STATE.pdfBytes) preparePdf(); }); });
+
+    // Segment filter, search, retry warn & bilingual exports
+    $("#seg-search").addEventListener("input", function () { STATE.segSearch = $("#seg-search").value; renderSegmentsTable(); });
+    $$("[data-seg-filter]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        STATE.segFilter = btn.getAttribute("data-seg-filter");
+        $$("[data-seg-filter]").forEach(function (b) { b.classList.toggle("is-active", b === btn); });
+        renderSegmentsTable();
+      });
+    });
+    $("#btn-export-csv").addEventListener("click", function () {
+      if (!STATE.segments.length || !H().exportSegmentsToCsv) return;
+      downloadTextFile((STATE.pdfName || "translation").replace(/\.pdf$/i, "") + "_bilingual.csv", H().exportSegmentsToCsv(STATE.segments), "text/csv;charset=utf-8");
+    });
+    $("#btn-export-md").addEventListener("click", function () {
+      if (!STATE.segments.length || !H().exportSegmentsToMarkdown) return;
+      downloadTextFile((STATE.pdfName || "translation").replace(/\.pdf$/i, "") + "_bilingual.md", H().exportSegmentsToMarkdown(STATE.segments, STATE.pdfName), "text/markdown;charset=utf-8");
+    });
+    $("#btn-export-tmx").addEventListener("click", function () {
+      if (!STATE.segments.length || !H().exportSegmentsToTmx) return;
+      var dir = (STATE.docInfo && STATE.docInfo.huong) || "en-vi";
+      downloadTextFile((STATE.pdfName || "translation").replace(/\.pdf$/i, "") + ".tmx", H().exportSegmentsToTmx(STATE.segments, dir), "application/xml;charset=utf-8");
+    });
+    $("#btn-export-json").addEventListener("click", function () {
+      if (!STATE.segments.length) return;
+      var map = {};
+      STATE.segments.forEach(function (s) { if (s.dst) map[s.id] = s.dst; });
+      downloadTextFile((STATE.pdfName || "translation").replace(/\.pdf$/i, "") + "_translations.json", JSON.stringify(map, null, 2), "application/json;charset=utf-8");
+    });
+
     $("#ws-retry-warn").addEventListener("click", function () {
       if (!STATE.warnIds.length || STATE.running) return;
       var engId = $("#ws-engine-select").value;
@@ -935,13 +1656,13 @@
         var retryHint = "\n- Đây là lượt sửa cảnh báo: hãy dịch đủ tiếng Việt có dấu (hoặc tiếng Anh đúng chiều), giữ nguyên số liệu/tên riêng.";
         var prompt = rules + retryHint + "\n" + rulesEnd + "\n\n" + items.map(function (it) { return JSON.stringify(it); }).join("\n");
         $("#mon-status-title").textContent = "Đang dịch lại " + items.length + " đoạn cảnh báo…";
-        return translateBatchWithRetry(engId, model, prompt, 2).then(function (ans) {
+        return translateWithFailover(engId, model, prompt).then(function (ans) {
           var cleaned = stripCodeFences(ans.text);
           var parsed = {};
           try { parsed = JSON.parse(cleaned); } catch { /* ignore */ }
           saveStudioCheckpoint(parsed);
           return callWorker("load", cleaned).then(function (lr) {
-            appendSegmentRows(items, parsed, lr.warnings);
+            appendSegmentRows(items, parsed, lr.warnings, "ai");
             STATE.warnIds = Object.keys(lr.warnings || {});
             updateBentoKpis(lr.done || 0, lr.total || 0, STATE.warnIds.length);
             $("#ws-warn-bar").hidden = !STATE.warnIds.length;
@@ -950,12 +1671,66 @@
         });
       }).catch(function (e) { logLine("Lỗi dịch lại cảnh báo: " + e.message); });
     });
-    $("#ws-run-btn").addEventListener("click", runTranslationAndBuild);
-    $("#ws-stop-btn").addEventListener("click", function () { STATE.stop = true; });
-    $("#ws-build-only-btn").addEventListener("click", function () { buildAndSavePdfs().catch(function (e) { logLine("Lỗi dựng: " + e.message); }); });
-    $$('input[name="ws-dir"]').forEach(function (r) { r.addEventListener("change", function () { if (STATE.pdfBytes) preparePdf(); }); });
 
-    // QA Scorer
+    // Visual PDF Preview Comparator wiring
+    $("#pv-render-btn").addEventListener("click", renderPreviewPage);
+    $("#pv-prev").addEventListener("click", function () { if (STATE.previewPage > 1) { STATE.previewPage--; renderPreviewPage(); } });
+    $("#pv-next").addEventListener("click", function () { if (STATE.previewPage < STATE.previewTotal) { STATE.previewPage++; renderPreviewPage(); } });
+    $("#pv-mode").addEventListener("change", renderPreviewPage);
+    $("#pv-target").addEventListener("change", renderPreviewPage);
+    $("#pv-zoom").addEventListener("change", renderPreviewPage);
+    $("#pv-slider-range").addEventListener("input", function () { updateCurtainSlider($("#pv-slider-range").value); });
+
+    // Glossary Manager wiring
+    $("#gloss-add-btn").addEventListener("click", function () {
+      var src = $("#gloss-src-in").value.trim();
+      var dst = $("#gloss-dst-in").value.trim();
+      var note = $("#gloss-note-in").value.trim();
+      if (!src || !dst) return;
+      var cur = (STATE.config.glossary || []).filter(function (x) { return x.src.toLowerCase() !== src.toLowerCase(); });
+      cur.push({ src: src, dst: dst, note: note });
+      api("/api/config", { glossary: cur }).then(function (d) {
+        STATE.config = d.config;
+        $("#gloss-src-in").value = ""; $("#gloss-dst-in").value = ""; $("#gloss-note-in").value = "";
+        renderGlossaryView(); updateHeaderAndConfigUI();
+      });
+    });
+    $("#gloss-import-btn").addEventListener("click", function () { $("#gloss-import-box").hidden = !$("#gloss-import-box").hidden; });
+    $("#gloss-import-cancel").addEventListener("click", function () { $("#gloss-import-box").hidden = true; });
+    $("#gloss-import-apply").addEventListener("click", function () {
+      var parsed = H().parseGlossaryImport ? H().parseGlossaryImport($("#gloss-import-text").value) : [];
+      if (!parsed.length) return;
+      var merged = (STATE.config.glossary || []).concat(parsed);
+      api("/api/config", { glossary: merged }).then(function (d) {
+        STATE.config = d.config;
+        $("#gloss-import-text").value = "";
+        $("#gloss-import-box").hidden = true;
+        renderGlossaryView(); updateHeaderAndConfigUI();
+        logLine("Đã nhập " + parsed.length + " thuật ngữ vào từ điển.");
+      });
+    });
+    $("#gloss-export-btn").addEventListener("click", function () {
+      var terms = getActiveGlossaryTerms();
+      var csv = "\uFEFFSource,Target,Origin\r\n" + terms.map(function (t) {
+        return "\"" + t.src.replace(/"/g, "\"\"") + "\",\"" + t.dst.replace(/"/g, "\"\"") + "\",\"" + (t.source || "") + "\"";
+      }).join("\r\n");
+      downloadTextFile("pdf-layout-vi-glossary.csv", csv, "text/csv;charset=utf-8");
+    });
+    $("#gloss-clear-custom").addEventListener("click", function () {
+      api("/api/config", { glossary: [] }).then(function (d) {
+        STATE.config = d.config;
+        renderGlossaryView(); updateHeaderAndConfigUI();
+      });
+    });
+
+    // History view wiring
+    $("#hist-search").addEventListener("input", renderHistoryList);
+    $("#hist-refresh-btn").addEventListener("click", loadHistory);
+    $("#hist-clear-btn").addEventListener("click", function () {
+      api("/api/history/delete", { clearAll: true }).then(loadHistory);
+    });
+
+    // Standalone QA Scorer
     $("#qa-pick-src").addEventListener("click", function () { $("#qa-src-file").click(); });
     $("#qa-pick-dst").addEventListener("click", function () { $("#qa-dst-file").click(); });
     $("#qa-src-file").addEventListener("change", function () {
@@ -967,10 +1742,23 @@
       if (f) readFileInput(f).then(function (x) { STATE.qaDstFile = x; $("#qa-dst-name").textContent = x.name; });
     });
     $("#qa-run-btn").addEventListener("click", runStandaloneQa);
+
+    // TM Vault & Logs wiring
+    $("#tm-export-btn").addEventListener("click", function () {
+      api("/api/tm/export").then(function (d) {
+        downloadTextFile("pdf-layout-vi-tm.json", JSON.stringify(d.entries || [], null, 2), "application/json;charset=utf-8");
+      });
+    });
+    $("#tm-clear-btn").addEventListener("click", function () {
+      api("/api/tm/clear").then(function () { refreshTmStats(); logLine("Đã làm trống bộ nhớ dịch TM."); });
+    });
     $("#logs-clear-btn").addEventListener("click", function () { $("#logs-pre").textContent = ""; });
 
     // Boot sequence
+    loadGlossaryPresets();
     loadEngines();
+    loadHistory();
+    refreshTmStats();
     callWorker("init").catch(function (e) {
       $("#top-engine-label").textContent = "Lỗi bộ máy PDF";
       $("#top-engine-dot").className = "dot";

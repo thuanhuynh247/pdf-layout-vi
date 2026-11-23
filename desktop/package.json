@@ -1,7 +1,7 @@
 {
   "name": "pdf-layout-vi-desktop",
   "productName": "PDF Layout VI Studio",
-  "version": "3.5.0",
+  "version": "4.0.0",
   "description": "Ứng dụng Windows Studio dịch PDF giữ nguyên bố cục vector, kết nối trực tiếp Claude Code, Codex, Gemini, Antigravity, Muse, Ollama và OpenRouter.",
   "main": "electron/main.mjs",
   "author": "Huynh Anh Thuan",

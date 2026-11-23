@@ -1,5 +1,5 @@
-// electron/main.mjs — Dedicated Windows Desktop Shell (OpenMausBot ELECTRON_RUN_AS_NODE=1 + Fluent Window)
-import { app, BrowserWindow, shell, dialog, Menu, ipcMain } from "electron";
+// electron/main.mjs — Dedicated Windows Desktop Shell v4.0.0 (OpenMausBot ELECTRON_RUN_AS_NODE=1 + Fluent Window)
+import { app, BrowserWindow, shell, dialog, Menu, ipcMain, Notification } from "electron";
 import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -138,6 +138,32 @@ function registerIpc() {
       await shell.openExternal(String(url));
     }
     return true;
+  });
+
+  ipcMain.handle("theme:set", (_ev, theme) => {
+    if (mainWindow && process.platform === "win32" && typeof mainWindow.setTitleBarOverlay === "function") {
+      const isLight = theme === "light";
+      mainWindow.setTitleBarOverlay({
+        color: isLight ? "#f8fafc" : "#0b1120",
+        symbolColor: isLight ? "#0f172a" : "#cbd5e1",
+        height: 44,
+      });
+    }
+    return true;
+  });
+
+  ipcMain.handle("app:notify", (_ev, title, body) => {
+    try {
+      if (Notification && Notification.isSupported()) {
+        new Notification({
+          title: String(title || "PDF Layout VI Studio"),
+          body: String(body || ""),
+          silent: false,
+        }).show();
+        return true;
+      }
+    } catch { /* ignore */ }
+    return false;
   });
 }
 

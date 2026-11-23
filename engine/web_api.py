@@ -185,3 +185,66 @@ def score(goc_path: str, dich_path: str, ten: str = "") -> str:
         return json.dumps({"ok": True, **json.loads(out[start:])}, ensure_ascii=False)
     except Exception:
         return json.dumps({"ok": False, "error": out}, ensure_ascii=False)
+
+
+def _resolve_pdf_target(which: str = "src") -> Path | None:
+    if which == "src":
+        in_dir = Path("/tmp/in")
+        if in_dir.exists():
+            pdfs = sorted(in_dir.glob("*.pdf"))
+            if pdfs:
+                return pdfs[0]
+        return None
+    out_dir = Path(OUT)
+    if not out_dir.exists():
+        return None
+    pdfs = sorted(out_dir.glob("*.pdf"))
+    if not pdfs:
+        return None
+    if which == "dst":
+        for p in pdfs:
+            if p.name.endswith(("_VI.pdf", "_EN.pdf")) and not any(m in p.name for m in ("doi-trang", "hai-cot", "xen-doan")):
+                return p
+        return pdfs[0]
+    for p in pdfs:
+        if p.name == which or which in p.name:
+            return p
+    return None
+
+
+def available_outputs() -> str:
+    out_dir = Path(OUT)
+    files = [{"name": p.name, "size": p.stat().st_size} for p in sorted(out_dir.glob("*.pdf"))] if out_dir.exists() else []
+    return json.dumps({"ok": True, "files": files}, ensure_ascii=False)
+
+
+def render_page(which: str = "src", page_no: int = 1, zoom: float = 1.35) -> str:
+    """Render 1 trang PDF (src / dst / doi-trang / hai-cot / xen-doan) thành ảnh PNG base64 ngay trong PyMuPDF WASM."""
+    import base64
+    import pymupdf
+
+    target = _resolve_pdf_target(which)
+    if not target or not target.exists():
+        return json.dumps({"ok": False, "error": f"Chưa có tệp PDF cho chế độ xem '{which}'."}, ensure_ascii=False)
+    safe_zoom = max(0.5, min(2.5, float(zoom or 1.35)))
+    doc = pymupdf.open(str(target))
+    try:
+        total = len(doc)
+        if total == 0:
+            return json.dumps({"ok": False, "error": "Tệp PDF không có trang nào."}, ensure_ascii=False)
+        idx = max(0, min(total - 1, int(page_no or 1) - 1))
+        page = doc[idx]
+        pix = page.get_pixmap(matrix=pymupdf.Matrix(safe_zoom, safe_zoom), alpha=False)
+        b64 = base64.b64encode(pix.tobytes("png")).decode("ascii")
+        return json.dumps({
+            "ok": True,
+            "which": which,
+            "file": target.name,
+            "page": idx + 1,
+            "pages": total,
+            "width": pix.width,
+            "height": pix.height,
+            "png_base64": b64,
+        }, ensure_ascii=False)
+    finally:
+        doc.close()
