@@ -795,7 +795,9 @@
     $("#cham-run").addEventListener("click", runScore);
     $$('input[name="mode"]').forEach(function (r) { r.addEventListener("change", function () { if (!$("#b3").hidden) start(); }); });
     if (!hasTranslator()) setText("#fast-note", "Cần Chrome 138 trở lên trên máy tính; trình duyệt này chưa có bộ dịch tích hợp. Bộ dịch chạy trên máy, không gửi chữ đi đâu.");
-    probeCliSilent();
+    if ((window.PDF_DESKTOP && window.PDF_DESKTOP.isDesktop) || location.hostname === "127.0.0.1" || location.hostname === "localhost") {
+      probeCliSilent();
+    }
     window.__ptlTest = { call: call, state: S };   // cho kiểm thử tự động
   });
 })();
