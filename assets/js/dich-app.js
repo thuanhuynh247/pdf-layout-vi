@@ -12,7 +12,10 @@
 
   // Quy tắc dịch lấy từ bộ máy (dich_pdf.QUY_TAC) theo chiều của tài liệu, để mọi kênh dùng chung một bản
   var LANG = { "en-vi": { src: "en", tgt: "vi", srcName: "tiếng Anh", tgtName: "tiếng Việt", label: "Anh → Việt", out: "_VI.pdf" },
+    "fr-vi": { src: "fr", tgt: "vi", srcName: "tiếng Pháp", tgtName: "tiếng Việt", label: "Pháp → Việt", out: "_VI.pdf" },
     "vi-en": { src: "vi", tgt: "en", srcName: "tiếng Việt", tgtName: "tiếng Anh", label: "Việt → Anh", out: "_EN.pdf" } };
+  // Lĩnh vực: ?linh-vuc=y-duoc (trang giới thiệu bản Y Dược trỏ về đây) hoặc người dùng chọn ở bước 2
+  function linhVuc() { return S.linhVuc === "y-duoc" ? "y-duoc" : "chung"; }
   function dir() { return LANG[(S.info && S.info.huong) || "en-vi"]; }
   function rules() { return (S.info && S.info.rules) || ""; }
   function rulesEnd(n) { return ((S.info && S.info.rules_end) || "").replace("{n}", n).replace(/\{\{/g, "{").replace(/\}\}/g, "}"); }
@@ -73,7 +76,10 @@
   }
 
   /* ---------------- Lưu tạm bản dịch (phòng khi tải lại trang) ---------------- */
-  function storeKey() { return "ptl:" + S.hash + ":" + ($("#pages").value.trim() || "all") + ((S.info && S.info.huong === "vi-en") ? ":vi-en" : ""); }
+  function storeKey() {
+    var h = S.info && S.info.huong;
+    return "ptl:" + S.hash + ":" + ($("#pages").value.trim() || "all") + (h && h !== "en-vi" ? ":" + h : "") + (linhVuc() === "y-duoc" ? ":y-duoc" : "");
+  }
   function saveLocal() {
     return call("translations").then(function (tr) {
       var v = JSON.stringify({ t: Date.now(), name: S.name, tr: tr });
@@ -118,10 +124,11 @@
     show("#b2", false); show("#b3", false); show("#b4", false);
     engineStatus("Đang chuẩn bị bộ máy (lần đầu khoảng 30 MB)…", 0.01);
     var pages = $("#pages").value.trim();
-    return call("prepare", S.bytes.slice(0), S.name, 15, pages, S.huong || "tu-dong").then(function (r) {
+    return call("prepare", S.bytes.slice(0), S.name, 15, pages, S.huong || "tu-dong", linhVuc()).then(function (r) {
       if (!r.ok) throw new Error(r.error || "Không mở được file.");
       S.info = r;
       $$('input[name="huong"]').forEach(function (x) { x.checked = x.value === r.huong; });
+      $$('input[name="linh-vuc"]').forEach(function (x) { x.checked = x.value === (r.linh_vuc || "chung"); });
       setText("#huong-note", S.huong === "tu-dong" ? "Tự nhận theo chữ trong tài liệu" : "");
       var src = r.sources || {};
       engineStatus("Đã đọc xong tài liệu" + (src.core ? " · bộ máy tải từ " + (src.core === src.wheel ? src.core : src.core + " và " + src.wheel) : ""), 1);
@@ -157,6 +164,7 @@
     if (c.dau_roi) html += "<p class='notice'>Có " + c.dau_roi + " dòng bị tách dấu thanh khỏi chữ cái; trang đã gắn lại.</p>";
     if (c.trang_loi_chu && c.trang_loi_chu.length) html += "<p class='notice'>" + c.trang_loi_chu.length + " trang trích ra chữ bị hỏng mã, không đọc được. Các trang đó giữ nguyên, không đưa cho AI.</p>";
     if (r.huong === "vi-en") html += "<p class='notice'>Bản tiếng Anh là bản nháp để đọc và tự kiểm. Học bạ, bằng cấp, giấy tờ nộp đại sứ quán hay cơ quan nhà nước vẫn cần người dịch ký và được chứng thực.</p>";
+    if (r.linh_vuc === "y-duoc") html += "<p class='notice'>Chế độ Y Dược: AI nhận thêm quy tắc giữ nguyên liều, hàm lượng, đơn vị đo và tên hoạt chất; mỗi đoạn lệch số liệu bị đánh dấu để dịch lại. Bản dịch chỉ để đọc hiểu, không thay thế tờ hướng dẫn sử dụng gốc hay chỉ định của bác sĩ, dược sĩ.</p>";
     if (!r.total) html += "<p class='notice'>Không tìm thấy chữ nào để dịch: có thể đây là PDF scan.</p>";
     $("#summary").innerHTML = html;
     $("#start").disabled = !r.total;
@@ -237,7 +245,7 @@
       S.ids = items.map(function (i) { return i.id; });
       $("#prompt").value = promptFor(items, dir().tgt === "en"
         ? "- This is a retry: last time these segments still had Vietnamese words, or changed numbers, dates or document numbers. Fix them."
-        : "- Đây là lượt dịch lại: các đoạn này lần trước còn tiếng Anh, thiếu dấu hoặc lệch số liệu. Hãy sửa.");
+        : "- Đây là lượt dịch lại: các đoạn này lần trước còn " + dir().srcName + ", thiếu dấu hoặc lệch số liệu, liều, đơn vị. Hãy sửa.");
       setText("#pb-label", "Câu nhắn dịch lại · " + items.length + " đoạn");
       show("#warn-box", false);
       $("#prompt").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -736,7 +744,10 @@
       var rows = [
         ["Số trang (dịch/gốc)", r.so_trang, pg[0] === pg[1] ? "ok" : "Số trang khác bản gốc (bình thường nếu là bản song ngữ)"],
         ["Ký tự lỗi phông, mất dấu", r.ky_tu_loi_phong, r.ky_tu_loi_phong === 0 ? "ok" : "Có ký tự hiện thành ô vuông hoặc dấu hỏi"],
-      ].concat(r.huong === "vi-en" ? [
+      ].concat(r.huong === "fr-vi" ? [
+        ["Tỷ lệ từ có dấu", r.ty_le_tu_co_dau, r.ty_le_tu_co_dau >= 0.5 ? "ok" : "Thấp: dấu hiệu mất dấu tiếng Việt"],
+        ["Từ tiếng Pháp còn sót", r.ty_le_tu_tieng_phap_con_lai, r.ty_le_tu_tieng_phap_con_lai <= 0.05 ? "ok" : "Còn nhiều tiếng Pháp chưa dịch"]
+      ] : r.huong === "vi-en" ? [
         ["Từ tiếng Việt còn sót", r.ty_le_tu_tieng_viet_con_lai, r.ty_le_tu_tieng_viet_con_lai <= 0.02 ? "ok" : "Còn chữ tiếng Việt chưa dịch"],
         ["Tiếng Việt không dấu còn sót", r.ty_le_tu_tieng_viet_khong_dau, r.ty_le_tu_tieng_viet_khong_dau <= 0.02 ? "ok" : "Còn câu tiếng Việt bị mất dấu"]
       ] : [
@@ -769,6 +780,11 @@
     $("#pages-apply").addEventListener("click", function () { if (S.bytes) prepare(); });
     $$('input[name="huong"]').forEach(function (x) {
       x.addEventListener("change", function () { if (S.bytes && x.checked) { S.huong = x.value; prepare(); } });
+    });
+    try { if (new URLSearchParams(location.search).get("linh-vuc") === "y-duoc") S.linhVuc = "y-duoc"; } catch (e) { /* trình duyệt cũ */ }
+    $$('input[name="linh-vuc"]').forEach(function (x) {
+      x.checked = x.value === linhVuc();
+      x.addEventListener("change", function () { if (x.checked) { S.linhVuc = x.value; if (S.bytes) prepare(); } });
     });
     $("#start").addEventListener("click", start);
     $("#copy-prompt").addEventListener("click", copyPrompt);

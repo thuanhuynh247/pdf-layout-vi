@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bản Y Dược · PDF Layout VI</title>
+<meta name="description" content="Dịch tờ hướng dẫn sử dụng thuốc, phác đồ, bài báo lâm sàng từ tiếng Anh hoặc tiếng Pháp sang tiếng Việt, giữ nguyên bố cục. Kiểm từng liều và đơn vị đo, dùng thuật ngữ theo Dược thư. Cài trên Windows hoặc dùng trên web, miễn phí.">
+<meta name="theme-color" content="#eef2f2">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PDF Layout VI Y Dược: dịch tài liệu thuốc Anh, Pháp sang Việt, giữ nguyên trang">
+<meta property="og:description" content="Kiểm từng liều và đơn vị đo, thuật ngữ theo Dược thư, bản cài Windows miễn phí.">
+<meta property="og:url" content="https://pdf.huynhanhthuan.com/y-duoc">
+<meta property="og:image" content="https://pdf.huynhanhthuan.com/assets/img/og.png">
+<link rel="canonical" href="https://pdf.huynhanhthuan.com/y-duoc">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="preload" href="assets/fonts/pjs-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="config.js" defer></script>
+<script src="assets/js/main.js" defer></script>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="pdf-translation-layout, về trang chủ">
+      <img src="assets/img/favicon.svg" alt="" width="26" height="26">
+      <span>pdf-translation-layout <span class="mono" data-version>v4.1.0</span></span>
+    </a>
+    <nav class="nav" aria-label="Mục lục">
+      <a href="#vi-du">Ví dụ thật</a>
+      <a href="#khac-gi">Khác gì bản thường</a>
+      <a href="#cai-dat">Cài đặt</a>
+      <a href="#hoi-dap">Hỏi đáp</a>
+      <a href="./">Trang chủ</a>
+    </nav>
+    <a class="btn btn-primary btn-sm" href="dich?linh-vuc=y-duoc">Dịch trên web</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="section page-hero">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Bản Y Dược · Anh → Việt · Pháp → Việt · Windows và web</p>
+        <h1>Dịch tài liệu thuốc sang tiếng Việt, giữ đúng từng liều</h1>
+        <p>Tờ hướng dẫn sử dụng, tóm tắt đặc tính sản phẩm, phác đồ, bài báo lâm sàng bằng tiếng Anh hoặc tiếng Pháp. Bản dịch nằm đúng chỗ trên trang gốc. Mỗi con số, mỗi đơn vị đo được đối chiếu với bản gốc; đoạn nào lệch thì phiếu kiểm định chưa cho kết luận đạt.</p>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary" data-yduoc-exe href="https://github.com/thuanhuynh247/pdf-layout-vi/releases/latest" target="_blank" rel="noopener">Tải bản cài Windows (.exe)</a>
+        <a class="btn btn-ghost" data-yduoc-portable href="https://github.com/thuanhuynh247/pdf-layout-vi/releases/latest" target="_blank" rel="noopener">Bản chạy ngay, không cài</a>
+        <a class="btn btn-ghost" href="dich?linh-vuc=y-duoc">Dùng trên web</a>
+      </div>
+      <p class="meta-row"><span>Windows 10, 11 (64-bit)</span><span>Claude, Codex, Gemini, Ollama, OpenRouter</span><span>Miễn phí, mã nguồn mở</span></p>
+    </div>
+  </section>
+
+  <section class="section" id="vi-du" aria-labelledby="vi-du-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Chạy thật trên bộ máy v3.3</p>
+        <h2 id="vi-du-h">Một tờ hướng dẫn tiếng Pháp, trước và sau</h2>
+        <p>Để thử, bản dịch được cố ý sửa “4 g par jour” thành “2 g mỗi ngày”. Bộ máy bắt được ngay khi nạp: <code class="mono">p1-6: liều hoặc đơn vị đo có thể bị thay đổi (4 g)</code>, và phiếu kiểm định ghi CHƯA ĐẠT cho tới khi sửa lại đúng.</p>
+      </div>
+      <div class="yd-pair">
+        <figure><img src="assets/img/yduoc-fr.webp" width="1030" height="760" loading="lazy" alt="Trang gốc tiếng Pháp: tờ hướng dẫn Paracétamol 500 mg với mục cách dùng và tác dụng không mong muốn."><figcaption class="label">Bản gốc · tiếng Pháp</figcaption></figure>
+        <figure><img src="assets/img/yduoc-vi.webp" width="1030" height="760" loading="lazy" alt="Cùng trang sau khi dịch: tiêu đề, liều 500 mg đến 1 g, 3 g, 4 g mỗi ngày và các mục giữ nguyên vị trí."><figcaption class="label">Bản dịch · tiếng Việt</figcaption></figure>
+      </div>
+      <p class="footnote">Tờ hướng dẫn trên là mẫu dựng để thử, không phải tài liệu của một thuốc đang lưu hành.</p>
+    </div>
+  </section>
+
+  <section class="section" id="khac-gi" aria-labelledby="khac-gi-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Cùng bộ máy, thêm lớp kiểm cho ngành Y Dược</p>
+        <h2 id="khac-gi-h">Khác gì bản thường</h2>
+      </div>
+      <ol class="steps steps-wrap">
+        <li><div><h3>Dịch từ tiếng Pháp</h3><p>Ngoài Anh → Việt, bản này nhận và dịch Pháp → Việt. Tài liệu được tự nhận ngôn ngữ; số kiểu Pháp như 1 000 UI hay 2,5 mg giữ nguyên giá trị.</p></div><code>Anh → Việt · Pháp → Việt · Việt → Anh</code></li>
+        <li><div><h3>Quy tắc dịch riêng cho thuốc</h3><p>AI nhận thêm quy tắc: không quy đổi, không làm tròn liều; tên hoạt chất theo tên chung quốc tế như Dược thư Quốc gia; tên Latin và viết tắt chuyên môn giữ nguyên; không làm nhẹ cảnh báo.</p></div><code>Contre-indications
+→ Chống chỉ định</code></li>
+        <li><div><h3>Bộ thuật ngữ tự bật theo chiều dịch</h3><p>46 thuật ngữ Anh – Việt và 46 thuật ngữ Pháp – Việt: tên mục của tờ hướng dẫn, dạng bào chế, đường dùng, mức tần suất tác dụng không mong muốn. Bạn thêm thuật ngữ của khoa, của công ty mình; khi trùng, cách dịch của bạn được dùng.</p></div><code>Từ điển thuật ngữ → Y Dược Pháp → Việt (46)</code></li>
+        <li><div><h3>Kiểm từng liều và đơn vị đo</h3><p>Mọi cặp số và đơn vị (mg, µg, mL, UI, mmol, %…) trong bản gốc phải có mặt trong bản dịch; µg và mcg, UI và IU được coi là một. Đoạn lệch được đánh dấu để dịch lại và chặn kết luận ĐẠT.</p></div><code>| Liều, hàm lượng, đơn vị đo khớp bản gốc | ✘ Cần sửa | 1 đoạn lệch |</code></li>
+        <li><div><h3>Chân trang nói rõ giới hạn</h3><p>Mỗi trang bản dịch có dòng nhỏ: bản dịch AI để tham khảo, không thay thế tờ hướng dẫn gốc hay chỉ định của bác sĩ.</p></div><code>Bản dịch AI để tham khảo · không thay thế tờ hướng dẫn gốc…</code></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="cai-dat" aria-labelledby="cai-dat-h">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Khoảng năm phút</p>
+        <h2 id="cai-dat-h">Cài trên Windows</h2>
+      </div>
+      <ol class="steps steps-wrap">
+        <li><div><h3>Tải và chạy file cài</h3><p>Bấm nút tải ở đầu trang, mở file <strong>PDF-Layout-VI-YDuoc-…-setup.exe</strong>. Windows có thể hiện cảnh báo SmartScreen vì ứng dụng chưa mua chứng thư ký số; bấm “More info” rồi “Run anyway”. Bản Y Dược cài song song được với bản Studio.</p></div><code>More info → Run anyway</code></li>
+        <li><div><h3>Chọn AI sẽ dịch</h3><p>Mở mục Kết nối AI, chọn công cụ đã đăng nhập trên máy (Claude Code, Codex, Gemini CLI), hoặc dán khóa Gemini API, OpenRouter. Với hồ sơ có thông tin người bệnh, chọn Ollama để chữ không rời máy.</p></div><code>Kết nối AI → Đặt làm nền tảng chính</code></li>
+        <li><div><h3>Kéo PDF vào và bấm dịch</h3><p>Lĩnh vực Y Dược đã bật sẵn. Ứng dụng tự nhận tiếng Anh hay tiếng Pháp, dịch từng lô, dựng PDF và lập phiếu kiểm định. Đoạn nào cần sửa, bấm vào bản dịch để sửa tay rồi dựng lại.</p></div><code>Dịch PDF Studio → Chọn PDF → Bắt đầu dịch</code></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="hoi-dap" aria-labelledby="hoi-dap-h">
+    <div class="wrap">
+      <div class="section-head">
+        <h2 id="hoi-dap-h">Hỏi đáp</h2>
+      </div>
+      <div class="faq">
+        <details><summary>Dùng bản dịch này để kê đơn, cấp phát thuốc được không?</summary><div><p>Không. Bản dịch là bản đọc hiểu do AI tạo. Liều dùng, chỉ định, chống chỉ định luôn phải đối chiếu với tờ hướng dẫn sử dụng đã được cấp phép, phác đồ chính thức và người có chuyên môn. Bộ kiểm liều giảm rủi ro sai số, không thay được việc người có chuyên môn đọc lại.</p></div></details>
+        <details><summary>Tài liệu có bị gửi đi đâu không?</summary><div><p>File PDF được mở và dựng lại ngay trên máy bạn. Phần chữ cần dịch được gửi tới AI bạn chọn, theo chính sách của nhà cung cấp đó. Nếu tài liệu có thông tin người bệnh, dùng Ollama chạy trên máy để chữ không ra khỏi máy tính.</p></div></details>
+        <details><summary>Bộ kiểm liều bắt được những gì?</summary><div><p>Số đi kèm đơn vị đo: mg, µg/mcg, ng, g, kg, mL, L, UI/IU, mEq, mmol, µmol, mmHg và %. Trong chế độ Y Dược, đoạn chỉ có một con số cũng được kiểm. Bộ kiểm không hiểu nghĩa câu: AI dịch sai “trước bữa ăn” thành “sau bữa ăn” thì bộ kiểm không biết, nên vẫn cần người đọc lại.</p></div></details>
+        <details><summary>PDF nào dịch được?</summary><div><p>PDF có lớp chữ, tức bôi đen được chữ. PDF scan dạng ảnh chụp cần nhận dạng chữ (OCR) trước, phiên bản này chưa làm bước đó.</p></div></details>
+        <details><summary>Có phải trả tiền không?</summary><div><p>Ứng dụng miễn phí, mã nguồn mở. Việc dịch dùng hạn mức tài khoản AI bạn đang có.</p></div></details>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div>
+      <p><strong>pdf-translation-layout</strong> · Huỳnh Anh Thuận · mã nguồn MIT, khi chạy dùng PyMuPDF (AGPL-3.0) · © <span id="year">2026</span></p>
+      <p>Liên hệ: <a href="mailto:hello@huynhanhthuan.com">hello@huynhanhthuan.com</a></p>
+      <p class="credit">Thuật ngữ tham khảo cách gọi của Dược thư Quốc gia Việt Nam. Công cụ do cá nhân phát triển, không liên kết với cơ quan quản lý dược.</p>
+    </div>
+    <nav aria-label="Liên kết cuối trang">
+      <a href="./">Trang chủ</a>
+      <a href="dich?linh-vuc=y-duoc">Dịch trên web</a>
+      <a href="chat-luong">Đo chất lượng</a>
+      <a data-github hidden href="#">Mã nguồn</a>
+      <a href="privacy.html">Chính sách dữ liệu</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -3,7 +3,7 @@
 dich_pdf.py — Dịch PDF Anh ⇄ Việt giữ nguyên bố cục, chạy được ngay trong khung chat của trợ lý AI
 (Claude.ai, ChatGPT, Antigravity, Claude Code…) hoặc trên máy. Một file duy nhất, chỉ cần PyMuPDF.
 
-Hai chiều: Anh → Việt (en-vi) và Việt → Anh (vi-en). Mặc định công cụ tự nhận chiều theo ngôn ngữ của tài liệu.
+Ba chiều: Anh → Việt (en-vi), Pháp → Việt (fr-vi) và Việt → Anh (vi-en). Lĩnh vực: chung hoặc Y Dược (--linh-vuc y-duoc). Mặc định công cụ tự nhận chiều theo ngôn ngữ của tài liệu.
 Với PDF tiếng Việt, chữ được làm sạch trước khi đưa cho AI: chuyển mã phông cũ TCVN3 (.VnTime…) và VNI,
 gắn lại dấu thanh bị tách rời, chuẩn hóa Unicode NFC.
 
@@ -38,7 +38,7 @@ import sys
 import unicodedata
 from pathlib import Path
 
-PHIEN_BAN = "3.2.0"
+PHIEN_BAN = "3.3.0"
 HERE = Path(__file__).resolve().parent
 SKILL_DIR = HERE.parent
 FONT_DIR = SKILL_DIR / "assets" / "fonts"
@@ -56,8 +56,13 @@ CHAN_TRANG = "Bản dịch cá nhân bằng AI · không phân phối · pdf-tra
 # Bản tiếng Anh dễ bị đem nộp như bản dịch chính thức (con dấu, chữ ký dạng ảnh vẫn nằm nguyên trên trang),
 # nên chân trang nói rõ đây không phải bản dịch có chứng thực.
 CHAN_TRANG_EN = "Unofficial AI translation for reference only · not a certified translation · pdf-translation-layout"
-HUONG = {"en-vi": ("en", "vi"), "vi-en": ("vi", "en")}
-TEN_NGU = {"en": "tiếng Anh", "vi": "tiếng Việt"}
+HUONG = {"en-vi": ("en", "vi"), "fr-vi": ("fr", "vi"), "vi-en": ("vi", "en")}
+TEN_NGU = {"en": "tiếng Anh", "fr": "tiếng Pháp", "vi": "tiếng Việt"}
+# Lĩnh vực chuyên ngành: thêm quy tắc dịch, kiểm liều và đơn vị đo, chân trang riêng
+LINH_VUC = {"chung": "Chung", "y-duoc": "Y Dược"}
+# Bản dịch tài liệu thuốc, phác đồ dễ bị dùng thay tờ hướng dẫn gốc nên chân trang nói rõ giới hạn của nó.
+CHAN_TRANG_YD = "Bản dịch AI để tham khảo · không thay thế tờ hướng dẫn gốc hay chỉ định của bác sĩ · pdf-translation-layout"
+CHAN_TRANG_YD_EN = "Unofficial AI translation for reference only · not a substitute for the approved label or medical advice"
 GIOI_HAN_TAI_VE_MB = 30  # Claude.ai: tối đa 30 MB mỗi file
 SAVE_OPTS = dict(garbage=4, deflate=True, deflate_images=True, deflate_fonts=True)  # gộp ảnh/phông trùng lặp
 
@@ -161,6 +166,11 @@ def _out_dir(a) -> Path:
 _LETTER = re.compile(r"[A-Za-z]")
 _URLISH = re.compile(r"^\s*(https?://\S+|www\.\S+|\S+@\S+\.\S+)\s*$")
 _EN_STOP = set("the and of to in is are for with on that this be as by or from it at an not your you can".split())
+# Từ chức năng tiếng Pháp (không trùng với từ tiếng Anh thường gặp) để nhận tài liệu tiếng Pháp và tìm chữ Pháp còn sót
+_FR_STOP = set("le la les des du de et est une un dans pour que qui pas sur au aux avec par ce cette ces sont il elle "
+               "ils elles nous vous leur leurs ou mais être été très peut doit chez sans selon entre lors après avant".split())
+# Chữ có dấu chỉ tiếng Việt mới có (tiếng Pháp cũng dùng é, è, à, â, ê, ô…, nên không dùng được để phân biệt)
+_VI_STRICT = set("ăđơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉĩịọỏốồổỗộớờởỡợụủũứừửữựỳỷỹỵýáíóúãõ")
 
 
 def _hexcolor(c: int) -> str:
@@ -542,13 +552,29 @@ def _should_translate(text: str, src_lang: str = "en") -> bool:
     return True
 
 
+def _fr_ratio(text: str) -> float:
+    words = re.findall(r"[^\W\d_]+", text.lower())
+    if not words:
+        return 0.0
+    return sum(1 for w in words if w in _FR_STOP) / len(words)
+
+
 def _detect_lang(texts) -> str:
-    """vi nếu đủ nhiều từ mang dấu tiếng Việt, ngược lại en."""
+    """vi, fr hoặc en. Tiếng Việt nhận bằng chữ có dấu riêng của tiếng Việt (ă, đ, ơ, ư, dấu nặng, hỏi, ngã…);
+    tiếng Pháp nhận bằng từ chức năng (le, les, des, est, dans…) khi chúng nhiều hơn từ chức năng tiếng Anh."""
     words = [w for t in texts for w in re.findall(r"[^\W\d_]+", t.lower())]
     if not words:
         return "en"
+    n = len(words)
+    strict = sum(1 for w in words if any(c in _VI_STRICT for c in w)) / n
+    if strict >= 0.06:
+        return "vi"
+    fr = sum(1 for w in words if w in _FR_STOP) / n
+    en = sum(1 for w in words if w in _EN_STOP) / n
+    if fr >= 0.08 and fr > en:
+        return "fr"
     marked = sum(1 for w in words if any(c in _VI_MARK for c in w))
-    return "vi" if marked / len(words) >= 0.12 else "en"
+    return "vi" if marked / n >= 0.12 else "en"
 
 
 def extract_segments(doc, huong: str = "tu-dong"):
@@ -561,7 +587,8 @@ def extract_segments(doc, huong: str = "tu-dong"):
     # Chiều dịch: theo yêu cầu, hoặc theo ngôn ngữ của tài liệu (phông mã cũ tiếng Việt là dấu hiệu chắc chắn)
     if huong not in HUONG:
         sample = [unicodedata.normalize("NFC", doc[i].get_text()) for i in range(min(doc.page_count, 20))]
-        huong = "vi-en" if fonts or _detect_lang(sample) == "vi" else "en-vi"
+        lang = "vi" if fonts else _detect_lang(sample)
+        huong = {"vi": "vi-en", "fr": "fr-vi"}.get(lang, "en-vi")
     src_lang = HUONG[huong][0]
     for page in doc:
         d = page.get_text("dict", flags=fz.TEXTFLAGS_DICT & ~fz.TEXT_PRESERVE_IMAGES)
@@ -690,8 +717,8 @@ def cmd_chuan_bi(a) -> int:
     pages, huong, info = extract_segments(doc, getattr(a, "huong", None) or "tu-dong")
     root = _work_root(a)
     name = re.sub(r"[^\w\-]+", "_", Path(ten).stem, flags=re.UNICODE)[:60] or "tai_lieu"
-    if huong == "vi-en":
-        name += "_vi-en"  # cùng tài liệu dịch hai chiều thì hai việc riêng
+    if huong != "en-vi":
+        name += "_" + huong  # cùng tài liệu dịch hai chiều thì hai việc riêng
     job = root / name
     if job.exists() and not a.lam_lai and (job / "meta.json").is_file():
         print(f"Đã có việc dang dở cho '{src.name}'. Dùng tiếp (thêm --lam-lai để làm lại từ đầu).")
@@ -715,7 +742,8 @@ def cmd_chuan_bi(a) -> int:
         if ids:
             batches.append({"lo": len(batches) + 1, "trang": [start, end], "ids": ids, "xong": False})
     meta = {"ten": ten, "so_trang": n, "lo_trang": lo, "tao_luc": _dt.datetime.now().isoformat(timespec="seconds"),
-            "phien_ban": PHIEN_BAN, "trang_scan": scanned, "huong": huong, "lam_sach": info}
+            "phien_ban": PHIEN_BAN, "trang_scan": scanned, "huong": huong, "lam_sach": info,
+            "linh_vuc": getattr(a, "linh_vuc", None) if getattr(a, "linh_vuc", None) in LINH_VUC else "chung"}
     _save(job / "meta.json", meta)
     _save(job / "trang.json", pages)
     _save(job / "lo.json", batches)
@@ -724,9 +752,11 @@ def cmd_chuan_bi(a) -> int:
     n_tr = sum(len(b["ids"]) for b in batches)
     words = sum(len(s["text"].split()) for s in segs_all if s["translate"])
     src_l, tgt_l = HUONG[huong]
-    tu_nhan = "" if getattr(a, "huong", None) in HUONG else " (tự nhận theo tài liệu; đổi bằng --huong en-vi hoặc vi-en)"
+    tu_nhan = "" if getattr(a, "huong", None) in HUONG else " (tự nhận theo tài liệu; đổi bằng --huong en-vi, fr-vi hoặc vi-en)"
     print(f"Tài liệu: {ten} · {n} trang · {n_tr} đoạn cần dịch (~{words} từ) · {len(batches)} lô × {lo} trang")
     print(f"Chiều dịch: {TEN_NGU[src_l]} → {TEN_NGU[tgt_l]}{tu_nhan}")
+    if meta["linh_vuc"] != "chung":
+        print(f"Lĩnh vực: {LINH_VUC[meta['linh_vuc']]} (thêm quy tắc thuật ngữ, kiểm liều và đơn vị đo)")
     if info["chuyen_ma"]:
         print("Đã chuyển mã phông tiếng Việt cũ sang Unicode: "
               + ", ".join(f"{k.upper()} {v} dòng" for k, v in info["chuyen_ma"].items())
@@ -803,8 +833,66 @@ QUY_TAC = {
         "- Use the same English term for the same Vietnamese term in every batch of this document.",
         "- Do not merge, split or skip segments. No notes, explanations or alternatives."]),
 }
+QUY_TAC["fr-vi"] = "\n".join([
+    "Dịch các đoạn tiếng Pháp dưới đây sang tiếng Việt cho một tài liệu PDF.",
+    "Yêu cầu:",
+    "- Tiếng Việt tự nhiên, đủ dấu, đúng văn phong của tài liệu. Dịch theo nghĩa, không dịch từng chữ.",
+    "- Giữ nguyên số liệu, đơn vị, tên riêng, URL, email, mã, công thức. Số kiểu Pháp giữ nguyên giá trị: "
+    "1 000 → 1.000; 2,5 giữ là 2,5; 15 % → 15%.",
+    "- Ngày tháng: không đảo ngày và tháng (03/02/2020 là ngày 3 tháng 2); « le 3 février 2020 » → ngày 3 tháng 2 năm 2020.",
+    "- Dấu ngoặc « » chuyển thành “ ”. Từ viết tắt tiếng Pháp giữ nguyên (CHU, HAS, ANSM, AMM, SMUR).",
+    "- Thuật ngữ thống nhất với các lô trước trong cuộc trò chuyện này.",
+    "- Mục danh sách giữ ký hiệu đầu dòng (•, 1., a)…). Đoạn có \"loai\": \"tieu-de\" là tiêu đề: dịch ngắn gọn.",
+    "- Ô bảng và nhãn ngắn: dịch thật ngắn để vừa chỗ.",
+    "- Không gộp, không tách, không bỏ đoạn nào; không thêm chú thích hay giải thích."])
+
+# Quy tắc bổ sung cho tài liệu Y Dược (tờ hướng dẫn sử dụng thuốc, bài báo lâm sàng, phác đồ, giáo trình)
+QUY_TAC_Y_DUOC = {
+    "vi": "\n".join([
+        "LĨNH VỰC Y DƯỢC — độ chính xác đặt trên văn phong:",
+        "- Liều, nồng độ, đơn vị, khoảng, tần suất giữ ĐÚNG từng con số: không quy đổi đơn vị, không làm tròn, không gộp "
+        "(5–10 mg/kg/ngày, 2 × 500 mg, 0,5 mL, 1 000 UI, q8h, mmol/L, µg). Chỉ đổi dấu thập phân sang kiểu Việt (2.5 → 2,5).",
+        "- Tên hoạt chất dùng tên chung quốc tế INN như Dược thư Quốc gia Việt Nam (paracetamol, amoxicilin, "
+        "metformin; tiếng Pháp paracétamol → paracetamol). Tên biệt dược giữ nguyên cùng ®, ™.",
+        "- Tên khoa học Latin của vi sinh vật, cây thuốc giữ nguyên (Staphylococcus aureus, Panax ginseng). "
+        "Viết tắt chuyên môn giữ nguyên (IV, IM, PO, ECG, HbA1c, INR, eGFR, bid, tid).",
+        "- Tên mục chuẩn: Indications/Indications thérapeutiques = Chỉ định; Contraindications/Contre-indications = "
+        "Chống chỉ định; Warnings and precautions/Mises en garde et précautions d'emploi = Cảnh báo và thận trọng; "
+        "Dosage and administration/Posologie et mode d'administration = Liều dùng và cách dùng; Adverse reactions/"
+        "Effets indésirables = Tác dụng không mong muốn; Drug interactions/Interactions médicamenteuses = Tương tác thuốc; "
+        "Overdose/Surdosage = Quá liều; Pregnancy and lactation/Grossesse et allaitement = Phụ nữ có thai và cho con bú; "
+        "Pharmacodynamics = Dược lực học; Pharmacokinetics = Dược động học; Excipients = Tá dược; Storage/Conservation = "
+        "Bảo quản; Shelf life/Durée de conservation = Hạn dùng.",
+        "- Giữ đúng mức độ của lời dặn: must not/ne doit pas = không được; should/il est recommandé = nên; may/peut = có thể; "
+        "very common/très fréquent (≥ 1/10) và các mức tần suất khác giữ nguyên tỷ lệ.",
+        "- Không thêm, không bớt, không làm nhẹ cảnh báo; không thêm lời khuyên y khoa nào."]),
+    "en": "\n".join([
+        "MEDICAL AND PHARMACEUTICAL DOCUMENT — accuracy over style:",
+        "- Keep every dose, strength, unit, range and frequency exactly: no unit conversion, no rounding, no merging "
+        "(5–10 mg/kg/day, 2 × 500 mg, 0.5 mL, 1,000 IU, q8h, mmol/L, µg). Only switch decimal separators (2,5 → 2.5).",
+        "- Active ingredients by their INN (paracetamol, amoxicillin). Brand names unchanged with ®, ™. "
+        "Latin names of organisms and medicinal plants unchanged. Clinical abbreviations unchanged.",
+        "- Standard label headings: Chỉ định = Indications; Chống chỉ định = Contraindications; Cảnh báo và thận trọng = "
+        "Warnings and precautions; Liều dùng và cách dùng = Dosage and administration; Tác dụng không mong muốn = Adverse "
+        "reactions; Tương tác thuốc = Drug interactions; Quá liều = Overdose; Phụ nữ có thai và cho con bú = Pregnancy and "
+        "lactation; Dược lực học = Pharmacodynamics; Dược động học = Pharmacokinetics; Tá dược = Excipients; "
+        "Bảo quản = Storage; Hạn dùng = Shelf life.",
+        "- Keep the strength of every instruction: không được = must not; nên = should; có thể = may.",
+        "- Never add, drop or soften a warning; add no medical advice."]),
+}
+
+
+def quy_tac(huong: str, linh_vuc: str = "chung") -> str:
+    """Quy tắc dịch cho một chiều, cộng quy tắc của lĩnh vực chuyên ngành nếu có."""
+    base = QUY_TAC[huong]
+    if linh_vuc == "y-duoc":
+        base += "\n" + QUY_TAC_Y_DUOC[HUONG[huong][1]]
+    return base
+
+
 DONG_KET = {
     "en-vi": 'Chỉ trả về MỘT khối JSON dạng {{"<id>": "<bản dịch>", ...}} với đủ {n} id dưới đây.',
+    "fr-vi": 'Chỉ trả về MỘT khối JSON dạng {{"<id>": "<bản dịch>", ...}} với đủ {n} id dưới đây.',
     "vi-en": 'Return ONE JSON object {{"<id>": "<English translation>", ...}} with exactly these {n} ids, '
              'in one ```json block, and nothing else.',
 }
@@ -812,6 +900,11 @@ DONG_KET = {
 
 def _huong(job: Path) -> str:
     return (_load(job / "meta.json", {}) or {}).get("huong", "en-vi")
+
+
+def _linh_vuc(job: Path) -> str:
+    lv = (_load(job / "meta.json", {}) or {}).get("linh_vuc", "chung")
+    return lv if lv in LINH_VUC else "chung"
 
 
 def _seg_index(job: Path):
@@ -869,8 +962,11 @@ def cmd_lay_lo(a) -> int:
     print(f"LÔ {b['lo']}/{total} · trang {b['trang'][0]}–{b['trang'][1]} · {len(items)} đoạn"
           + (f" (lô này còn {con_lai} đoạn nữa, lấy ở lần gọi lay-lo sau)" if con_lai else ""))
     if _huong(job) == "vi-en":
-        print("CHIỀU VIỆT → ANH. " + QUY_TAC["vi-en"])
+        print("CHIỀU VIỆT → ANH. " + quy_tac("vi-en", _linh_vuc(job)))
         print('Return JSON {"<id>": "<English>", ...} with EVERY id below, then run: dich_pdf.py nap-lo <file.json>')
+    elif _huong(job) == "fr-vi" or _linh_vuc(job) != "chung":
+        print("CHIỀU " + ("PHÁP" if _huong(job) == "fr-vi" else "ANH") + " → VIỆT. " + quy_tac(_huong(job), _linh_vuc(job)))
+        print('Trả về JSON dạng {"<id>": "<bản dịch>", ...} với ĐỦ mọi id dưới đây, rồi chạy: dich_pdf.py nap-lo <file.json>')
     else:
         print("Dịch sang tiếng Việt có dấu đầy đủ, giữ nguyên số liệu, tên riêng, URL, email; không gộp hay tách đoạn.")
         print('Trả về JSON dạng {"<id>": "<bản dịch>", ...} với ĐỦ mọi id dưới đây, rồi chạy: dich_pdf.py nap-lo <file.json>')
@@ -898,20 +994,63 @@ def _en_ratio(text: str) -> float:
     return sum(1 for w in words if w in _EN_STOP) / len(words)
 
 
-def _check_translation(src: str, vi: str, huong: str = "en-vi") -> str | None:
+_GROUP_SEP = re.compile(r"(?<=\d)[ \u00a0\u202f\u2009](?=\d{3}(?!\d))")  # 1 000 000 kiểu Pháp
+_UNIT_EQ = {"mcg": "µg", "μg": "µg", "ug": "µg", "ui": "iu", "ml": "ml", "cc": "ml", "μl": "µl", "ul": "µl", "µmol": "µmol",
+            "μmol": "µmol"}
+_DOSE = re.compile(r"(\d+(?:[.,]\d+)?)\s?(mg|µg|μg|mcg|ug|ng|g|kg|ml|µl|μl|ul|dl|cl|l|iu|ui|meq|mmol|µmol|μmol|nmol|"
+                   r"mmhg|%)(?![^\W\d_])", re.I)
+
+
+def _ungroup(x: str) -> str:
+    """Bỏ dấu phân nhóm nghìn (1.000 / 1,000 → 1000); dấu thập phân (2,5 / 2.5) giữ nguyên."""
+    return re.sub(r"[.,](?=\d{3}(?!\d))", "", x)
+
+
+def _num_norm(x: str) -> set:
+    return {x.replace(",", "."), x.replace(".", ","), _ungroup(x)}
+
+
+def _check_doses(src: str, dst: str) -> str | None:
+    """Tài liệu Y Dược: mọi cặp (số, đơn vị) của bản gốc phải còn nguyên trong bản dịch."""
+    s, d = _GROUP_SEP.sub("", src), _GROUP_SEP.sub("", dst)
+    have = {}
+    for m in _DOSE.finditer(d):
+        u = m.group(2).lower()
+        for v in _num_norm(m.group(1)):
+            have.setdefault(v, set()).add(_UNIT_EQ.get(u, u))
+    for m in _DOSE.finditer(s):
+        u = m.group(2).lower()
+        u = _UNIT_EQ.get(u, u)
+        if not any(u in have.get(v, ()) for v in _num_norm(m.group(1))):
+            return f"liều hoặc đơn vị đo có thể bị thay đổi ({m.group(0).strip()})"
+    return None
+
+
+def _check_translation(src: str, vi: str, huong: str = "en-vi", linh_vuc: str = "chung") -> str | None:
     if huong == "vi-en":
-        return _check_en(src, vi)
+        w = _check_en(src, vi)
+        return w or (_check_doses(src, vi) if linh_vuc == "y-duoc" and vi else None)
     if not vi or not vi.strip():
         return "trống"
     n = len(re.findall(r"[^\W\d_]+", vi))
     if n >= 6 and _en_ratio(vi) > 0.12:
         return "có vẻ chưa dịch (còn tiếng Anh)"
+    if huong == "fr-vi" and n >= 6 and _fr_ratio(vi) > 0.12:
+        return "có vẻ chưa dịch (còn tiếng Pháp)"
     if n >= 6 and _vi_ratio(vi) < 0.08:
         return "có vẻ thiếu dấu tiếng Việt"
-    nums_src = sorted(re.findall(r"\d+(?:[.,]\d+)?", src))
-    nums_vi = sorted(re.findall(r"\d+(?:[.,]\d+)?", vi))
-    if len(nums_src) >= 2 and not set(x.replace(",", ".") for x in nums_src) <= set(x.replace(",", ".") for x in nums_vi) | {
-            x.replace(".", ",") for x in nums_vi} | {x.replace(",", "") for x in nums_vi}:
+    if linh_vuc == "y-duoc":
+        w = _check_doses(src, vi)
+        if w:
+            return w
+    src_g, vi_g = _GROUP_SEP.sub("", src), _GROUP_SEP.sub("", vi)
+    nums_src = sorted(re.findall(r"\d+(?:[.,]\d+)?", src_g))
+    nums_vi = sorted(re.findall(r"\d+(?:[.,]\d+)?", vi_g))
+    # Y Dược: một con số cũng phải giữ (liều, hàm lượng thường chỉ có một số trong đoạn)
+    have = set()
+    for x in nums_vi:
+        have |= _num_norm(x) | {x.replace(",", "")}
+    if len(nums_src) >= (1 if linh_vuc == "y-duoc" else 2) and not all(_num_norm(x) & have for x in nums_src):
         return "số liệu có thể bị thay đổi"
     return None
 
@@ -995,10 +1134,10 @@ def cmd_nap_lo(a) -> int:
     auto = _propagate(trans, idx)
     _save(job / "ban_dich.json", trans)
     warn = {}
-    huong = _huong(job)
+    huong, lv = _huong(job), _linh_vuc(job)
     for k in data:
         if k in idx:
-            w = _check_translation(idx[k]["text"], data[k], huong)
+            w = _check_translation(idx[k]["text"], data[k], huong, lv)
             if w:
                 warn[k] = w
     changed = []
@@ -1120,7 +1259,7 @@ def build_translated(job: Path, out_pdf: Path, footer=True):
         todo = [s for s in pinfo["segments"] if s["translate"] and trans.get(s["id"])]
         if not todo:
             if footer:
-                _footer(page, arch, css, huong)
+                _footer(page, arch, css, huong, _linh_vuc(job))
             continue
         for s in todo:  # xóa chữ gốc theo từng dòng (dải giữa dòng để không đụng dòng bên cạnh)
             for (x0, y0, x1, y1) in s["lines"]:
@@ -1162,7 +1301,7 @@ def build_translated(job: Path, out_pdf: Path, footer=True):
                     status = "thu-nho"
             log[s["id"]] = {"scale": round(scale, 3), "status": status, "page": s["page"]}
         if footer:
-            _footer(page, arch, css, huong)
+            _footer(page, arch, css, huong, _linh_vuc(job))
     page = None  # bỏ tham chiếu tới trang cuối cùng: reload_page đòi trang không còn ai giữ
     for i, want in snap.items():  # trang nào bị mất liên kết (do dùng chung đối tượng) thì gắn lại
         if not want:
@@ -1204,10 +1343,13 @@ def _drop_links(page):
         pass
 
 
-def _footer(page, arch, css, huong="en-vi"):
+def _footer(page, arch, css, huong="en-vi", linh_vuc="chung"):
     fz = _import_pymupdf()
     w, h = page.rect.width, page.rect.height
-    text = CHAN_TRANG_EN if huong == "vi-en" else CHAN_TRANG
+    if linh_vuc == "y-duoc":
+        text = CHAN_TRANG_YD_EN if huong == "vi-en" else CHAN_TRANG_YD
+    else:
+        text = CHAN_TRANG_EN if huong == "vi-en" else CHAN_TRANG
     page.insert_htmlbox(fz.Rect(36, h - 13, w - 36, h - 3),
                         f'<p style="font-family:vnsans;font-size:6pt;color:#8a9597;text-align:center">{text}</p>',
                         css=css, archive=arch, scale_low=0.5)
@@ -1275,7 +1417,7 @@ def build_interleaved(job: Path, out_pdf: Path, footer=True):
     d = fz.open(out_pdf)
     if footer:
         for pg in d:
-            _footer(pg, arch, _css(), huong)
+            _footer(pg, arch, _css(), huong, _linh_vuc(job))
     d.subset_fonts()
     tmp = out_pdf.with_suffix(".tmp.pdf")
     d.save(tmp, **SAVE_OPTS)
@@ -1387,6 +1529,7 @@ def cmd_kiem_dinh(a) -> int:
     if not files:
         sys.exit("Chưa dựng PDF. Chạy: dich_pdf.py dung")
     huong = meta.get("huong", "en-vi")
+    lv = meta.get("linh_vuc", "chung") if meta.get("linh_vuc") in LINH_VUC else "chung"
     src_l, tgt_l = HUONG[huong]
     vi_pdf = files[0]
     missing_glyph = _font_glyph_checker()
@@ -1400,7 +1543,7 @@ def cmd_kiem_dinh(a) -> int:
         m = missing_glyph(vi, s["bold"], s["italic"], s.get("family", "sans"))
         if m:
             tofu[s["id"]] = "".join(sorted(m))
-        w = _check_translation(s["text"], vi, huong)
+        w = _check_translation(s["text"], vi, huong, lv)
         if w:
             nghi_van[s["id"]] = w
     tran = [k for k, v in log.items() if v["status"] == "tran"]
@@ -1431,13 +1574,17 @@ def cmd_kiem_dinh(a) -> int:
         checks.append(("Đoạn nghi vấn (còn tiếng Việt, lệch số liệu, ngày, số hiệu)", not nghi_van,
                        f"{len(nghi_van)} đoạn", False))
     else:
-        checks.append(("Đoạn nghi vấn (còn tiếng Anh, thiếu dấu, lệch số liệu)", not nghi_van, f"{len(nghi_van)} đoạn", False))
+        checks.append((f"Đoạn nghi vấn (còn {TEN_NGU[src_l]}, thiếu dấu, lệch số liệu)", not nghi_van, f"{len(nghi_van)} đoạn", False))
+    if lv == "y-duoc":
+        # Lệch liều hay đơn vị đo là lỗi nặng với tài liệu thuốc: chặn kết luận ĐẠT cho tới khi được sửa
+        lech_lieu = {k: v for k, v in nghi_van.items() if v.startswith("liều") or v.startswith("số liệu")}
+        checks.append(("Liều, hàm lượng, đơn vị đo khớp bản gốc (Y Dược)", not lech_lieu, f"{len(lech_lieu)} đoạn lệch", True))
     ok = all(c[1] for c in checks if c[3])
     now = _dt.datetime.now().strftime("%d/%m/%Y %H:%M")
     ls = meta.get("lam_sach") or {}
     lines = ["# Phiếu kiểm định bản dịch", "",
              f"- Tài liệu: **{meta['ten']}** · {meta['so_trang']} trang · {len(segs)} đoạn",
-             f"- Chiều dịch: {TEN_NGU[src_l]} → {TEN_NGU[tgt_l]}",
+             f"- Chiều dịch: {TEN_NGU[src_l]} → {TEN_NGU[tgt_l]}" + (f" · lĩnh vực {LINH_VUC[lv]}" if lv != "chung" else ""),
              f"- File kiểm định: `{vi_pdf.name}`",
              f"- Thời điểm: {now} · công cụ pdf-translation-layout {PHIEN_BAN}",
              f"- Kết luận: **{'ĐẠT' if ok else 'CHƯA ĐẠT'}**" + ("" if not (nghi_van or chua_dich or thu_nho) else " (có mục cần xem lại)"),
@@ -1477,11 +1624,14 @@ def cmd_kiem_dinh(a) -> int:
         lines += ["", "> Bản dịch máy để tham khảo, không phải bản dịch có chứng thực. Giấy tờ nộp cơ quan nhà nước, "
                   "đại sứ quán, trường học (học bạ, bằng cấp, giấy tờ hộ tịch, sao kê) cần người dịch ký và được chứng thực. "
                   "Con dấu và chữ ký dạng ảnh trong bản gốc vẫn nằm nguyên trên bản tiếng Anh."]
-    else:
+    if lv == "y-duoc":
+        lines += ["", "> Tài liệu Y Dược: bản dịch AI chỉ để đọc hiểu, không thay thế tờ hướng dẫn sử dụng đã được cấp phép, "
+                  "phác đồ chính thức hay chỉ định của bác sĩ, dược sĩ. Mọi liều dùng phải được đối chiếu với bản gốc trước khi áp dụng."]
+    if huong != "vi-en":
         lines += ["", "> Bản dịch cá nhân bằng AI, dùng để đọc hiểu. Muốn phát hành hoặc chia sẻ công khai cần có sự đồng ý của chủ sở hữu bản quyền."]
     report_md = _out_dir(a) / f"{Path(meta['ten']).stem}_phieu-kiem-dinh.md"
     report_md.write_text("\n".join(lines), encoding="utf-8")
-    _save(job / "kiem_dinh.json", {"dat": ok, "huong": huong,
+    _save(job / "kiem_dinh.json", {"dat": ok, "huong": huong, "linh_vuc": lv,
                                     "checks": [{"muc": c[0], "dat": c[1], "chi_tiet": c[2], "canh_bao": not c[3]} for c in checks],
                                     "tofu": tofu, "tran": tran, "thu_nho": thu_nho, "nghi_van": nghi_van,
                                     "chua_dich": chua_dich, "chu_bong": ghost})
@@ -1540,7 +1690,10 @@ def cmd_cham_diem(a) -> int:
                 if not inter.is_empty and inter.get_area() > 0.25 * min(boxes[i].get_area(), boxes[j].get_area()):
                     overlap += 1
     lang_metrics = {"ty_le_tu_co_dau": round(vi, 3), "ty_le_tu_tieng_anh_con_lai": round(en, 3)}
-    if _detect_lang([txt_src]) == "vi":
+    if _detect_lang([txt_src]) == "fr":
+        lang_metrics = {"huong": "fr-vi", "ty_le_tu_co_dau": round(vi, 3),
+                        "ty_le_tu_tieng_phap_con_lai": round(_fr_ratio(txt_out), 3)}
+    elif _detect_lang([txt_src]) == "vi":
         # Chiều Việt → Anh: đo tiếng Việt còn sót (có dấu, và không dấu) thay cho tỷ lệ từ có dấu
         masked = _MASK.sub(" ", unicodedata.normalize("NFC", txt_out))
         ws = re.findall(r"[^\W\d_]+", masked)
@@ -1609,8 +1762,10 @@ def main():
     p.add_argument("--lo", type=int, default=15, help="Số trang mỗi lô (10–20)")
     p.add_argument("--lam-lai", action="store_true")
     p.add_argument("--trang", help="Chỉ dịch các trang này, vd \"1-10\" hoặc \"1-5,8,12-14\"")
-    p.add_argument("--huong", choices=["tu-dong", "en-vi", "vi-en"], default="tu-dong",
-                   help="Chiều dịch: en-vi (Anh → Việt), vi-en (Việt → Anh); mặc định tự nhận theo tài liệu")
+    p.add_argument("--huong", choices=["tu-dong", "en-vi", "fr-vi", "vi-en"], default="tu-dong",
+                   help="Chiều dịch: en-vi (Anh → Việt), fr-vi (Pháp → Việt), vi-en (Việt → Anh); mặc định tự nhận")
+    p.add_argument("--linh-vuc", choices=list(LINH_VUC), default="chung",
+                   help="Lĩnh vực: chung, y-duoc (thêm quy tắc thuật ngữ Y Dược, kiểm liều và đơn vị đo)")
     p.set_defaults(f=cmd_chuan_bi)
     p = sub.add_parser("lay-lo")
     p.add_argument("--lo", type=int, default=0)

@@ -1,4 +1,4 @@
-// server/index.mjs — Dedicated Windows Desktop backend v4.0.0 (AI Connectors, Vault, TM, Glossary, History, Loopback-Safe File I/O)
+// server/index.mjs — Dedicated Windows Desktop backend v4.1.0 (AI Connectors, Vault, TM, Glossary, History, Loopback-Safe File I/O)
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
@@ -36,6 +36,32 @@ function isAllowedOrigin(origin, pathname) {
   if (TRUSTED_WEB_ORIGINS.has(origin) && isBridgePathname(pathname)) return true;
   return false;
 }
+
+const DEFAULT_EDITION = { id: "standard", name: "PDF Layout VI Studio", badge: "v4.1 PRO", defaultDomain: "chung" };
+
+// Ấn bản (Studio hay Y Dược): bản cài đặt mang file edition.json trong resources; lúc phát triển chọn bằng PDF_LAYOUT_EDITION
+export function loadEdition() {
+  const candidates = [
+    process.env.PDF_LAYOUT_EDITION_FILE,
+    path.resolve(__dirname, "..", "edition.json"),
+    path.resolve(__dirname, "..", "editions", `${(process.env.PDF_LAYOUT_EDITION || "standard").replace(/[^a-z-]/g, "")}.json`),
+  ].filter(Boolean);
+  for (const f of candidates) {
+    try {
+      const e = JSON.parse(fs.readFileSync(f, "utf8"));
+      if (e && typeof e.id === "string") {
+        return {
+          ...DEFAULT_EDITION,
+          ...e,
+          defaultDomain: e.defaultDomain === "y-duoc" ? "y-duoc" : "chung",
+        };
+      }
+    } catch { /* thử file kế tiếp */ }
+  }
+  return { ...DEFAULT_EDITION };
+}
+
+const EDITION = loadEdition();
 
 function resolvePaths() {
   const envDesktop = process.env.PDF_LAYOUT_DESKTOP_UI_DIR;
@@ -176,12 +202,17 @@ export function createAppServer() {
         return sendJson(req, res, 200, {
           ok: true,
           app: "pdf-layout-vi-desktop",
-          version: "4.0.0",
+          version: "4.1.0",
+          edition: EDITION,
           platform: process.platform,
           desktopDir: DESKTOP_DIR,
           engineDir: ENGINE_DIR,
-          features: ["visual-preview", "batch-queue", "glossary", "tm-cache", "auto-failover", "history", "command-palette"],
+          features: ["visual-preview", "batch-queue", "glossary", "tm-cache", "auto-failover", "history", "command-palette", "fr-vi", "y-duoc"],
         });
+      }
+
+      if (pathname === "/api/edition" && req.method === "GET") {
+        return sendJson(req, res, 200, { ok: true, edition: EDITION });
       }
 
       if (pathname === "/api/config" && req.method === "GET") {

@@ -81,8 +81,15 @@
       <div class="dir-pick" role="radiogroup" aria-labelledby="huong-h">
         <span class="label" id="huong-h">Chiều dịch</span>
         <label class="check"><input type="radio" name="huong" value="en-vi" checked><span>Anh → Việt</span></label>
+        <label class="check"><input type="radio" name="huong" value="fr-vi"><span>Pháp → Việt</span></label>
         <label class="check"><input type="radio" name="huong" value="vi-en"><span>Việt → Anh</span></label>
         <span class="dir-note" id="huong-note"></span>
+      </div>
+      <div class="dir-pick" role="radiogroup" aria-labelledby="linhvuc-h">
+        <span class="label" id="linhvuc-h">Lĩnh vực</span>
+        <label class="check"><input type="radio" name="linh-vuc" value="chung" checked><span>Chung</span></label>
+        <label class="check"><input type="radio" name="linh-vuc" value="y-duoc"><span>Y Dược</span></label>
+        <span class="dir-note" id="linhvuc-note">Thuốc, phác đồ, bài báo lâm sàng: thêm quy tắc thuật ngữ, kiểm liều và đơn vị đo</span>
       </div>
       <details class="pages-opt">
         <summary>Chỉ dịch một số trang</summary>
@@ -235,7 +242,7 @@
       <div class="section-head">
         <p class="eyebrow">Chấm bản dịch có sẵn</p>
         <h2 id="cham-h">Đã dịch bằng công cụ khác? Chấm ngay tại đây</h2>
-        <p>Chọn file gốc và file đã dịch (Anh → Việt hoặc Việt → Anh, từ bất kỳ công cụ nào). Trang đo bảy chỉ số như <a href="chat-luong">trang đo chất lượng</a>, ngay trên máy bạn. Nên chấm bản dịch đơn ngữ, không phải bản song ngữ.</p>
+        <p>Chọn file gốc và file đã dịch (Anh → Việt, Pháp → Việt hoặc Việt → Anh, từ bất kỳ công cụ nào). Trang đo bảy chỉ số như <a href="chat-luong">trang đo chất lượng</a>, ngay trên máy bạn. Nên chấm bản dịch đơn ngữ, không phải bản song ngữ.</p>
       </div>
       <div class="form-row">
         <div class="field"><label for="cham-goc">File gốc</label><input class="input" type="file" id="cham-goc" accept="application/pdf,.pdf"></div>

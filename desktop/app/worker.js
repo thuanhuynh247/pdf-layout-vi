@@ -71,13 +71,13 @@ function J(s) { return JSON.parse(s); }
 
 var handlers = {
   init: init,
-  prepare: async function (bytes, name, lo, trang, huong) {
+  prepare: async function (bytes, name, lo, trang, huong, linhVuc) {
     await init();
     var safe = (name || "tai-lieu.pdf").replace(/[\\/:*?"<>|]+/g, "_");
     if (!/\.pdf$/i.test(safe)) safe += ".pdf";
     try { py.FS.readdir("/tmp/in").forEach(function (f) { if (f !== "." && f !== "..") py.FS.unlink("/tmp/in/" + f); }); } catch (e) { /* empty */ }
     py.FS.writeFile("/tmp/in/" + safe, new Uint8Array(bytes));
-    var r = J(api.prepare("/tmp/in/" + safe, lo || 15, trang || "", huong || "tu-dong"));
+    var r = J(api.prepare("/tmp/in/" + safe, lo || 15, trang || "", huong || "tu-dong", linhVuc || "chung"));
     if (r.ok) r.loadedFamilies = await loadFonts(r.families);
     return r;
   },

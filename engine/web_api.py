@@ -56,11 +56,13 @@ def _progress() -> dict:
             "batches_total": len(batches)}
 
 
-def prepare(pdf_path: str, lo: int = 15, trang: str = "", huong: str = "tu-dong") -> str:
-    """huong: "tu-dong" (nhận theo ngôn ngữ tài liệu), "en-vi" hoặc "vi-en"."""
+def prepare(pdf_path: str, lo: int = 15, trang: str = "", huong: str = "tu-dong", linh_vuc: str = "chung") -> str:
+    """huong: "tu-dong" (nhận theo ngôn ngữ tài liệu), "en-vi", "fr-vi" hoặc "vi-en".
+    linh_vuc: "chung" hoặc "y-duoc" (thêm quy tắc Y Dược, kiểm liều và đơn vị đo, chân trang riêng)."""
     shutil.rmtree(WORK, ignore_errors=True)
     shutil.rmtree(OUT, ignore_errors=True)
-    code, out = _run(D.cmd_chuan_bi, pdf=pdf_path, lo=lo, lam_lai=True, trang=trang or None, huong=huong or "tu-dong")
+    code, out = _run(D.cmd_chuan_bi, pdf=pdf_path, lo=lo, lam_lai=True, trang=trang or None, huong=huong or "tu-dong",
+                     linh_vuc=linh_vuc or "chung")
     if code:
         return json.dumps({"ok": False, "error": out})
     job = _job()
@@ -70,9 +72,10 @@ def prepare(pdf_path: str, lo: int = 15, trang: str = "", huong: str = "tu-dong"
     words = sum(len(s["text"].split()) for p in pages for s in p["segments"] if s["translate"])
     chars = sum(len(t) for t in {s["text"] for p in pages for s in p["segments"] if s["translate"]})  # bỏ trùng
     h = meta.get("huong", "en-vi")
+    lv = meta.get("linh_vuc", "chung")
     return json.dumps({"ok": True, "message": out, "name": meta["ten"], "pages": meta["so_trang"],
                        "scanned": meta.get("trang_scan", []), "families": families, "words": words,
-                       "chars": chars, "huong": h, "rules": D.QUY_TAC[h], "rules_end": D.DONG_KET[h],
+                       "chars": chars, "huong": h, "linh_vuc": lv, "rules": D.quy_tac(h, lv), "rules_end": D.DONG_KET[h],
                        "clean": meta.get("lam_sach", {}), **_progress()}, ensure_ascii=False)
 
 
@@ -99,14 +102,14 @@ def load(text: str) -> str:
     if code:
         return json.dumps({"ok": False, "error": out or "Không đọc được JSON bản dịch."}, ensure_ascii=False)
     warn = {}
-    huong = D._huong(job)
+    huong, lv = D._huong(job), D._linh_vuc(job)
     try:
         import re
         data = json.loads(re.search(r"\{.*\}|\[.*\]", text, flags=re.S).group(0))
         if isinstance(data, dict):
             for k, v in data.items():
                 if k in idx and v:
-                    w = D._check_translation(idx[k]["text"], str(v), huong)
+                    w = D._check_translation(idx[k]["text"], str(v), huong, lv)
                     if w:
                         warn[k] = {"warning": w, "source": idx[k]["text"], "vi": str(v)}
     except Exception:
