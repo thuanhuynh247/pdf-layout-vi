@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>PDF Layout VI Studio v4.0</title>
+  <title>PDF Layout VI Studio v4.1</title>
   <link rel="stylesheet" href="app.css">
 </head>
 <body>
@@ -12,8 +12,8 @@
     <header class="titlebar">
       <div class="titlebar-brand">
         <img class="brand-icon" src="icon.png" alt="">
-        <span class="brand-name">PDF Layout VI Studio</span>
-        <span class="brand-badge">v4.0 PRO</span>
+        <span class="brand-name" id="brand-name">PDF Layout VI Studio</span>
+        <span class="brand-badge" id="brand-badge">v4.1 PRO</span>
       </div>
       <div class="titlebar-status">
         <button class="pill pill-cmd" id="btn-cmd-palette" type="button" title="Mở bảng lệnh nhanh (Ctrl+K)">
@@ -228,8 +228,17 @@
                   <label>Chiều dịch</label>
                   <div class="seg-group">
                     <label class="seg"><input type="radio" name="ws-dir" value="en-vi" checked><span>Anh → Việt</span></label>
+                    <label class="seg"><input type="radio" name="ws-dir" value="fr-vi"><span>Pháp → Việt</span></label>
                     <label class="seg"><input type="radio" name="ws-dir" value="vi-en"><span>Việt → Anh</span></label>
                   </div>
+                </div>
+                <div class="field-group">
+                  <label>Lĩnh vực</label>
+                  <div class="seg-group">
+                    <label class="seg"><input type="radio" name="ws-domain" value="chung" checked><span>Chung</span></label>
+                    <label class="seg"><input type="radio" name="ws-domain" value="y-duoc"><span>Y Dược</span></label>
+                  </div>
+                  <div class="field-hint" id="ws-domain-hint" hidden>Bật quy tắc thuật ngữ Y Dược, bộ thuật ngữ theo chiều dịch, kiểm liều và đơn vị đo. Bản dịch chỉ để đọc hiểu, không thay thế tờ hướng dẫn gốc.</div>
                 </div>
                 <div class="field-row">
                   <div class="field-group">

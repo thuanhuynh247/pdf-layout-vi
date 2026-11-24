@@ -8,7 +8,7 @@ window.SITE_CONFIG = {
   APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxOZPeGValKjmm_12FGldg6DmmjPApAyJlDd6k1S4G21mwjtumo2HnSEmSy8V2e7xmk/exec",
 
   // Phiên bản hiển thị trên trang
-  VERSION: "4.0.0",
+  VERSION: "4.1.0",
 
   // Trang "Dùng với Claude": true = hiện nút tải thẳng file zip (không cần email);
   // false = nút dẫn tới form đăng ký, file gửi qua email.
@@ -28,6 +28,10 @@ window.SITE_CONFIG = {
 
   // Link tải ứng dụng Windows (.exe) tích hợp AI CLI trên GitHub Releases.
   DESKTOP_URL: "https://github.com/thuanhuynh247/pdf-layout-vi/releases/latest",
+
+  // Bản Y Dược (Anh → Việt, Pháp → Việt): file cài và bản chạy ngay trên GitHub Releases
+  YDUOC_URL: "https://github.com/thuanhuynh247/pdf-layout-vi/releases/download/v4.1.0/PDF-Layout-VI-YDuoc-4.1.0-x64-setup.exe",
+  YDUOC_PORTABLE_URL: "https://github.com/thuanhuynh247/pdf-layout-vi/releases/download/v4.1.0/PDF-Layout-VI-YDuoc-4.1.0-x64-portable.exe",
 
   // Chỉ hiện dòng "Đã có N người nhận" khi N đạt ngưỡng này (0 = không bao giờ hiện)
   SHOW_COUNT_FROM: 30,

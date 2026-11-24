@@ -23,7 +23,8 @@
       batchesDone: Number(d.batches_done || 0),
       batchesTotal: batchesTotal,
       scannedPages: scannedPages,
-      huong: d.huong === "vi-en" ? "vi-en" : "en-vi",
+      huong: d.huong === "vi-en" || d.huong === "fr-vi" ? d.huong : "en-vi",
+      linhVuc: d.linh_vuc === "y-duoc" ? "y-duoc" : "chung",
       bytes: Number(fileBytesLen || 0),
     };
   }
@@ -59,6 +60,30 @@
       return "- " + String(g.src).trim() + " => " + String(g.dst).trim();
     });
     return header + "\n" + lines.join("\n") + "\n";
+  }
+
+  function directionLabel(huong) {
+    return huong === "vi-en" ? "Việt → Anh" : (huong === "fr-vi" ? "Pháp → Việt" : "Anh → Việt");
+  }
+
+  // Bộ thuật ngữ Y Dược hợp với chiều dịch (bản Y Dược tự bật); Việt → Anh không có bộ mẫu
+  function medicalPresetFor(huong) {
+    return huong === "fr-vi" ? "y-duoc-fr" : (huong === "en-vi" ? "y-duoc-en" : "");
+  }
+
+  function mergeGlossary(lists) {
+    var seen = {};
+    var out = [];
+    (lists || []).forEach(function (list) {
+      (list || []).forEach(function (t) {
+        if (!t || !t.src || !t.dst) return;
+        var k = String(t.src).trim().toLowerCase();
+        if (seen[k]) return;
+        seen[k] = true;
+        out.push(t);
+      });
+    });
+    return out;
   }
 
   function pickFailoverEngine(currentId, failoverOrder, enginesList, triedIds) {
@@ -152,7 +177,7 @@
   }
 
   function exportSegmentsToTmx(segments, huong) {
-    var srcLang = huong === "vi-en" ? "vi-VN" : "en-US";
+    var srcLang = huong === "vi-en" ? "vi-VN" : (huong === "fr-vi" ? "fr-FR" : "en-US");
     var dstLang = huong === "vi-en" ? "en-US" : "vi-VN";
     var body = (segments || []).filter(function (s) { return s.src && s.dst; }).map(function (s) {
       return "    <tu tuid=\"" + xmlEsc(s.id) + "\">\n" +
@@ -226,6 +251,9 @@
 
   return {
     mapPrepareSummary: mapPrepareSummary,
+    directionLabel: directionLabel,
+    medicalPresetFor: medicalPresetFor,
+    mergeGlossary: mergeGlossary,
     extractJsonText: extractJsonText,
     redactSecrets: redactSecrets,
     buildGlossaryPromptBlock: buildGlossaryPromptBlock,

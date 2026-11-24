@@ -8,6 +8,7 @@ dich.html                    Dịch PDF ngay trên trình duyệt (bản tháng 
 engine/                      Bộ máy chạy trong trình duyệt: Pyodide 0.29.5, PyMuPDF 1.28.2 (WebAssembly), phông, dich_pdf.py, web_api.py. Lắp lại bằng tools/dung_web.py của kho công cụ.
                              Mặc định (ENGINE_SOURCE "cdn") Pyodide và PyMuPDF tải từ jsDelivr và PyPI, kiểm SHA-256; engine/pyodide và file .whl chỉ là bản dự phòng (xem docs/ADR-003)
 assets/js/dich-app.js, dich-worker.js   Giao diện và Web Worker của trang dịch
+y-duoc.html                  Trang giới thiệu bản Y Dược v4.1 (Anh → Việt, Pháp → Việt, kiểm liều và đơn vị đo); /dich?linh-vuc=y-duoc bật sẵn chế độ Y Dược
 dung-voi-claude.html         Hướng dẫn 4 bước dùng trong Claude.ai, không cài gì (bản 3.1)
 chat-luong.html              Đo chất lượng: bộ chấm, kết quả đo, file để kiểm lại
 tai-ve/                      File tải thẳng bản 3.1: skill cho Claude, plugin Antigravity (công khai)
@@ -45,4 +46,6 @@ npm install
 npm test           # Chạy kiểm thử unit & HTTP seam (node:test)
 npm start          # Mở ứng dụng Electron + AI CLI Bridge
 npm run build:win  # Đóng gói NSIS Setup & Portable .exe vào desktop/release/
+npm run build:win:yduoc  # Ấn bản Y Dược (appId riêng, cài song song) vào desktop/release-yduoc/
+# Chạy thử ấn bản Y Dược khi phát triển: PDF_LAYOUT_EDITION=y-duoc npm start
 ```

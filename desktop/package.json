@@ -1,8 +1,8 @@
 {
   "name": "pdf-layout-vi-desktop",
   "productName": "PDF Layout VI Studio",
-  "version": "4.0.0",
-  "description": "Ứng dụng Windows Studio dịch PDF giữ nguyên bố cục vector, kết nối trực tiếp Claude Code, Codex, Gemini, Antigravity, Muse, Ollama và OpenRouter.",
+  "version": "4.1.0",
+  "description": "Ứng dụng Windows dịch PDF giữ nguyên bố cục vector (Anh → Việt, Pháp → Việt, Việt → Anh), có ấn bản Y Dược; kết nối Claude Code, Codex, Gemini, Antigravity, Muse, Ollama và OpenRouter.",
   "main": "electron/main.mjs",
   "author": "Huynh Anh Thuan",
   "license": "MIT",
@@ -16,7 +16,8 @@
     "server": "node server/index.mjs",
     "test": "node --test test/server.test.mjs",
     "pack:dir": "electron-builder --config electron-builder.yml --dir",
-    "build:win": "electron-builder --config electron-builder.yml --win"
+    "build:win": "electron-builder --config electron-builder.yml --win",
+    "build:win:yduoc": "electron-builder --config electron-builder.yduoc.yml --win"
   },
   "devDependencies": {
     "electron": "^35.0.0",

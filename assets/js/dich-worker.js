@@ -200,13 +200,13 @@ var handlers = {
   configure: async function (opts) { if (opts) { OPTS.source = opts.source || "cdn"; OPTS.ver = opts.ver || ""; } return OPTS; },
   init: init,
   sources: async function () { return used; },
-  prepare: async function (bytes, name, lo, trang, huong) {
+  prepare: async function (bytes, name, lo, trang, huong, linhVuc) {
     await init();
     var safe = (name || "tai-lieu.pdf").replace(/[\\/:*?"<>|]+/g, "_");
     if (!/\.pdf$/i.test(safe)) safe += ".pdf";
     try { py.FS.readdir("/tmp/in").forEach(function (f) { if (f !== "." && f !== "..") py.FS.unlink("/tmp/in/" + f); }); } catch (e) { /* trống */ }
     py.FS.writeFile("/tmp/in/" + safe, new Uint8Array(bytes));
-    var r = J(api.prepare("/tmp/in/" + safe, lo || 15, trang || "", huong || "tu-dong"));
+    var r = J(api.prepare("/tmp/in/" + safe, lo || 15, trang || "", huong || "tu-dong", linhVuc || "chung"));
     if (r.ok) r.loadedFamilies = await loadFonts(r.families);
     r.sources = used;
     return r;

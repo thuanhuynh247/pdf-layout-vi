@@ -548,3 +548,10 @@ fieldset[aria-invalid="true"] .chip span { border-color: var(--error); }
 .cli-actions { display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-top: 4px; }
 .cli-more summary { cursor: pointer; font-size: var(--fs-sm); font-weight: 600; color: var(--teal-ink); padding: var(--sp-2) 0; }
 
+
+/* Trang Y Dược: cặp ảnh trước / sau */
+.yd-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-4); }
+.yd-pair figure { margin: 0; background: var(--paper); border: var(--border); border-radius: var(--radius-m); overflow: hidden; }
+.yd-pair img { display: block; width: 100%; height: auto; }
+.yd-pair figcaption { padding: var(--sp-2) var(--sp-3); border-top: var(--border); }
+@media (max-width: 720px) { .yd-pair { grid-template-columns: 1fr; } }

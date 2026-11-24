@@ -171,16 +171,45 @@
     return STATE.engines.filter(function (e) { return e.id === id; })[0] || null;
   }
 
+  function currentDomain() {
+    var el = $('input[name="ws-domain"]:checked');
+    return el && el.value === "y-duoc" ? "y-duoc" : "chung";
+  }
+
   function getActiveGlossaryTerms() {
-    var list = [];
+    var custom = [], fromPreset = [], fromMedical = [];
+    // Thuật ngữ tự thêm đứng trước: khi trùng, cách dịch của người dùng thắng bộ mẫu
+    (STATE.config.glossary || []).forEach(function (t) {
+      custom.push({ src: t.src, dst: t.dst, note: t.note || "", source: "Tùy chỉnh" });
+    });
     var preset = STATE.glossaryPresets && STATE.glossaryPresets[STATE.config.glossaryPreset];
     if (preset && Array.isArray(preset.terms)) {
-      preset.terms.forEach(function (t) { list.push({ src: t.src, dst: t.dst, source: preset.name }); });
+      preset.terms.forEach(function (t) { fromPreset.push({ src: t.src, dst: t.dst, source: preset.name }); });
     }
-    (STATE.config.glossary || []).forEach(function (t) {
-      list.push({ src: t.src, dst: t.dst, note: t.note || "", source: "Tùy chỉnh" });
-    });
-    return list;
+    var dir = (STATE.docInfo && STATE.docInfo.huong) || ($('input[name="ws-dir"]:checked') || {}).value || "en-vi";
+    var medId = currentDomain() === "y-duoc" && H().medicalPresetFor ? H().medicalPresetFor(dir) : "";
+    var med = medId && STATE.glossaryPresets && STATE.glossaryPresets[medId];
+    if (med && medId !== STATE.config.glossaryPreset) {
+      med.terms.forEach(function (t) { fromMedical.push({ src: t.src, dst: t.dst, source: med.name + " (tự bật)" }); });
+    }
+    return H().mergeGlossary ? H().mergeGlossary([custom, fromPreset, fromMedical]) : custom.concat(fromPreset, fromMedical);
+  }
+
+  function applyEdition(ed) {
+    if (!ed) return;
+    STATE.edition = ed;
+    if ($("#brand-name") && ed.name) $("#brand-name").textContent = ed.name;
+    if ($("#brand-badge") && ed.badge) $("#brand-badge").textContent = ed.badge;
+    if (ed.name) document.title = ed.name + " v4.1";
+    var want = ed.defaultDomain === "y-duoc" ? "y-duoc" : "chung";
+    var radio = $('input[name="ws-domain"][value="' + want + '"]');
+    if (radio && !STATE.pdfBytes) radio.checked = true;
+    updateDomainHint();
+  }
+
+  function updateDomainHint() {
+    if ($("#ws-domain-hint")) $("#ws-domain-hint").hidden = currentDomain() !== "y-duoc";
+    if ($("#badge-glossary")) $("#badge-glossary").textContent = String(getActiveGlossaryTerms().length);
   }
 
   function updateHeaderAndConfigUI() {
@@ -688,17 +717,20 @@
     $("#pv-curtain-wrap").hidden = true;
     updateBentoKpis(0, 0, 0);
     switchMonTab("segments");
+    STATE.autoDir = true; // file mới: để bộ máy tự nhận Anh, Pháp hay Việt; người dùng đổi chiều sau thì theo lựa chọn
     return preparePdf();
   }
 
   function preparePdf() {
     if (!STATE.pdfBytes) return Promise.resolve();
     var huongEl = $('input[name="ws-dir"]:checked');
-    var huong = huongEl ? huongEl.value : "tu-dong";
+    var huong = STATE.autoDir ? "tu-dong" : (huongEl ? huongEl.value : "tu-dong");
+    STATE.autoDir = false;
     var pages = $("#ws-pages").value.trim();
     var copy = STATE.pdfBytes.slice(0);
     logLine("Phân tích PDF: " + STATE.pdfName + (pages ? " (trang " + pages + ")" : ""));
-    return callWorker("prepare", copy, STATE.pdfName, 15, pages, huong).then(function (r) {
+    var linhVuc = currentDomain();
+    return callWorker("prepare", copy, STATE.pdfName, 15, pages, huong, linhVuc).then(function (r) {
       if (!r.ok) throw new Error(r.error || r.message || "Không đọc được file PDF.");
       STATE.docInfo = r;
       var summary = H().mapPrepareSummary ? H().mapPrepareSummary(r, STATE.pdfBytes.byteLength) : {
@@ -709,16 +741,17 @@
       STATE.previewTotal = Math.max(1, summary.pages || 1);
       STATE.previewPage = 1;
       $("#pv-page-label").textContent = "Trang 1 / " + STATE.previewTotal;
-      STATE.checkpointKey = checkpointStorageKey(STATE.pdfName, STATE.pdfBytes.byteLength, pages, summary.huong);
+      STATE.checkpointKey = checkpointStorageKey(STATE.pdfName, STATE.pdfBytes.byteLength, pages, summary.huong + (summary.linhVuc === "y-duoc" ? "+y-duoc" : ""));
 
       $("#ws-file-sub").textContent = fmtSize(STATE.pdfBytes.byteLength) + " · Sẵn sàng dịch";
       $("#ws-doc-meta").hidden = false;
       $("#meta-pages").textContent = String(summary.pages);
       $("#meta-items").textContent = summary.totalSegments.toLocaleString("vi-VN") + " đoạn · " + summary.words.toLocaleString("vi-VN") + " từ";
       $("#meta-batches").textContent = String(summary.batchesTotal) + " lô";
-      $("#meta-dir").textContent = summary.huong === "vi-en" ? "Việt → Anh" : "Anh → Việt";
-      if (summary.huong === "vi-en") $('input[name="ws-dir"][value="vi-en"]').checked = true;
-      else $('input[name="ws-dir"][value="en-vi"]').checked = true;
+      $("#meta-dir").textContent = (H().directionLabel ? H().directionLabel(summary.huong) : summary.huong) + (summary.linhVuc === "y-duoc" ? " · Y Dược" : "");
+      var dirRadio = $('input[name="ws-dir"][value="' + summary.huong + '"]');
+      if (dirRadio) dirRadio.checked = true;
+      updateDomainHint();
 
       if (summary.scannedPages && summary.scannedPages.length) {
         $("#ws-scan-warn").hidden = false;
@@ -1615,6 +1648,9 @@
     $("#ws-stop-btn").addEventListener("click", function () { STATE.stop = true; });
     $("#ws-build-only-btn").addEventListener("click", function () { buildAndSavePdfs().catch(function (e) { logLine("Lỗi dựng: " + e.message); }); });
     $$('input[name="ws-dir"]').forEach(function (r) { r.addEventListener("change", function () { if (STATE.pdfBytes) preparePdf(); }); });
+    $$('input[name="ws-domain"]').forEach(function (r) {
+      r.addEventListener("change", function () { updateDomainHint(); if (STATE.pdfBytes) preparePdf(); });
+    });
 
     // Segment filter, search, retry warn & bilingual exports
     $("#seg-search").addEventListener("input", function () { STATE.segSearch = $("#seg-search").value; renderSegmentsTable(); });
@@ -1755,6 +1791,7 @@
     $("#logs-clear-btn").addEventListener("click", function () { $("#logs-pre").textContent = ""; });
 
     // Boot sequence
+    api("/api/edition").then(function (d) { applyEdition(d && d.edition); }).catch(function () { /* bản cũ không có ấn bản */ });
     loadGlossaryPresets();
     loadEngines();
     loadHistory();

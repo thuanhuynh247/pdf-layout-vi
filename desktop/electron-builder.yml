@@ -8,6 +8,7 @@ files:
   - electron/**/*
   - package.json
   - "!release/**"
+  - "!release-yduoc/**"
   - "!node_modules/.cache/**"
 extraResources:
   - from: server
@@ -16,6 +17,8 @@ extraResources:
     to: app
   - from: ../engine
     to: engine
+  - from: editions/standard.json
+    to: edition.json
 asar: true
 win:
   icon: build/icon.ico

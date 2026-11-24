@@ -13,7 +13,7 @@ process.env.PDF_LAYOUT_DATA_DIR = TEST_DATA_DIR;
 
 const { cleanChildEnv, augmentedPath } = await import("../server/env-path.mjs");
 const { listEngines } = await import("../server/drivers.mjs");
-const { createAppServer } = await import("../server/index.mjs");
+const { createAppServer, loadEdition } = await import("../server/index.mjs");
 
 const require = createRequire(import.meta.url);
 const __filename = fileURLToPath(import.meta.url);
@@ -51,7 +51,7 @@ test("drivers: listEngines returns 11 normalized platform connectors including G
   assert.ok(gemApi.models.includes("gemini-2.5-flash") && gemApi.models.includes("gemini-3-flash-preview"));
 });
 
-test("server HTTP seams: health v4.0.0, loopback CORS security, static isolation & path traversal defense", async () => {
+test("server HTTP seams: health v4.1.0, loopback CORS security, static isolation & path traversal defense", async () => {
   const server = createAppServer();
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const addr = server.address();
@@ -60,7 +60,9 @@ test("server HTTP seams: health v4.0.0, loopback CORS security, static isolation
   try {
     const h = await fetch(`${baseUrl}/api/health`).then((r) => r.json());
     assert.equal(h.ok, true);
-    assert.equal(h.version, "4.0.0");
+    assert.equal(h.version, "4.1.0");
+    assert.equal(h.edition.id, "standard");
+    assert.ok(h.features.includes("fr-vi") && h.features.includes("y-duoc"));
     assert.ok(Array.isArray(h.features) && h.features.includes("visual-preview") && h.features.includes("tm-cache"));
 
     // Cross-origin request from untrusted external site MUST be rejected (403)
@@ -301,4 +303,57 @@ test("DOM ID parity: every #id referenced in desktop/app/app.js exists in deskto
   assert.ok(jsIds.size >= 80, `Expected >= 80 DOM ID bindings, found ${jsIds.size}`);
   const missing = [...jsIds].filter((id) => !htmlIds.has(id));
   assert.deepEqual(missing, [], `Missing DOM IDs in index.html: ${missing.join(", ")}`);
+});
+
+test("ấn bản Y Dược: edition file, /api/edition, bộ thuật ngữ Y Dược Anh/Pháp", async () => {
+  const prev = process.env.PDF_LAYOUT_EDITION_FILE;
+  process.env.PDF_LAYOUT_EDITION_FILE = path.join(__dirname, "..", "editions", "y-duoc.json");
+  try {
+    const ed = loadEdition();
+    assert.equal(ed.id, "y-duoc");
+    assert.equal(ed.defaultDomain, "y-duoc");
+    assert.match(ed.name, /Y Dược/);
+  } finally {
+    if (prev === undefined) delete process.env.PDF_LAYOUT_EDITION_FILE; else process.env.PDF_LAYOUT_EDITION_FILE = prev;
+  }
+  process.env.PDF_LAYOUT_EDITION_FILE = path.join(os.tmpdir(), "khong-co-file-nay.json");
+  assert.equal(loadEdition().id, "standard");
+  delete process.env.PDF_LAYOUT_EDITION_FILE;
+
+  const server = createAppServer();
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const baseUrl = `http://127.0.0.1:${server.address().port}`;
+  try {
+    const e = await fetch(`${baseUrl}/api/edition`).then((r) => r.json());
+    assert.equal(e.ok, true);
+    assert.equal(e.edition.id, "standard");
+    const pr = await fetch(`${baseUrl}/api/glossary/presets`).then((r) => r.json());
+    for (const id of ["y-duoc-en", "y-duoc-fr"]) {
+      const terms = pr.presets[id].terms;
+      assert.ok(terms.length >= 40, id + " đủ thuật ngữ");
+      assert.equal(new Set(terms.map((t) => t.src.toLowerCase())).size, terms.length, id + " không trùng");
+    }
+    assert.ok(pr.presets["y-duoc-fr"].terms.some((t) => t.src === "contre-indication" && t.dst === "chống chỉ định"));
+    assert.ok(pr.presets["y-duoc-en"].terms.some((t) => t.src === "contraindication" && t.dst === "chống chỉ định"));
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+test("helpers: chiều Pháp → Việt, lĩnh vực Y Dược, gộp thuật ngữ", () => {
+  const helpers = require("../app/helpers.js");
+  const s = helpers.mapPrepareSummary({ ok: true, name: "notice.pdf", pages: 2, huong: "fr-vi", linh_vuc: "y-duoc", total: 8 }, 1000);
+  assert.equal(s.huong, "fr-vi");
+  assert.equal(s.linhVuc, "y-duoc");
+  assert.equal(helpers.mapPrepareSummary({ huong: "xx" }, 0).huong, "en-vi");
+  assert.equal(helpers.mapPrepareSummary({}, 0).linhVuc, "chung");
+  assert.equal(helpers.directionLabel("fr-vi"), "Pháp → Việt");
+  assert.equal(helpers.medicalPresetFor("fr-vi"), "y-duoc-fr");
+  assert.equal(helpers.medicalPresetFor("en-vi"), "y-duoc-en");
+  assert.equal(helpers.medicalPresetFor("vi-en"), "");
+  const merged = helpers.mergeGlossary([[{ src: "Posologie", dst: "liều dùng (tùy chỉnh)" }], [{ src: "posologie", dst: "liều dùng" }, { src: "gélule", dst: "viên nang cứng" }]]);
+  assert.equal(merged.length, 2);
+  assert.equal(merged[0].dst, "liều dùng (tùy chỉnh)");
+  const tmx = helpers.exportSegmentsToTmx([{ id: "p1-1", src: "Posologie", dst: "Liều dùng" }], "fr-vi");
+  assert.match(tmx, /fr-FR/);
 });

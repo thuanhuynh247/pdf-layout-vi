@@ -22,6 +22,8 @@
   $$("[data-github]").forEach(function (el) { if (CFG.GITHUB_URL) { el.href = CFG.GITHUB_URL; el.hidden = false; } });
   $$("[data-github-off]").forEach(function (el) { el.hidden = !!CFG.GITHUB_URL; });
   $$("[data-desktop-exe]").forEach(function (el) { if (CFG.DESKTOP_URL) { el.href = CFG.DESKTOP_URL; el.hidden = false; } });
+  $$("[data-yduoc-exe]").forEach(function (el) { if (CFG.YDUOC_URL) el.href = CFG.YDUOC_URL; });
+  $$("[data-yduoc-portable]").forEach(function (el) { if (CFG.YDUOC_PORTABLE_URL) el.href = CFG.YDUOC_PORTABLE_URL; });
   $$("[data-direct]").forEach(function (el) { el.hidden = CFG.CLAUDE_DIRECT_DOWNLOAD === false; });
   $$("[data-via-email]").forEach(function (el) { el.hidden = CFG.CLAUDE_DIRECT_DOWNLOAD !== false; });
 

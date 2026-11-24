@@ -30,6 +30,20 @@ function resolvePaths() {
   };
 }
 
+function readEdition() {
+  const file = app.isPackaged
+    ? path.join(process.resourcesPath, "edition.json")
+    : path.resolve(__dirname, "..", "editions", `${(process.env.PDF_LAYOUT_EDITION || "standard").replace(/[^a-z-]/g, "")}.json`);
+  try {
+    const e = JSON.parse(fs.readFileSync(file, "utf8"));
+    return { file, name: String(e.name || "PDF Layout VI Studio") };
+  } catch {
+    return { file: "", name: "PDF Layout VI Studio" };
+  }
+}
+
+const EDITION = readEdition();
+
 function startEmbeddedServer() {
   return new Promise((resolve, reject) => {
     const { serverEntry, desktopDir, engineDir } = resolvePaths();
@@ -40,6 +54,7 @@ function startEmbeddedServer() {
       HOST: "127.0.0.1",
       PDF_LAYOUT_DESKTOP_UI_DIR: desktopDir,
       PDF_LAYOUT_ENGINE_DIR: engineDir,
+      ...(EDITION.file ? { PDF_LAYOUT_EDITION_FILE: EDITION.file } : {}),
     };
 
     const child = spawn(process.execPath, [serverEntry], {
@@ -156,7 +171,7 @@ function registerIpc() {
     try {
       if (Notification && Notification.isSupported()) {
         new Notification({
-          title: String(title || "PDF Layout VI Studio"),
+          title: String(title || EDITION.name),
           body: String(body || ""),
           silent: false,
         }).show();
@@ -175,7 +190,7 @@ function createWindow(baseUrl) {
     height: 880,
     minWidth: 1024,
     minHeight: 700,
-    title: "PDF Layout VI Studio",
+    title: EDITION.name,
     autoHideMenuBar: true,
     backgroundColor: "#0c1117",
     ...(isWin

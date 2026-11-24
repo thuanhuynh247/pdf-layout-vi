@@ -1,0 +1,47 @@
+# Ấn bản Y Dược: cùng mã nguồn, cài song song với bản Studio (appId riêng), mặc định lĩnh vực Y Dược
+appId: com.huynhanhthuan.pdflayoutvi.yduoc
+productName: PDF Layout VI Y Duoc
+copyright: Copyright © 2026 Huynh Anh Thuan
+directories:
+  output: release-yduoc
+  buildResources: build
+files:
+  - electron/**/*
+  - package.json
+  - "!release/**"
+  - "!release-yduoc/**"
+  - "!node_modules/.cache/**"
+extraResources:
+  - from: server
+    to: server
+  - from: app
+    to: app
+  - from: ../engine
+    to: engine
+  - from: editions/y-duoc.json
+    to: edition.json
+asar: true
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+nsis:
+  artifactName: PDF-Layout-VI-YDuoc-${version}-${arch}-setup.${ext}
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: PDF Layout VI Y Dược
+  uninstallDisplayName: PDF Layout VI Y Dược
+portable:
+  artifactName: PDF-Layout-VI-YDuoc-${version}-${arch}-portable.${ext}
+publish:
+  provider: github
+  owner: thuanhuynh247
+  repo: pdf-layout-vi
