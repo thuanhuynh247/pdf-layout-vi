@@ -2,6 +2,32 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { fileURLToPath } from "node:url";
+
+// Thuật ngữ Y Dược đã xác minh nguồn (Thông tư 01/2018, Dược thư QG 2022, TT 26/2025, ICD-10 BYT…), dựng từ báo cáo nghiên cứu
+function loadVerifiedMedical() {
+  try {
+    const f = path.join(path.dirname(fileURLToPath(import.meta.url)), "glossary-y-duoc.json");
+    const d = JSON.parse(fs.readFileSync(f, "utf8"));
+    return { en: Array.isArray(d.en) ? d.en : [], fr: Array.isArray(d.fr) ? d.fr : [] };
+  } catch {
+    return { en: [], fr: [] };
+  }
+}
+const VERIFIED_MEDICAL = loadVerifiedMedical();
+
+// Đã xác minh đứng trước; thuật ngữ biên soạn tay chỉ thêm khi chưa có
+function withVerified(verified, curated) {
+  const seen = new Set();
+  const out = [];
+  for (const t of [...verified, ...curated.map((c) => ({ ...c, note: c.note || "biên soạn, chưa đối chiếu nguồn" }))]) {
+    const k = String(t.src || "").trim().toLowerCase();
+    if (!k || !t.dst || seen.has(k)) continue;
+    seen.add(k);
+    out.push({ src: t.src, dst: t.dst, note: t.note || "" });
+  }
+  return out;
+}
 
 // Bộ thuật ngữ Y Dược theo cách gọi của Dược thư Quốc gia Việt Nam; bản Y Dược tự bật bộ hợp với chiều dịch.
 export const GLOSSARY_PRESETS = {
@@ -68,7 +94,7 @@ export const GLOSSARY_PRESETS = {
     id: "y-duoc-en",
     name: "Y Dược Anh → Việt",
     huong: "en-vi",
-    terms: [
+    terms: withVerified(VERIFIED_MEDICAL.en, [
       { src: "contraindication", dst: "chống chỉ định" },
       { src: "indication", dst: "chỉ định" },
       { src: "dosage and administration", dst: "liều dùng và cách dùng" },
@@ -115,13 +141,13 @@ export const GLOSSARY_PRESETS = {
       { src: "myocardial infarction", dst: "nhồi máu cơ tim" },
       { src: "QT prolongation", dst: "kéo dài khoảng QT" },
       { src: "Good Manufacturing Practice (GMP)", dst: "Thực hành tốt sản xuất thuốc (GMP)" },
-    ],
+    ]),
   },
   "y-duoc-fr": {
     id: "y-duoc-fr",
     name: "Y Dược Pháp → Việt",
     huong: "fr-vi",
-    terms: [
+    terms: withVerified(VERIFIED_MEDICAL.fr, [
       { src: "contre-indication", dst: "chống chỉ định" },
       { src: "indications thérapeutiques", dst: "chỉ định" },
       { src: "posologie", dst: "liều dùng" },
@@ -168,7 +194,7 @@ export const GLOSSARY_PRESETS = {
       { src: "peu fréquent", dst: "ít gặp" },
       { src: "très rare", dst: "rất hiếm gặp" },
       { src: "fréquence indéterminée", dst: "chưa rõ tần suất" },
-    ],
+    ]),
   },
 };
 

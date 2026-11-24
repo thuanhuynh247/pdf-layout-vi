@@ -357,3 +357,20 @@ test("helpers: chiều Pháp → Việt, lĩnh vực Y Dược, gộp thuật ng
   const tmx = helpers.exportSegmentsToTmx([{ id: "p1-1", src: "Posologie", dst: "Liều dùng" }], "fr-vi");
   assert.match(tmx, /fr-FR/);
 });
+
+test("thuật ngữ Y Dược đã xác minh: nạp từ glossary-y-duoc.json, lọc theo lô, khớp trọn từ", async () => {
+  const { GLOSSARY_PRESETS } = await import("../server/config-store.mjs");
+  const en = GLOSSARY_PRESETS["y-duoc-en"].terms;
+  const fr = GLOSSARY_PRESETS["y-duoc-fr"].terms;
+  assert.ok(en.length >= 300 && fr.length >= 120);
+  assert.ok(en.some((t) => t.src === "Therapeutic indications" && t.dst === "Chỉ định" && /TT01/.test(t.note)));
+  assert.ok(fr.some((t) => t.src === "Indications thérapeutiques" && t.dst === "Chỉ định"));
+  const helpers = require("../app/helpers.js");
+  const hit = helpers.glossaryTermsInText(en, "Take 1 tablet po bid. Contraindications: none. Report potassium levels.");
+  const srcs = hit.map((t) => t.src.toLowerCase());
+  assert.ok(srcs.includes("po") && srcs.includes("bid"));
+  assert.ok(!srcs.includes("iv") && !srcs.includes("im"), "không khớp lẫn trong từ khác");
+  const block = helpers.buildGlossaryPromptBlock(en, "en-vi", "Posology and method of administration");
+  assert.match(block, /Liều dùng, cách dùng/);
+  assert.equal(helpers.buildGlossaryPromptBlock(en, "en-vi", "zzz qqq"), "");
+});
