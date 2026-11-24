@@ -1,0 +1,2172 @@
+{
+ "nguon": "Báo cáo nghiên cứu 'Thuật ngữ Y Dược Anh Pháp Việt' (11/2026): chỉ gồm thuật ngữ tiếng Việt có nguồn",
+ "en": [
+  {
+   "src": "Package leaflet",
+   "dst": "Tờ hướng dẫn sử dụng thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12–13; EN: QRD; FR: NOTICE-FR"
+  },
+  {
+   "src": "Name of the medicinal product",
+   "dst": "Tên thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Qualitative and quantitative composition",
+   "dst": "Thành phần công thức thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ16; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Pharmaceutical form",
+   "dst": "Dạng bào chế",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ17; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Therapeutic indications",
+   "dst": "Chỉ định",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ18; DTQG3; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Posology and method of administration",
+   "dst": "Liều dùng, cách dùng",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ19; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Contraindications",
+   "dst": "Chống chỉ định",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ20; DTQG3; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Special warnings and precautions for use",
+   "dst": "Cảnh báo và thận trọng khi dùng thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ21; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Interaction with other medicinal products and other forms of interaction",
+   "dst": "Tương tác thuốc",
+   "note": "Mục HDSD/SmPC; VI: DTQG3; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Interactions and incompatibilities",
+   "dst": "Tương tác, tương kỵ của thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ24"
+  },
+  {
+   "src": "combined heading",
+   "dst": "Tương tác, tương kỵ của thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ24"
+  },
+  {
+   "src": "Fertility, pregnancy and lactation",
+   "dst": "Sử dụng thuốc cho phụ nữ có thai và cho con bú",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ22; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Pregnancy",
+   "dst": "Thời kỳ mang thai",
+   "note": "Mục HDSD/SmPC; VI: DTQG3; FR: NOTICE-FR"
+  },
+  {
+   "src": "Breast-feeding",
+   "dst": "Thời kỳ cho con bú",
+   "note": "Mục HDSD/SmPC; VI: DTQG3; FR: NOTICE-FR"
+  },
+  {
+   "src": "Effects on ability to drive and use machines",
+   "dst": "Ảnh hưởng của thuốc lên khả năng lái xe, vận hành máy móc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ23; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Undesirable effects",
+   "dst": "Tác dụng không mong muốn của thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ25; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Overdose",
+   "dst": "Quá liều và cách xử trí",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ26; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Pharmacodynamic properties",
+   "dst": "Đặc tính dược lực học",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Pharmacotherapeutic group",
+   "dst": "Nhóm dược lý",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ27"
+  },
+  {
+   "src": "ATC code",
+   "dst": "Mã ATC",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ27; DTQG3"
+  },
+  {
+   "src": "Mechanism of action",
+   "dst": "Cơ chế tác dụng",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ27; DTQG2"
+  },
+  {
+   "src": "Pharmacokinetic properties",
+   "dst": "Đặc tính dược động học",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Incompatibilities",
+   "dst": "Tương kỵ",
+   "note": "Mục HDSD/SmPC; VI: DTQG3; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Shelf life",
+   "dst": "Hạn dùng",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ29; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Special precautions for storage",
+   "dst": "Điều kiện bảo quản",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ31; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Nature and contents of container",
+   "dst": "Quy cách đóng gói",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ28; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Marketing authorisation number",
+   "dst": "Số giấy đăng ký lưu hành",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ7; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "International nonproprietary name",
+   "dst": "Tên chung quốc tế",
+   "note": "Mục HDSD/SmPC; VI: DTQG3; TT26; EN: TT26"
+  },
+  {
+   "src": "Name and address of manufacturer",
+   "dst": "Tên, địa chỉ của cơ sở sản xuất thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12"
+  },
+  {
+   "src": "Warnings and precautions",
+   "dst": "Cảnh báo và thận trọng khi dùng thuốc",
+   "note": "Tiêu đề PIL/notice; VI: TT01 Đ21; FR: NOTICE-FR"
+  },
+  {
+   "src": "Pregnancy, breast-feeding and fertility",
+   "dst": "Sử dụng thuốc cho phụ nữ có thai và cho con bú",
+   "note": "Tiêu đề PIL/notice; VI: TT01 Đ22; EN: QRD; FR: NOTICE-FR"
+  },
+  {
+   "src": "Possible side effects",
+   "dst": "Tác dụng không mong muốn của thuốc",
+   "note": "Tiêu đề PIL/notice; VI: TT01 Đ25; EN: QRD; FR: NOTICE-FR"
+  },
+  {
+   "src": "Driving and using machines",
+   "dst": "Ảnh hưởng của thuốc lên khả năng lái xe, vận hành máy móc",
+   "note": "Tiêu đề PIL/notice; VI: TT01 Đ23"
+  },
+  {
+   "src": "This medicine is subject to medical prescription",
+   "dst": "Thuốc này chỉ dùng theo đơn thuốc",
+   "note": "Nhãn thuốc; VI: TT01 Đ15"
+  },
+  {
+   "src": "Prescription-only medicine",
+   "dst": "Thuốc kê đơn",
+   "note": "Nhãn thuốc; VI: TT01 Đ15"
+  },
+  {
+   "src": "Non-prescription medicine",
+   "dst": "Thuốc không kê đơn",
+   "note": "Nhãn thuốc; VI: TT01 Đ12"
+  },
+  {
+   "src": "Keep out of the sight and reach of children",
+   "dst": "Để xa tầm tay trẻ em",
+   "note": "Nhãn thuốc; VI: TT01 Đ15; EN: QRD"
+  },
+  {
+   "src": "Batch number",
+   "dst": "Số lô sản xuất",
+   "note": "Nhãn thuốc; VI: TT01 Đ29; EN: QRD, TT01 Đ29"
+  },
+  {
+   "src": "Manufacturing date",
+   "dst": "Ngày sản xuất",
+   "note": "Nhãn thuốc; VI: TT01 Đ29; EN: TT01 Đ29"
+  },
+  {
+   "src": "Mfg Date",
+   "dst": "Ngày sản xuất",
+   "note": "Nhãn thuốc; VI: TT01 Đ29; EN: TT01 Đ29"
+  },
+  {
+   "src": "Expiry date",
+   "dst": "Hạn dùng",
+   "note": "Nhãn thuốc; VI: TT01 Đ29; EN: QRD, TT01 Đ29"
+  },
+  {
+   "src": "Exp Date",
+   "dst": "Hạn dùng",
+   "note": "Nhãn thuốc; VI: TT01 Đ29; EN: QRD, TT01 Đ29"
+  },
+  {
+   "src": "Active substance",
+   "dst": "Dược chất",
+   "note": "Nhãn thuốc; VI: TT01 Đ7"
+  },
+  {
+   "src": "Herbal medicine",
+   "dst": "Thuốc dược liệu",
+   "note": "Nhãn thuốc; VI: TT01 Đ12, Đ25"
+  },
+  {
+   "src": "Traditional medicine",
+   "dst": "Thuốc cổ truyền",
+   "note": "Nhãn thuốc; VI: TT01 Đ12, Đ25"
+  },
+  {
+   "src": "Manufacturer",
+   "dst": "Cơ sở sản xuất thuốc",
+   "note": "Nhãn thuốc; VI: TT01 Đ7, Đ12"
+  },
+  {
+   "src": "Importer",
+   "dst": "Cơ sở nhập khẩu",
+   "note": "Nhãn thuốc; VI: TT01 Đ7"
+  },
+  {
+   "src": "Country of origin",
+   "dst": "Xuất xứ của thuốc",
+   "note": "Nhãn thuốc; VI: TT01 Đ7"
+  },
+  {
+   "src": "Quality standard",
+   "dst": "Tiêu chuẩn chất lượng",
+   "note": "Nhãn thuốc; VI: TT01 Đ7, Đ12"
+  },
+  {
+   "src": "Outer packaging",
+   "dst": "Bao bì ngoài",
+   "note": "Nhãn thuốc; VI: TT01 Đ7; FR: RCP-FR"
+  },
+  {
+   "src": "Immediate packaging",
+   "dst": "Bao bì trực tiếp",
+   "note": "Nhãn thuốc; VI: TT01 Đ7–9"
+  },
+  {
+   "src": "Tablet",
+   "dst": "Viên nén",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Coated tablet",
+   "dst": "Viên nén bao",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Sugar-coated tablet",
+   "dst": "Viên nén bao đường",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Film-coated tablet",
+   "dst": "Viên nén bao phim",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Prolonged-release tablet",
+   "dst": "Viên nén giải phóng kéo dài",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Extended-release tablet",
+   "dst": "Viên nén giải phóng kéo dài",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Gastro-resistant tablet",
+   "dst": "Viên nén kháng dịch vị",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Enteric-coated tablet",
+   "dst": "Viên nén bao tan trong ruột",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Dispersible tablet",
+   "dst": "Viên nén phân tán",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Orodispersible tablet",
+   "dst": "Viên nén phân tán trong miệng",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Effervescent tablet",
+   "dst": "Viên nén sủi bọt",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Soluble tablet",
+   "dst": "Viên nén hòa tan",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Chewable tablet",
+   "dst": "Viên nhai",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Sublingual tablet",
+   "dst": "Viên nén đặt dưới lưỡi",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Buccal tablet",
+   "dst": "Viên ngậm",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Lozenge",
+   "dst": "Viên ngậm",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Capsule",
+   "dst": "Viên nang",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Capsule, hard",
+   "dst": "Viên nang cứng",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Capsule, soft",
+   "dst": "Viên nang mềm",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Gastro-resistant capsule, hard",
+   "dst": "Viên nang cứng kháng dịch vị",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Prolonged-release capsule",
+   "dst": "Viên nang giải phóng kéo dài",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Oral powder",
+   "dst": "Thuốc bột uống",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Powder for oral suspension",
+   "dst": "Thuốc bột để pha hỗn dịch",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Powder for oral solution",
+   "dst": "Thuốc bột để pha dung dịch",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Granules",
+   "dst": "Thuốc cốm",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Effervescent granules",
+   "dst": "Thuốc cốm sủi bọt",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Granules for oral suspension",
+   "dst": "Thuốc cốm pha hỗn dịch uống",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Syrup",
+   "dst": "Siro",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Dry syrup",
+   "dst": "Siro khô",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Oral solution",
+   "dst": "Dung dịch uống",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Oral suspension",
+   "dst": "Hỗn dịch uống",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Oral emulsion",
+   "dst": "Nhũ tương uống",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Oromucosal spray",
+   "dst": "Thuốc xịt miệng",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Oromucosal gel",
+   "dst": "Gel rà miệng",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Mouthwash",
+   "dst": "Thuốc súc miệng",
+   "note": "Dạng bào chế; VNRAS (đã sửa chính tả \"xúc\")"
+  },
+  {
+   "src": "Elixir",
+   "dst": "Elixir",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Injection",
+   "dst": "Thuốc tiêm",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Solution for injection",
+   "dst": "Dung dịch tiêm",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Suspension for injection",
+   "dst": "Hỗn dịch tiêm",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Emulsion for injection",
+   "dst": "Nhũ tương tiêm",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Powder for solution for injection",
+   "dst": "Thuốc bột để pha tiêm",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Lyophilised powder for injection",
+   "dst": "Bột đông khô pha tiêm",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Solution for infusion",
+   "dst": "Dung dịch tiêm truyền",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Concentrate for solution for injection",
+   "dst": "Dung dịch đậm đặc để pha tiêm",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Concentrate for solution for infusion",
+   "dst": "Dung dịch đậm đặc để pha tiêm truyền",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Powder for solution for infusion",
+   "dst": "Thuốc bột pha tiêm truyền",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Emulsion for infusion",
+   "dst": "Nhũ tương tiêm truyền",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Implant",
+   "dst": "Thuốc cấy",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Ointment",
+   "dst": "Thuốc mỡ",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Cream",
+   "dst": "Kem",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Gel",
+   "dst": "Gel",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Paste",
+   "dst": "Bột nhão",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Cutaneous solution",
+   "dst": "Dung dịch dùng ngoài",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Cutaneous emulsion",
+   "dst": "Nhũ tương dùng ngoài",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Cutaneous powder",
+   "dst": "Thuốc bột dùng ngoài",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Cutaneous spray",
+   "dst": "Thuốc phun mù dùng ngoài",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "topical aerosol",
+   "dst": "Thuốc phun mù dùng ngoài",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Transdermal patch",
+   "dst": "Thuốc dán qua da",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Eye drops",
+   "dst": "Thuốc nhỏ mắt",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Eye drops, suspension",
+   "dst": "Hỗn dịch nhỏ mắt",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Eye ointment",
+   "dst": "Thuốc mỡ tra mắt",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Ophthalmic insert",
+   "dst": "Hệ cài đặt ở mắt",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Ear drops",
+   "dst": "Thuốc nhỏ tai",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Ear spray",
+   "dst": "Thuốc xịt tai",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Nasal drops",
+   "dst": "Thuốc nhỏ mũi",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Nasal spray",
+   "dst": "Thuốc xịt mũi",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Inhalation powder",
+   "dst": "Thuốc bột để hít",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Inhalation aerosol",
+   "dst": "Thuốc phun mù dùng hít",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "pressurised inhalation",
+   "dst": "Thuốc phun mù dùng hít",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Nebuliser solution",
+   "dst": "Dung dịch khí dung",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Inhalation",
+   "dst": "Thuốc hít",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Suppository",
+   "dst": "Thuốc đạn",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Enema",
+   "dst": "Dung dịch thụt trực tràng",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "rectal solution",
+   "dst": "Dung dịch thụt trực tràng",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Rectal capsule",
+   "dst": "Viên nang đặt trực tràng",
+   "note": "Dạng bào chế; VNRAS"
+  },
+  {
+   "src": "Pessary",
+   "dst": "Thuốc đặt âm đạo",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Vaginal tablet",
+   "dst": "Viên nén đặt âm đạo",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Vaginal capsule",
+   "dst": "Viên nang đặt âm đạo",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Oral use",
+   "dst": "Uống",
+   "note": "Đường dùng; VI: KCB; TTT; EN/FR: HC"
+  },
+  {
+   "src": "Sublingual use",
+   "dst": "Ngậm dưới lưỡi",
+   "note": "Đường dùng; VI: TTT; EN/FR: HC"
+  },
+  {
+   "src": "Intravenous use",
+   "dst": "Tiêm tĩnh mạch",
+   "note": "Đường dùng; VI: TTT; EN/FR: HC"
+  },
+  {
+   "src": "Intramuscular use",
+   "dst": "Tiêm bắp",
+   "note": "Đường dùng; VI: TTT; EN/FR: HC"
+  },
+  {
+   "src": "Subcutaneous use",
+   "dst": "Tiêm dưới da",
+   "note": "Đường dùng; VI: TTT; EN/FR: HC"
+  },
+  {
+   "src": "Vaginal use",
+   "dst": "Đặt âm đạo",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Cutaneous use",
+   "dst": "Dùng ngoài",
+   "note": "Đường dùng; VI: KCB; EN/FR: HC"
+  },
+  {
+   "src": "Ocular use",
+   "dst": "Nhỏ mắt",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Auricular use",
+   "dst": "Nhỏ tai",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Nasal use",
+   "dst": "Nhỏ mũi",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Inhalation use",
+   "dst": "Hít",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Very common",
+   "dst": "Rất thường gặp (ADR ≥ 1/10)",
+   "note": "Tần suất ADR; VI: TT01 Đ25; DTQG3; FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Common",
+   "dst": "Thường gặp (1/100 ≤ ADR < 1/10)",
+   "note": "Tần suất ADR; VI: TT01 Đ25; DTQG3; FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Uncommon",
+   "dst": "Ít gặp (1/1000 ≤ ADR < 1/100)",
+   "note": "Tần suất ADR; VI: TT01 Đ25; DTQG3; FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Rare",
+   "dst": "Hiếm gặp (1/10 000 ≤ ADR < 1/1000)",
+   "note": "Tần suất ADR; VI: DTQG3 (TT01 in sai ngưỡng); FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Very rare",
+   "dst": "Rất hiếm gặp (ADR < 1/10 000)",
+   "note": "Tần suất ADR; VI: TT01 Đ25; DTQG3; FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Pharmacokinetics",
+   "dst": "Dược động học",
+   "note": "Dược động học; DTQG-PK"
+  },
+  {
+   "src": "Absorption",
+   "dst": "Hấp thu",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Distribution",
+   "dst": "Phân bố",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Metabolism",
+   "dst": "Chuyển hóa",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Elimination",
+   "dst": "Thải trừ",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Phase I / Phase II reactions",
+   "dst": "Phản ứng pha I / pha II",
+   "note": "Dược động học; DTQG-PK"
+  },
+  {
+   "src": "Bioavailability",
+   "dst": "Sinh khả dụng (F)",
+   "note": "Dược động học; DTQG-PK; MSD-BA; FR: UCL"
+  },
+  {
+   "src": "Absolute bioavailability",
+   "dst": "Sinh khả dụng tuyệt đối",
+   "note": "Dược động học; DTQG-PK"
+  },
+  {
+   "src": "Bioequivalence",
+   "dst": "Tương đương sinh học",
+   "note": "Dược động học; MSD-BA; BE-2026"
+  },
+  {
+   "src": "In vivo bioequivalence study",
+   "dst": "Thử tương đương sinh học",
+   "note": "Dược động học; BE-2026"
+  },
+  {
+   "src": "Pharmaceutical equivalence",
+   "dst": "Tương đương bào chế",
+   "note": "Dược động học; BE-2026"
+  },
+  {
+   "src": "Therapeutic equivalence",
+   "dst": "Tương đương điều trị",
+   "note": "Dược động học; MSD-BA"
+  },
+  {
+   "src": "Comparator product / Reference product",
+   "dst": "Thuốc đối chiếu",
+   "note": "Dược động học; BE-2026"
+  },
+  {
+   "src": "Test product",
+   "dst": "Thuốc thử",
+   "note": "Dược động học; BE-2026"
+  },
+  {
+   "src": "Innovator pharmaceutical product",
+   "dst": "Thuốc phát minh",
+   "note": "Dược động học; BE-2026"
+  },
+  {
+   "src": "Equivalence dissolution",
+   "dst": "Thử tương đương độ hòa tan",
+   "note": "Dược động học; BE-2026"
+  },
+  {
+   "src": "Peak concentration",
+   "dst": "Nồng độ đỉnh (Cmax)",
+   "note": "Dược động học; DTQG-PK; MSD-BA"
+  },
+  {
+   "src": "Time to peak concentration",
+   "dst": "Thời gian đạt nồng độ đỉnh (Tmax)",
+   "note": "Dược động học; DTQG-PK; MSD-BA"
+  },
+  {
+   "src": "Area under the curve",
+   "dst": "Diện tích dưới đường cong (AUC)",
+   "note": "Dược động học; DTQG-PK; MSD-BA; FR: UCL"
+  },
+  {
+   "src": "Elimination half-life",
+   "dst": "Nửa đời thải trừ (t1/2)",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Volume of distribution",
+   "dst": "Thể tích phân bố (Vd)",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Clearance",
+   "dst": "Độ thanh thải (CL)",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Plasma protein binding",
+   "dst": "Liên kết với protein huyết tương",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "First-pass hepatic metabolism",
+   "dst": "Chuyển hóa lần đầu qua gan",
+   "note": "Dược động học; DTQG-PK"
+  },
+  {
+   "src": "Steady state",
+   "dst": "Trạng thái cân bằng (Css)",
+   "note": "Dược động học; DTQG-PK"
+  },
+  {
+   "src": "First-order kinetics",
+   "dst": "Động học bậc 1",
+   "note": "Dược động học; DTQG-PK"
+  },
+  {
+   "src": "Cytochrome P450",
+   "dst": "Cytochrom P450",
+   "note": "Dược động học; DTQG-PK"
+  },
+  {
+   "src": "Prodrug",
+   "dst": "Tiền chất (prodrug)",
+   "note": "Dược động học; DTQG-PK"
+  },
+  {
+   "src": "Pharmacodynamics",
+   "dst": "Dược lực học",
+   "note": "Dược lực học; MSD-PDo; DTQG3"
+  },
+  {
+   "src": "Receptor",
+   "dst": "Thụ thể",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Agonist",
+   "dst": "Chất chủ vận",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Partial agonist",
+   "dst": "Chất chủ vận từng phần",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Inverse agonist",
+   "dst": "Chất chủ vận nghịch đảo",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Antagonist",
+   "dst": "Chất đối kháng",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Competitive antagonism",
+   "dst": "Đối kháng cạnh tranh",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Non-competitive antagonism",
+   "dst": "Đối kháng không cạnh tranh",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Affinity",
+   "dst": "Ái lực",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Intrinsic activity",
+   "dst": "Hiệu lực nội tại",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Selectivity",
+   "dst": "Sự chọn lọc",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Tolerance",
+   "dst": "Dung nạp",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Desensitization",
+   "dst": "Giải mẫn cảm",
+   "note": "Dược lực học; MSD-PD"
+  },
+  {
+   "src": "Drug interaction",
+   "dst": "Tương tác thuốc",
+   "note": "Dược lực học; DTQG-ADR"
+  },
+  {
+   "src": "Pharmacovigilance",
+   "dst": "Cảnh giác dược",
+   "note": "Cảnh giác dược; CGD"
+  },
+  {
+   "src": "Adverse event",
+   "dst": "Biến cố bất lợi (AE)",
+   "note": "Cảnh giác dược; CGD; TT29; DTQG-ADR; FR: COCH"
+  },
+  {
+   "src": "Adverse drug reaction",
+   "dst": "Phản ứng có hại của thuốc (ADR)",
+   "note": "Cảnh giác dược; CGD; DTQG-ADR; FR: RCP-FR"
+  },
+  {
+   "src": "Serious adverse event",
+   "dst": "Biến cố bất lợi nghiêm trọng (SAE)",
+   "note": "Cảnh giác dược; TT29; GCP-2026"
+  },
+  {
+   "src": "Unexpected adverse event",
+   "dst": "Biến cố bất lợi ngoài dự kiến",
+   "note": "Cảnh giác dược; TT29"
+  },
+  {
+   "src": "Serious ADR",
+   "dst": "ADR nghiêm trọng",
+   "note": "Cảnh giác dược; CGD; DTQG-ADR"
+  },
+  {
+   "src": "Unexpected ADR",
+   "dst": "ADR ngoài dự kiến",
+   "note": "Cảnh giác dược; CGD"
+  },
+  {
+   "src": "Spontaneous reporting",
+   "dst": "Báo cáo tự nguyện",
+   "note": "Cảnh giác dược; CGD; DTQG-ADR"
+  },
+  {
+   "src": "Active surveillance",
+   "dst": "Giám sát chủ động",
+   "note": "Cảnh giác dược; CGD"
+  },
+  {
+   "src": "Medication error",
+   "dst": "Sai sót liên quan đến thuốc",
+   "note": "Cảnh giác dược; CGD"
+  },
+  {
+   "src": "Substandard medicine",
+   "dst": "Thuốc kém chất lượng",
+   "note": "Cảnh giác dược; CGD"
+  },
+  {
+   "src": "Risk management plan",
+   "dst": "Kế hoạch quản lý nguy cơ",
+   "note": "Cảnh giác dược; CGD"
+  },
+  {
+   "src": "Risk management",
+   "dst": "Quản lý nguy cơ",
+   "note": "Cảnh giác dược; CGD"
+  },
+  {
+   "src": "Causality assessment",
+   "dst": "Đánh giá mối quan hệ nhân quả",
+   "note": "Cảnh giác dược; DTQG-ADR; CGD"
+  },
+  {
+   "src": "WHO causality scale",
+   "dst": "Thang WHO",
+   "note": "Cảnh giác dược; DTQG-ADR"
+  },
+  {
+   "src": "Naranjo scale",
+   "dst": "Thang Naranjo",
+   "note": "Cảnh giác dược; DTQG-ADR"
+  },
+  {
+   "src": "Type A / Type B reaction",
+   "dst": "Phản ứng typ A / typ B",
+   "note": "Cảnh giác dược; DTQG-ADR"
+  },
+  {
+   "src": "Anaphylactic shock",
+   "dst": "Sốc phản vệ",
+   "note": "Cảnh giác dược; DTQG-ADR"
+  },
+  {
+   "src": "Stevens-Johnson syndrome",
+   "dst": "Hội chứng Stevens-Johnson",
+   "note": "Cảnh giác dược; DTQG-ADR"
+  },
+  {
+   "src": "Toxic epidermal necrolysis",
+   "dst": "Hoại tử thượng bì nhiễm độc (hội chứng Lyell)",
+   "note": "Cảnh giác dược; DTQG-ADR"
+  },
+  {
+   "src": "QT prolongation",
+   "dst": "Khoảng QT kéo dài",
+   "note": "Cảnh giác dược; DTQG-ADR"
+  },
+  {
+   "src": "Hepatotoxicity",
+   "dst": "Độc tính trên gan",
+   "note": "Cảnh giác dược; DTQG-ADR"
+  },
+  {
+   "src": "Nephrotoxicity",
+   "dst": "Độc tính trên thận",
+   "note": "Cảnh giác dược; DTQG-ADR"
+  },
+  {
+   "src": "Clinical trial",
+   "dst": "Thử thuốc trên lâm sàng",
+   "note": "Thử nghiệm lâm sàng; TT29"
+  },
+  {
+   "src": "of drugs",
+   "dst": "Thử thuốc trên lâm sàng",
+   "note": "Thử nghiệm lâm sàng; TT29"
+  },
+  {
+   "src": "Good Clinical Practice",
+   "dst": "Thực hành tốt thử thuốc trên lâm sàng",
+   "note": "Thử nghiệm lâm sàng; TT29; BE-2026"
+  },
+  {
+   "src": "Randomised controlled trial",
+   "dst": "Thử nghiệm đối chứng ngẫu nhiên",
+   "note": "Thử nghiệm lâm sàng; NVT; GCP-2026; FR: COCH"
+  },
+  {
+   "src": "Randomisation",
+   "dst": "Phân nhóm ngẫu nhiên",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Blinding",
+   "dst": "Làm mù",
+   "note": "Thử nghiệm lâm sàng; GCP-2026; FR: COCH"
+  },
+  {
+   "src": "Double-blind",
+   "dst": "Mù đôi",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Placebo",
+   "dst": "Giả dược",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Placebo-controlled",
+   "dst": "So sánh đối chứng với giả dược",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Case-control study",
+   "dst": "Nghiên cứu bệnh chứng",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "Primary endpoint",
+   "dst": "Biến số chính",
+   "note": "Thử nghiệm lâm sàng; GCP-2026; FR: COCH"
+  },
+  {
+   "src": "Protocol",
+   "dst": "Đề cương nghiên cứu",
+   "note": "Thử nghiệm lâm sàng; GCP-2026; TT29"
+  },
+  {
+   "src": "Protocol amendment",
+   "dst": "Thay đổi đề cương nghiên cứu",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Informed consent form",
+   "dst": "Phiếu tình nguyện tham gia nghiên cứu",
+   "note": "Thử nghiệm lâm sàng; GCP-2026; TT29"
+  },
+  {
+   "src": "Investigator",
+   "dst": "Nghiên cứu viên",
+   "note": "Thử nghiệm lâm sàng; TT29"
+  },
+  {
+   "src": "Principal investigator",
+   "dst": "Nghiên cứu viên chính",
+   "note": "Thử nghiệm lâm sàng; TT29"
+  },
+  {
+   "src": "Sponsor",
+   "dst": "Tổ chức, cá nhân có thuốc thử lâm sàng",
+   "note": "Thử nghiệm lâm sàng; TT29 (đang hiệu lực)"
+  },
+  {
+   "src": "Contract research organisation",
+   "dst": "Tổ chức hỗ trợ nghiên cứu",
+   "note": "Thử nghiệm lâm sàng; TT29; GCP-2026"
+  },
+  {
+   "src": "Trial site",
+   "dst": "Cơ sở nhận thử thuốc trên lâm sàng",
+   "note": "Thử nghiệm lâm sàng; TT29"
+  },
+  {
+   "src": "Ethics committee",
+   "dst": "Hội đồng đạo đức trong nghiên cứu y sinh học",
+   "note": "Thử nghiệm lâm sàng; GCP-2026; TT29"
+  },
+  {
+   "src": "Monitoring",
+   "dst": "Giám sát nghiên cứu",
+   "note": "Thử nghiệm lâm sàng; TT29; GCP-2026"
+  },
+  {
+   "src": "Audit",
+   "dst": "Kiểm tra của Hội đồng đạo đức hoặc của tổ chức, cá nhân có thuốc thử",
+   "note": "Thử nghiệm lâm sàng; TT29"
+  },
+  {
+   "src": "Inspection",
+   "dst": "Kiểm tra của cơ quan quản lý có thẩm quyền",
+   "note": "Thử nghiệm lâm sàng; TT29"
+  },
+  {
+   "src": "Standard operating procedure",
+   "dst": "Quy trình thực hành chuẩn",
+   "note": "Thử nghiệm lâm sàng; TT29"
+  },
+  {
+   "src": "Investigator's Brochure",
+   "dst": "Hồ sơ sản phẩm dành cho nghiên cứu viên",
+   "note": "Thử nghiệm lâm sàng; TT29"
+  },
+  {
+   "src": "Case report form",
+   "dst": "Phiếu thu thập thông tin nghiên cứu",
+   "note": "Thử nghiệm lâm sàng; TT29; GCP-2026"
+  },
+  {
+   "src": "Source documents",
+   "dst": "Tài liệu nguồn",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Essential documents",
+   "dst": "Tài liệu thiết yếu",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Investigational product",
+   "dst": "Thuốc nghiên cứu",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Trial participant",
+   "dst": "Người tham gia thử thuốc trên lâm sàng",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Phase I / II / III / IV",
+   "dst": "Giai đoạn 1 / 2 / 3 / 4",
+   "note": "Thử nghiệm lâm sàng; GCP-2026; TT29"
+  },
+  {
+   "src": "Bridging study",
+   "dst": "Nghiên cứu bắc cầu",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Statistical analysis plan",
+   "dst": "Kế hoạch phân tích thống kê",
+   "note": "Thử nghiệm lâm sàng; GCP-2026"
+  },
+  {
+   "src": "Relative risk / risk ratio",
+   "dst": "Tỉ số nguy cơ (RR)",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "Odds ratio",
+   "dst": "Tỉ số chênh (OR)",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "Confidence interval",
+   "dst": "Khoảng tin cậy",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "Statistically significant",
+   "dst": "Có ý nghĩa thống kê",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "hypertension",
+   "dst": "Tăng huyết áp",
+   "note": "ICD-10 I10; VI: TT46 (trong \"Tăng huyết áp có biến chứng\")"
+  },
+  {
+   "src": "essential hypertension",
+   "dst": "Tăng huyết áp",
+   "note": "ICD-10 I10; VI: TT46 (trong \"Tăng huyết áp có biến chứng\")"
+  },
+  {
+   "src": "acute coronary syndrome",
+   "dst": "Hội chứng mạch vành cấp",
+   "note": "ICD-10 I20–I23; VI: TT46"
+  },
+  {
+   "src": "chronic ischaemic heart disease",
+   "dst": "Bệnh tim do thiếu máu cục bộ mạn",
+   "note": "ICD-10 I25; VI: TT46"
+  },
+  {
+   "src": "chronic ischemic heart disease",
+   "dst": "Bệnh tim do thiếu máu cục bộ mạn",
+   "note": "ICD-10 I25; VI: TT46"
+  },
+  {
+   "src": "atrial fibrillation",
+   "dst": "Rung nhĩ",
+   "note": "ICD-10 I48; VI: TT46 (trong \"Rung nhĩ mãn tính có biến chứng\")"
+  },
+  {
+   "src": "heart failure",
+   "dst": "Suy tim",
+   "note": "ICD-10 I50; VI: TT46"
+  },
+  {
+   "src": "pulmonary embolism",
+   "dst": "Tắc mạch phổi",
+   "note": "ICD-10 I26; VI: TT46"
+  },
+  {
+   "src": "intracerebral haemorrhage",
+   "dst": "Xuất huyết não",
+   "note": "ICD-10 I61; VI: TT46"
+  },
+  {
+   "src": "intracerebral hemorrhage",
+   "dst": "Xuất huyết não",
+   "note": "ICD-10 I61; VI: TT46"
+  },
+  {
+   "src": "cerebral infarction",
+   "dst": "Nhồi máu não",
+   "note": "ICD-10 I63; VI: TT46"
+  },
+  {
+   "src": "ischaemic stroke",
+   "dst": "Nhồi máu não",
+   "note": "ICD-10 I63; VI: TT46"
+  },
+  {
+   "src": "ischemic stroke",
+   "dst": "Nhồi máu não",
+   "note": "ICD-10 I63; VI: TT46"
+  },
+  {
+   "src": "diabetes mellitus",
+   "dst": "Đái tháo đường",
+   "note": "ICD-10 E10–E14; VI: TT46; TT01/2025"
+  },
+  {
+   "src": "hyperthyroidism",
+   "dst": "Cường giáp",
+   "note": "ICD-10 E05; VI: TT01/2025; FR: ATIH"
+  },
+  {
+   "src": "thyrotoxicosis",
+   "dst": "Cường giáp",
+   "note": "ICD-10 E05; VI: TT01/2025; FR: ATIH"
+  },
+  {
+   "src": "asthma",
+   "dst": "Hen phế quản",
+   "note": "ICD-10 J45; VI: TT46"
+  },
+  {
+   "src": "chronic obstructive pulmonary disease",
+   "dst": "Bệnh phổi tắc nghẽn mạn tính khác",
+   "note": "ICD-10 J44; VI: TT01/2025"
+  },
+  {
+   "src": "COPD",
+   "dst": "Bệnh phổi tắc nghẽn mạn tính khác",
+   "note": "ICD-10 J44; VI: TT01/2025"
+  },
+  {
+   "src": "tuberculosis",
+   "dst": "Bệnh lao",
+   "note": "ICD-10 A15–A19; VI: TT46"
+  },
+  {
+   "src": "chronic hepatitis C",
+   "dst": "Viêm gan virus C mạn tính",
+   "note": "ICD-10 B18.2; VI: TT01/2025"
+  },
+  {
+   "src": "chronic viral hepatitis C",
+   "dst": "Viêm gan virus C mạn tính",
+   "note": "ICD-10 B18.2; VI: TT01/2025"
+  },
+  {
+   "src": "autoimmune hepatitis",
+   "dst": "Viêm gan tự miễn",
+   "note": "ICD-10 K75.4; VI: TT01/2025"
+  },
+  {
+   "src": "chronic kidney disease",
+   "dst": "Suy thận mạn",
+   "note": "ICD-10 N18; VI: TT46"
+  },
+  {
+   "src": "chronic renal failure",
+   "dst": "Suy thận mạn",
+   "note": "ICD-10 N18; VI: TT46"
+  },
+  {
+   "src": "epilepsy",
+   "dst": "Động kinh",
+   "note": "ICD-10 G40; VI: TT01/2025; TT46; FR: ATIH"
+  },
+  {
+   "src": "Parkinson's disease",
+   "dst": "Bệnh Parkinson",
+   "note": "ICD-10 G20; VI: TT01/2025; TT46; FR: ATIH"
+  },
+  {
+   "src": "Alzheimer's disease",
+   "dst": "Bệnh Alzheimer",
+   "note": "ICD-10 G30; VI: TT46; FR: ATIH"
+  },
+  {
+   "src": "depressive episode",
+   "dst": "Giai đoạn trầm cảm",
+   "note": "ICD-10 F32; VI: TT46; FR: ATIH"
+  },
+  {
+   "src": "schizophrenia",
+   "dst": "Tâm thần phân liệt",
+   "note": "ICD-10 F20; VI: TT46; FR: ATIH"
+  },
+  {
+   "src": "rheumatoid arthritis",
+   "dst": "Viêm khớp dạng thấp",
+   "note": "ICD-10 M05; VI: TT46"
+  },
+  {
+   "src": "osteoarthritis of the hip",
+   "dst": "Thoái hóa khớp háng",
+   "note": "ICD-10 M16; VI: TT46 (nguyên văn \"Thoái hoá\")"
+  },
+  {
+   "src": "hip osteoarthritis",
+   "dst": "Thoái hóa khớp háng",
+   "note": "ICD-10 M16; VI: TT46 (nguyên văn \"Thoái hoá\")"
+  },
+  {
+   "src": "osteoarthritis of the knee",
+   "dst": "Thoái hóa khớp gối",
+   "note": "ICD-10 M17; VI: TT46 (nguyên văn \"Thoái hoá\")"
+  },
+  {
+   "src": "knee osteoarthritis",
+   "dst": "Thoái hóa khớp gối",
+   "note": "ICD-10 M17; VI: TT46 (nguyên văn \"Thoái hoá\")"
+  },
+  {
+   "src": "gout",
+   "dst": "Gút",
+   "note": "ICD-10 M10; VI: TT01/2025; TT46"
+  },
+  {
+   "src": "osteoporosis",
+   "dst": "Loãng xương",
+   "note": "ICD-10 M81; VI: TT46"
+  },
+  {
+   "src": "immune thrombocytopenic purpura",
+   "dst": "Ban xuất huyết giảm tiểu cầu vô căn",
+   "note": "ICD-10 D69.3; VI: TT46"
+  },
+  {
+   "src": "idiopathic thrombocytopenic purpura",
+   "dst": "Ban xuất huyết giảm tiểu cầu vô căn",
+   "note": "ICD-10 D69.3; VI: TT46"
+  },
+  {
+   "src": "psoriasis",
+   "dst": "Vảy nến",
+   "note": "ICD-10 L40; VI: TT46"
+  },
+  {
+   "src": "atopic dermatitis",
+   "dst": "Viêm da cơ địa",
+   "note": "ICD-10 L20; VI: TT46"
+  },
+  {
+   "src": "urticaria",
+   "dst": "Mày đay",
+   "note": "ICD-10 L50; VI: TT46 (trong \"Mày đay mạn tính\")"
+  },
+  {
+   "src": "od",
+   "dst": "Ngày dùng 1 lần",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "qd",
+   "dst": "Ngày dùng 1 lần",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "bid",
+   "dst": "Ngày dùng 2 lần",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "tid",
+   "dst": "Ngày dùng 3 lần",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "qid",
+   "dst": "Ngày dùng 4 lần",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "q4h",
+   "dst": "Cứ 4 giờ dùng 1 lần",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "q6h",
+   "dst": "Cứ 6 giờ dùng 1 lần",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "q8h",
+   "dst": "Cứ 8 giờ dùng 1 lần",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "qam",
+   "dst": "Uống vào buổi sáng",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "ac",
+   "dst": "Trước bữa ăn",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "pc",
+   "dst": "Sau bữa ăn",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "achs",
+   "dst": "Trước bữa ăn và trước khi đi ngủ",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "po",
+   "dst": "Uống",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "iv",
+   "dst": "Tiêm tĩnh mạch",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "im",
+   "dst": "Tiêm bắp",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "sc",
+   "dst": "Tiêm dưới da",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "sl",
+   "dst": "Ngậm dưới lưỡi",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "NPO",
+   "dst": "Nhịn ăn uống hoàn toàn",
+   "note": "Viết tắt kê đơn; TTT"
+  },
+  {
+   "src": "nothing by mouth",
+   "dst": "Nhịn ăn uống hoàn toàn",
+   "note": "Viết tắt kê đơn; TTT"
+  }
+ ],
+ "fr": [
+  {
+   "src": "Notice",
+   "dst": "Tờ hướng dẫn sử dụng thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12–13; EN: QRD; FR: NOTICE-FR"
+  },
+  {
+   "src": "Dénomination du médicament",
+   "dst": "Tên thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Composition qualitative et quantitative",
+   "dst": "Thành phần công thức thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ16; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Forme pharmaceutique",
+   "dst": "Dạng bào chế",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ17; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Indications thérapeutiques",
+   "dst": "Chỉ định",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ18; DTQG3; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Posologie et mode d'administration",
+   "dst": "Liều dùng, cách dùng",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ19; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Contre-indications",
+   "dst": "Chống chỉ định",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ20; DTQG3; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Mises en garde spéciales et précautions d'emploi",
+   "dst": "Cảnh báo và thận trọng khi dùng thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ21; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Interactions avec d'autres médicaments et autres formes d'interactions",
+   "dst": "Tương tác thuốc",
+   "note": "Mục HDSD/SmPC; VI: DTQG3; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Fertilité, grossesse et allaitement",
+   "dst": "Sử dụng thuốc cho phụ nữ có thai và cho con bú",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ22; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Grossesse",
+   "dst": "Thời kỳ mang thai",
+   "note": "Mục HDSD/SmPC; VI: DTQG3; FR: NOTICE-FR"
+  },
+  {
+   "src": "Allaitement",
+   "dst": "Thời kỳ cho con bú",
+   "note": "Mục HDSD/SmPC; VI: DTQG3; FR: NOTICE-FR"
+  },
+  {
+   "src": "Effets sur l'aptitude à conduire des véhicules et à utiliser des machines",
+   "dst": "Ảnh hưởng của thuốc lên khả năng lái xe, vận hành máy móc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ23; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Effets indésirables",
+   "dst": "Tác dụng không mong muốn của thuốc",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ25; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Surdosage",
+   "dst": "Quá liều và cách xử trí",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ26; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Propriétés pharmacodynamiques",
+   "dst": "Đặc tính dược lực học",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Propriétés pharmacocinétiques",
+   "dst": "Đặc tính dược động học",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Incompatibilités",
+   "dst": "Tương kỵ",
+   "note": "Mục HDSD/SmPC; VI: DTQG3; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Durée de conservation",
+   "dst": "Hạn dùng",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ29; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Précautions particulières de conservation",
+   "dst": "Điều kiện bảo quản",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ31; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Nature et contenu de l'emballage extérieur",
+   "dst": "Quy cách đóng gói",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ12, Đ28; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Numéro d'autorisation de mise sur le marché",
+   "dst": "Số giấy đăng ký lưu hành",
+   "note": "Mục HDSD/SmPC; VI: TT01 Đ7; EN: QRD; FR: RCP-FR"
+  },
+  {
+   "src": "Avertissements et précautions",
+   "dst": "Cảnh báo và thận trọng khi dùng thuốc",
+   "note": "Tiêu đề PIL/notice; VI: TT01 Đ21; FR: NOTICE-FR"
+  },
+  {
+   "src": "Grossesse, allaitement et fertilité",
+   "dst": "Sử dụng thuốc cho phụ nữ có thai và cho con bú",
+   "note": "Tiêu đề PIL/notice; VI: TT01 Đ22; EN: QRD; FR: NOTICE-FR"
+  },
+  {
+   "src": "Quels sont les effets indésirables éventuels",
+   "dst": "Tác dụng không mong muốn của thuốc",
+   "note": "Tiêu đề PIL/notice; VI: TT01 Đ25; EN: QRD; FR: NOTICE-FR"
+  },
+  {
+   "src": "Emballage extérieur",
+   "dst": "Bao bì ngoài",
+   "note": "Nhãn thuốc; VI: TT01 Đ7; FR: RCP-FR"
+  },
+  {
+   "src": "Comprimé",
+   "dst": "Viên nén",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Comprimé enrobé",
+   "dst": "Viên nén bao",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Comprimé pelliculé",
+   "dst": "Viên nén bao phim",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Comprimé à libération prolongée",
+   "dst": "Viên nén giải phóng kéo dài",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Comprimé gastrorésistant",
+   "dst": "Viên nén kháng dịch vị",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Comprimé dispersible",
+   "dst": "Viên nén phân tán",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Comprimé effervescent",
+   "dst": "Viên nén sủi bọt",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Comprimé sublingual",
+   "dst": "Viên nén đặt dưới lưỡi",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Comprimé à sucer",
+   "dst": "Viên ngậm",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Gélule",
+   "dst": "Viên nang cứng",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Gélule à libération prolongée",
+   "dst": "Viên nang giải phóng kéo dài",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Sirop",
+   "dst": "Siro",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Solution buvable",
+   "dst": "Dung dịch uống",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Suspension buvable",
+   "dst": "Hỗn dịch uống",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Solution injectable",
+   "dst": "Dung dịch tiêm",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Solution pour perfusion",
+   "dst": "Dung dịch tiêm truyền",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Pommade",
+   "dst": "Thuốc mỡ",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Crème",
+   "dst": "Kem",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Gel",
+   "dst": "Gel",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Dispositif transdermique",
+   "dst": "Thuốc dán qua da",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Collyre",
+   "dst": "Thuốc nhỏ mắt",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Solution auriculaire",
+   "dst": "Thuốc nhỏ tai",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Solution nasale",
+   "dst": "Thuốc nhỏ mũi",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Suppositoire",
+   "dst": "Thuốc đạn",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Lavement",
+   "dst": "Dung dịch thụt trực tràng",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Ovule",
+   "dst": "Thuốc đặt âm đạo",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Comprimé vaginal",
+   "dst": "Viên nén đặt âm đạo",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Capsule vaginale",
+   "dst": "Viên nang đặt âm đạo",
+   "note": "Dạng bào chế; VNRAS; FR: Vidal"
+  },
+  {
+   "src": "Voie orale",
+   "dst": "Uống",
+   "note": "Đường dùng; VI: KCB; TTT; EN/FR: HC"
+  },
+  {
+   "src": "Voie sublinguale",
+   "dst": "Ngậm dưới lưỡi",
+   "note": "Đường dùng; VI: TTT; EN/FR: HC"
+  },
+  {
+   "src": "Voie intraveineuse",
+   "dst": "Tiêm tĩnh mạch",
+   "note": "Đường dùng; VI: TTT; EN/FR: HC"
+  },
+  {
+   "src": "Voie intramusculaire",
+   "dst": "Tiêm bắp",
+   "note": "Đường dùng; VI: TTT; EN/FR: HC"
+  },
+  {
+   "src": "Voie sous-cutanée",
+   "dst": "Tiêm dưới da",
+   "note": "Đường dùng; VI: TTT; EN/FR: HC"
+  },
+  {
+   "src": "Voie vaginale",
+   "dst": "Đặt âm đạo",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Voie cutanée",
+   "dst": "Dùng ngoài",
+   "note": "Đường dùng; VI: KCB; EN/FR: HC"
+  },
+  {
+   "src": "Voie ophtalmique",
+   "dst": "Nhỏ mắt",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Voie auriculaire",
+   "dst": "Nhỏ tai",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Voie nasale",
+   "dst": "Nhỏ mũi",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Voie inhalée",
+   "dst": "Hít",
+   "note": "Đường dùng; VI: VNRAS; EN/FR: HC"
+  },
+  {
+   "src": "Très fréquent",
+   "dst": "Rất thường gặp (ADR ≥ 1/10)",
+   "note": "Tần suất ADR; VI: TT01 Đ25; DTQG3; FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Fréquent",
+   "dst": "Thường gặp (1/100 ≤ ADR < 1/10)",
+   "note": "Tần suất ADR; VI: TT01 Đ25; DTQG3; FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Peu fréquent",
+   "dst": "Ít gặp (1/1000 ≤ ADR < 1/100)",
+   "note": "Tần suất ADR; VI: TT01 Đ25; DTQG3; FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Rare",
+   "dst": "Hiếm gặp (1/10 000 ≤ ADR < 1/1000)",
+   "note": "Tần suất ADR; VI: DTQG3 (TT01 in sai ngưỡng); FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Très rare",
+   "dst": "Rất hiếm gặp (ADR < 1/10 000)",
+   "note": "Tần suất ADR; VI: TT01 Đ25; DTQG3; FR: RCP-FR; EN: QRD"
+  },
+  {
+   "src": "Absorption",
+   "dst": "Hấp thu",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Distribution",
+   "dst": "Phân bố",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Métabolisme",
+   "dst": "Chuyển hóa",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Élimination",
+   "dst": "Thải trừ",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Biodisponibilité",
+   "dst": "Sinh khả dụng (F)",
+   "note": "Dược động học; DTQG-PK; MSD-BA; FR: UCL"
+  },
+  {
+   "src": "Aire sous la courbe",
+   "dst": "Diện tích dưới đường cong (AUC)",
+   "note": "Dược động học; DTQG-PK; MSD-BA; FR: UCL"
+  },
+  {
+   "src": "Demi-vie",
+   "dst": "Nửa đời thải trừ (t1/2)",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Volume de distribution",
+   "dst": "Thể tích phân bố (Vd)",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Clairance",
+   "dst": "Độ thanh thải (CL)",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Liaison aux protéines plasmatiques",
+   "dst": "Liên kết với protein huyết tương",
+   "note": "Dược động học; DTQG-PK; FR: UCL"
+  },
+  {
+   "src": "Événement indésirable",
+   "dst": "Biến cố bất lợi (AE)",
+   "note": "Cảnh giác dược; CGD; TT29; DTQG-ADR; FR: COCH"
+  },
+  {
+   "src": "Essai contrôlé randomisé",
+   "dst": "Thử nghiệm đối chứng ngẫu nhiên",
+   "note": "Thử nghiệm lâm sàng; NVT; GCP-2026; FR: COCH"
+  },
+  {
+   "src": "Aveugle",
+   "dst": "Làm mù",
+   "note": "Thử nghiệm lâm sàng; GCP-2026; FR: COCH"
+  },
+  {
+   "src": "Étude cas-témoins",
+   "dst": "Nghiên cứu bệnh chứng",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "Critère de jugement principal",
+   "dst": "Biến số chính",
+   "note": "Thử nghiệm lâm sàng; GCP-2026; FR: COCH"
+  },
+  {
+   "src": "Risque relatif",
+   "dst": "Tỉ số nguy cơ (RR)",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "Rapport des cotes",
+   "dst": "Tỉ số chênh (OR)",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "Intervalle de confiance",
+   "dst": "Khoảng tin cậy",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "Statistiquement significatif",
+   "dst": "Có ý nghĩa thống kê",
+   "note": "Thử nghiệm lâm sàng; NVT; FR: COCH"
+  },
+  {
+   "src": "hypertension artérielle",
+   "dst": "Tăng huyết áp",
+   "note": "ICD-10 I10; VI: TT46 (trong \"Tăng huyết áp có biến chứng\")"
+  },
+  {
+   "src": "hypertension essentielle",
+   "dst": "Tăng huyết áp",
+   "note": "ICD-10 I10; VI: TT46 (trong \"Tăng huyết áp có biến chứng\")"
+  },
+  {
+   "src": "syndrome coronarien aigu",
+   "dst": "Hội chứng mạch vành cấp",
+   "note": "ICD-10 I20–I23; VI: TT46"
+  },
+  {
+   "src": "cardiopathie ischémique chronique",
+   "dst": "Bệnh tim do thiếu máu cục bộ mạn",
+   "note": "ICD-10 I25; VI: TT46"
+  },
+  {
+   "src": "fibrillation auriculaire",
+   "dst": "Rung nhĩ",
+   "note": "ICD-10 I48; VI: TT46 (trong \"Rung nhĩ mãn tính có biến chứng\")"
+  },
+  {
+   "src": "fibrillation atriale",
+   "dst": "Rung nhĩ",
+   "note": "ICD-10 I48; VI: TT46 (trong \"Rung nhĩ mãn tính có biến chứng\")"
+  },
+  {
+   "src": "insuffisance cardiaque",
+   "dst": "Suy tim",
+   "note": "ICD-10 I50; VI: TT46"
+  },
+  {
+   "src": "embolie pulmonaire",
+   "dst": "Tắc mạch phổi",
+   "note": "ICD-10 I26; VI: TT46"
+  },
+  {
+   "src": "hémorragie intracérébrale",
+   "dst": "Xuất huyết não",
+   "note": "ICD-10 I61; VI: TT46"
+  },
+  {
+   "src": "infarctus cérébral",
+   "dst": "Nhồi máu não",
+   "note": "ICD-10 I63; VI: TT46"
+  },
+  {
+   "src": "diabète sucré",
+   "dst": "Đái tháo đường",
+   "note": "ICD-10 E10–E14; VI: TT46; TT01/2025"
+  },
+  {
+   "src": "Autres hypothyroïdies",
+   "dst": "Suy giáp khác",
+   "note": "ICD-10 E03; TT01/2025; FR: ATIH"
+  },
+  {
+   "src": "Thyréotoxicose",
+   "dst": "Cường giáp",
+   "note": "ICD-10 E05; VI: TT01/2025; FR: ATIH"
+  },
+  {
+   "src": "asthme",
+   "dst": "Hen phế quản",
+   "note": "ICD-10 J45; VI: TT46"
+  },
+  {
+   "src": "bronchopneumopathie chronique obstructive",
+   "dst": "Bệnh phổi tắc nghẽn mạn tính khác",
+   "note": "ICD-10 J44; VI: TT01/2025"
+  },
+  {
+   "src": "BPCO",
+   "dst": "Bệnh phổi tắc nghẽn mạn tính khác",
+   "note": "ICD-10 J44; VI: TT01/2025"
+  },
+  {
+   "src": "tuberculose",
+   "dst": "Bệnh lao",
+   "note": "ICD-10 A15–A19; VI: TT46"
+  },
+  {
+   "src": "hépatite C chronique",
+   "dst": "Viêm gan virus C mạn tính",
+   "note": "ICD-10 B18.2; VI: TT01/2025"
+  },
+  {
+   "src": "hépatite auto-immune",
+   "dst": "Viêm gan tự miễn",
+   "note": "ICD-10 K75.4; VI: TT01/2025"
+  },
+  {
+   "src": "insuffisance rénale chronique",
+   "dst": "Suy thận mạn",
+   "note": "ICD-10 N18; VI: TT46"
+  },
+  {
+   "src": "maladie rénale chronique",
+   "dst": "Suy thận mạn",
+   "note": "ICD-10 N18; VI: TT46"
+  },
+  {
+   "src": "Épilepsie",
+   "dst": "Động kinh",
+   "note": "ICD-10 G40; VI: TT01/2025; TT46; FR: ATIH"
+  },
+  {
+   "src": "Maladie de Parkinson",
+   "dst": "Bệnh Parkinson",
+   "note": "ICD-10 G20; VI: TT01/2025; TT46; FR: ATIH"
+  },
+  {
+   "src": "Maladie d'Alzheimer",
+   "dst": "Bệnh Alzheimer",
+   "note": "ICD-10 G30; VI: TT46; FR: ATIH"
+  },
+  {
+   "src": "Épisodes dépressifs",
+   "dst": "Giai đoạn trầm cảm",
+   "note": "ICD-10 F32; VI: TT46; FR: ATIH"
+  },
+  {
+   "src": "Schizophrénie",
+   "dst": "Tâm thần phân liệt",
+   "note": "ICD-10 F20; VI: TT46; FR: ATIH"
+  },
+  {
+   "src": "Autres troubles anxieux",
+   "dst": "Các rối loạn lo âu khác",
+   "note": "ICD-10 F41; TT46; FR: ATIH"
+  },
+  {
+   "src": "polyarthrite rhumatoïde",
+   "dst": "Viêm khớp dạng thấp",
+   "note": "ICD-10 M05; VI: TT46"
+  },
+  {
+   "src": "coxarthrose",
+   "dst": "Thoái hóa khớp háng",
+   "note": "ICD-10 M16; VI: TT46 (nguyên văn \"Thoái hoá\")"
+  },
+  {
+   "src": "gonarthrose",
+   "dst": "Thoái hóa khớp gối",
+   "note": "ICD-10 M17; VI: TT46 (nguyên văn \"Thoái hoá\")"
+  },
+  {
+   "src": "goutte",
+   "dst": "Gút",
+   "note": "ICD-10 M10; VI: TT01/2025; TT46"
+  },
+  {
+   "src": "ostéoporose",
+   "dst": "Loãng xương",
+   "note": "ICD-10 M81; VI: TT46"
+  },
+  {
+   "src": "purpura thrombopénique idiopathique",
+   "dst": "Ban xuất huyết giảm tiểu cầu vô căn",
+   "note": "ICD-10 D69.3; VI: TT46"
+  },
+  {
+   "src": "psoriasis",
+   "dst": "Vảy nến",
+   "note": "ICD-10 L40; VI: TT46"
+  },
+  {
+   "src": "dermatite atopique",
+   "dst": "Viêm da cơ địa",
+   "note": "ICD-10 L20; VI: TT46"
+  },
+  {
+   "src": "urticaire",
+   "dst": "Mày đay",
+   "note": "ICD-10 L50; VI: TT46 (trong \"Mày đay mạn tính\")"
+  }
+ ]
+}

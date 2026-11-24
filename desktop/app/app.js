@@ -1184,7 +1184,9 @@
             var rules = ((STATE.docInfo && STATE.docInfo.rules) || "").replace("trong cuộc trò chuyện này", "trong toàn bộ tài liệu");
             var rulesEnd = ((STATE.docInfo && STATE.docInfo.rules_end) || "").replace("{n}", misses.length).replace(/\{\{/g, "{").replace(/\}\}/g, "}");
             var batchPayload = misses.map(function (it) { return JSON.stringify(it); }).join("\n");
-            var prompt = rules + glossaryBlock + "\n" + rulesEnd + "\n\n" + batchPayload;
+            // Chỉ gửi thuật ngữ có trong lô này: bộ Y Dược có hàng trăm mục, gửi hết làm câu nhắn dài vô ích
+            var batchGlossary = H().buildGlossaryPromptBlock ? H().buildGlossaryPromptBlock(getActiveGlossaryTerms(), dir, misses.map(function (it) { return it.text; }).join("\n")) : glossaryBlock;
+            var prompt = rules + batchGlossary + "\n" + rulesEnd + "\n\n" + batchPayload;
 
             $("#mon-status-title").textContent = "Lô #" + batchNo + ": đang dịch " + misses.length + " đoạn qua " + eng.name + (model ? " (" + model + ")" : "") + "…";
             logLine("Gửi lô #" + batchNo + " (" + misses.length + " đoạn) -> " + eng.name);

@@ -50,8 +50,23 @@
       .replace(/(Bearer\s+)[A-Za-z0-9._-]{12,}/gi, "$1<REDACTED>");
   }
 
-  function buildGlossaryPromptBlock(entries, huong) {
-    var list = (entries || []).filter(function (g) { return g && g.src && g.dst; }).slice(0, 80);
+  function escapeRe(x) { return String(x).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+  // Thuật ngữ có xuất hiện trong lô đang dịch (không phân biệt hoa thường, khớp trọn từ để "po", "iv" không dính vào từ khác)
+  function glossaryTermsInText(entries, text) {
+    var t = String(text || "");
+    if (!t) return entries || [];
+    return (entries || []).filter(function (g) {
+      if (!g || !g.src) return false;
+      var re = new RegExp("(^|[^\\p{L}\\p{N}])" + escapeRe(String(g.src).trim()) + "(?=$|[^\\p{L}\\p{N}])", "iu");
+      return re.test(t);
+    });
+  }
+
+  function buildGlossaryPromptBlock(entries, huong, text) {
+    var pool = (entries || []).filter(function (g) { return g && g.src && g.dst; });
+    if (text !== undefined) pool = glossaryTermsInText(pool, text);
+    var list = pool.slice(0, 150);
     if (!list.length) return "";
     var header = huong === "vi-en"
       ? "\nMANDATORY GLOSSARY (use exact English equivalents when these terms appear):"
@@ -257,6 +272,7 @@
     extractJsonText: extractJsonText,
     redactSecrets: redactSecrets,
     buildGlossaryPromptBlock: buildGlossaryPromptBlock,
+    glossaryTermsInText: glossaryTermsInText,
     pickFailoverEngine: pickFailoverEngine,
     parseGlossaryImport: parseGlossaryImport,
     exportSegmentsToCsv: exportSegmentsToCsv,

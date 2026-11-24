@@ -851,20 +851,26 @@ QUY_TAC_Y_DUOC = {
     "vi": "\n".join([
         "LĨNH VỰC Y DƯỢC — độ chính xác đặt trên văn phong:",
         "- Liều, nồng độ, đơn vị, khoảng, tần suất giữ ĐÚNG từng con số: không quy đổi đơn vị, không làm tròn, không gộp "
-        "(5–10 mg/kg/ngày, 2 × 500 mg, 0,5 mL, 1 000 UI, q8h, mmol/L, µg). Chỉ đổi dấu thập phân sang kiểu Việt (2.5 → 2,5).",
+        "(5–10 mg/kg/ngày, 2 × 500 mg, 0,5 mL, 1 000 UI, mmol/L, µg). Chỉ đổi dấu sang kiểu Việt mà không đổi giá trị: "
+        "thập phân 2.5 → 2,5 và 0.5 → 0,5; phân nhóm nghìn 1,000 → 1.000.",
         "- Tên hoạt chất dùng tên chung quốc tế INN như Dược thư Quốc gia Việt Nam (paracetamol, amoxicilin, "
         "metformin; tiếng Pháp paracétamol → paracetamol). Tên biệt dược giữ nguyên cùng ®, ™.",
-        "- Tên khoa học Latin của vi sinh vật, cây thuốc giữ nguyên (Staphylococcus aureus, Panax ginseng). "
-        "Viết tắt chuyên môn giữ nguyên (IV, IM, PO, ECG, HbA1c, INR, eGFR, bid, tid).",
-        "- Tên mục chuẩn: Indications/Indications thérapeutiques = Chỉ định; Contraindications/Contre-indications = "
-        "Chống chỉ định; Warnings and precautions/Mises en garde et précautions d'emploi = Cảnh báo và thận trọng; "
-        "Dosage and administration/Posologie et mode d'administration = Liều dùng và cách dùng; Adverse reactions/"
-        "Effets indésirables = Tác dụng không mong muốn; Drug interactions/Interactions médicamenteuses = Tương tác thuốc; "
-        "Overdose/Surdosage = Quá liều; Pregnancy and lactation/Grossesse et allaitement = Phụ nữ có thai và cho con bú; "
-        "Pharmacodynamics = Dược lực học; Pharmacokinetics = Dược động học; Excipients = Tá dược; Storage/Conservation = "
-        "Bảo quản; Shelf life/Durée de conservation = Hạn dùng.",
-        "- Giữ đúng mức độ của lời dặn: must not/ne doit pas = không được; should/il est recommandé = nên; may/peut = có thể; "
-        "very common/très fréquent (≥ 1/10) và các mức tần suất khác giữ nguyên tỷ lệ.",
+        "- Tên khoa học Latin của vi sinh vật, cây thuốc giữ nguyên (Staphylococcus aureus, Panax ginseng). Viết tắt xét "
+        "nghiệm và chỉ số giữ nguyên (ECG, HbA1c, INR, eGFR, AUC, Cmax). Viết tắt kê đơn viết đầy đủ bằng tiếng Việt như "
+        "Thông tư 26/2025/TT-BYT về kê đơn (bid → ngày dùng 2 lần; tid → ngày dùng 3 lần; prn → khi cần; po → uống; "
+        "iv → tiêm tĩnh mạch; im → tiêm bắp; sc → tiêm dưới da).",
+        "- Tên mục theo Thông tư 01/2018/TT-BYT về tờ hướng dẫn sử dụng: Indications/Indications thérapeutiques = Chỉ định; "
+        "Contraindications/Contre-indications = Chống chỉ định; Warnings and precautions/Mises en garde et précautions "
+        "d'emploi = Cảnh báo và thận trọng khi dùng thuốc; Posology and method of administration/Posologie et mode "
+        "d'administration = Liều dùng, cách dùng; Undesirable effects/Effets indésirables = Tác dụng không mong muốn của "
+        "thuốc; Interactions = Tương tác, tương kỵ của thuốc; Overdose/Surdosage = Quá liều và cách xử trí; Pregnancy and "
+        "lactation/Grossesse et allaitement = Sử dụng thuốc cho phụ nữ có thai và cho con bú; Pharmacodynamic properties = "
+        "Dược lực học; Pharmacokinetic properties = Dược động học; Composition = Thành phần công thức thuốc; Shelf life/"
+        "Durée de conservation = Hạn dùng; Storage/Conservation = Bảo quản.",
+        "- Tần suất tác dụng không mong muốn: very common/très fréquent = rất thường gặp (≥ 1/10); common/fréquent = "
+        "thường gặp; uncommon/peu fréquent = ít gặp; rare = hiếm gặp; very rare/très rare = rất hiếm gặp; giữ nguyên tỷ lệ. "
+        "Not known/fréquence indéterminée = chưa rõ tần suất.",
+        "- Giữ đúng mức độ của lời dặn: must not/ne doit pas = không được; should/il est recommandé = nên; may/peut = có thể.",
         "- Không thêm, không bớt, không làm nhẹ cảnh báo; không thêm lời khuyên y khoa nào."]),
     "en": "\n".join([
         "MEDICAL AND PHARMACEUTICAL DOCUMENT — accuracy over style:",
